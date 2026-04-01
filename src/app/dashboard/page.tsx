@@ -10,22 +10,14 @@ export default function DashboardRedirect() {
   const router = useRouter();
 
   useEffect(() => {
-    if (!loading) {
-      if (activeStructureId) {
-        router.replace(`/dashboard/${activeStructureId}`);
-      } else if (structures.length === 0) {
-        // Pas de structure — rester ici
-      }
-    }
-  }, [loading, activeStructureId, structures, router]);
+    if (!loading && activeStructureId) router.replace(`/dashboard/${activeStructureId}`);
+  }, [loading, activeStructureId, router]);
 
   if (!loading && structures.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center gap-4 py-20">
         <p className="text-gray-500">Aucune structure trouvée.</p>
-        <p className="text-sm text-gray-400">
-          Contactez votre administrateur ou créez une structure.
-        </p>
+        <p className="text-sm text-gray-400">Contactez votre administrateur ou créez une structure.</p>
       </div>
     );
   }

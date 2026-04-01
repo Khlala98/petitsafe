@@ -12,6 +12,7 @@ interface UserStructure {
     id: string;
     nom: string;
     type: string;
+    modules_actifs: string[];
   };
 }
 
@@ -26,13 +27,11 @@ export function useAuth() {
     const getUser = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       setUser(user);
-
       if (user) {
         const { data } = await supabase
           .from("UserStructure")
-          .select("id, structure_id, role, structure:Structure(id, nom, type)")
+          .select("id, structure_id, role, structure:Structure(id, nom, type, modules_actifs)")
           .eq("user_id", user.id);
-
         if (data && data.length > 0) {
           setStructures(data as unknown as UserStructure[]);
           const savedId = localStorage.getItem("activeStructureId");
@@ -42,13 +41,10 @@ export function useAuth() {
       }
       setLoading(false);
     };
-
     getUser();
-
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
     });
-
     return () => subscription.unsubscribe();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -59,16 +55,8 @@ export function useAuth() {
 
   const activeStructure = structures.find((s) => s.structure_id === activeStructureId);
   const activeRole = activeStructure?.role ?? null;
+  const modulesActifs = activeStructure?.structure.modules_actifs ?? [];
   const prenom = user?.user_metadata?.prenom ?? "Utilisateur";
 
-  return {
-    user,
-    prenom,
-    structures,
-    activeStructureId,
-    activeStructure,
-    activeRole,
-    switchStructure,
-    loading,
-  };
+  return { user, prenom, structures, activeStructureId, activeStructure, activeRole, modulesActifs, switchStructure, loading };
 }

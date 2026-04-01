@@ -46,7 +46,7 @@ export default function LoginPage() {
         <div className="text-center">
           <h1 className="text-3xl font-bold text-petitsafe-primary">PetitSafe</h1>
           <p className="mt-2 text-sm text-gray-500">
-            Gestion &amp; Traçabilité pour la Petite Enfance
+            Conformité HACCP &amp; Traçabilité pour la Petite Enfance
           </p>
         </div>
 
@@ -102,10 +102,7 @@ export default function LoginPage() {
         </form>
 
         <div className="text-center space-y-2 text-sm">
-          <Link
-            href="/forgot-password"
-            className="text-petitsafe-primary hover:underline block"
-          >
+          <Link href="/forgot-password" className="text-petitsafe-primary hover:underline block">
             Mot de passe oublié ?
           </Link>
           <p className="text-gray-500">
