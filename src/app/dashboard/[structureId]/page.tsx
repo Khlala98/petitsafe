@@ -1,5 +1,7 @@
 "use client";
 
+export const dynamic = 'force-dynamic';
+
 import { useAuth } from "@/hooks/use-auth";
 import { useModules } from "@/hooks/use-modules";
 import { useParams } from "next/navigation";

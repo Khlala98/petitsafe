@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { getEnfants } from "@/app/actions/enfants";
 import { creerBiberon } from "@/app/actions/biberons";
@@ -27,7 +27,7 @@ function isLaitIncompatible(typeLait: string, hasPLV: boolean): boolean {
   return ["1er âge", "2ème âge", "Croissance"].includes(typeLait);
 }
 
-export default function NouveauBiberonPage() {
+function NouveauBiberonContent() {
   const params = useParams();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -218,5 +218,17 @@ export default function NouveauBiberonPage() {
         </>
       )}
     </div>
+  );
+}
+
+export default function NouveauBiberonPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex items-center justify-center py-20">
+        <Loader2 size={32} className="animate-spin text-petitsafe-primary" />
+      </div>
+    }>
+      <NouveauBiberonContent />
+    </Suspense>
   );
 }

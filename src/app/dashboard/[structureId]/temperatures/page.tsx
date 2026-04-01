@@ -1,5 +1,7 @@
 "use client";
 
+export const dynamic = 'force-dynamic';
+
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { getEquipements, creerEquipement, getReleves, creerReleve, getRelevesPlat, creerRelevePlat, getRelevesHistorique } from "@/app/actions/temperatures";

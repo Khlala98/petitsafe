@@ -5,7 +5,8 @@
       "Bash(npx prisma:*)",
       "Bash(xargs grep:*)",
       "Bash(grep -E \"\\(page\\\\.tsx|layout\\\\.tsx\\)$\")",
-      "Bash(npx vitest:*)"
+      "Bash(npx vitest:*)",
+      "Bash(npm run:*)"
     ]
   }
 }

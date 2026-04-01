@@ -1,5 +1,7 @@
 "use client";
 
+export const dynamic = 'force-dynamic';
+
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { getReceptions, creerReception, marquerProduit, getFournisseurs, getStocks, creerStock, ajusterStock } from "@/app/actions/stock";
