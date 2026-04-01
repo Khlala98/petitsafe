@@ -1,16 +1,82 @@
 import type { Metadata } from "next";
 
+const BASE_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://app.petitsafe.fr";
+
 export const metadata: Metadata = {
-  title: "PetitSafe — Registre HACCP numérique pour crèches et micro-crèches",
+  title: "PetitSafe — Registre HACCP numerique pour creches et micro-creches",
   description:
-    "Conformité DDPP, traçabilité alimentaire, biberonnerie ANSES, plan de nettoyage. Le tout-en-un HACCP pour la petite enfance en France. Gratuit 14 jours.",
+    "Conformite DDPP, tracabilite alimentaire, biberonnerie ANSES, plan de nettoyage. Le tout-en-un HACCP pour la petite enfance en France. Gratuit 14 jours.",
   openGraph: {
-    title: "PetitSafe — Registre HACCP numérique pour crèches",
+    title: "PetitSafe — Registre HACCP numerique pour creches",
     description:
-      "Votre registre HACCP numérique, en 30 secondes par saisie. Conformité DDPP garantie.",
+      "Votre registre HACCP numerique, en 30 secondes par saisie. Conformite DDPP garantie.",
     type: "website",
     locale: "fr_FR",
+    url: BASE_URL,
+    siteName: "PetitSafe",
   },
+  twitter: {
+    card: "summary_large_image",
+    title: "PetitSafe — HACCP numerique petite enfance",
+    description:
+      "Registre HACCP, tracabilite alimentaire, biberonnerie ANSES. 30 secondes par saisie.",
+  },
+  alternates: {
+    canonical: BASE_URL,
+  },
+};
+
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      name: "PetitSafe",
+      url: BASE_URL,
+      description:
+        "SaaS de gestion HACCP, PMS et tracabilite alimentaire pour les creches, micro-creches, MAM et assistantes maternelles en France.",
+      contactPoint: {
+        "@type": "ContactPoint",
+        telephone: "+33-1-23-45-67-89",
+        contactType: "customer service",
+        availableLanguage: "French",
+      },
+    },
+    {
+      "@type": "SoftwareApplication",
+      name: "PetitSafe",
+      applicationCategory: "BusinessApplication",
+      operatingSystem: "Web",
+      description:
+        "Registre HACCP numerique pour la petite enfance. Releves de temperature, tracabilite alimentaire, biberonnerie ANSES, plan de nettoyage, exports DDPP.",
+      offers: [
+        {
+          "@type": "Offer",
+          name: "HACCP Essentiel",
+          price: "39",
+          priceCurrency: "EUR",
+          priceSpecification: {
+            "@type": "UnitPriceSpecification",
+            price: "39",
+            priceCurrency: "EUR",
+            unitText: "MONTH",
+          },
+        },
+        {
+          "@type": "Offer",
+          name: "PetitSafe Complet",
+          price: "69",
+          priceCurrency: "EUR",
+          priceSpecification: {
+            "@type": "UnitPriceSpecification",
+            price: "69",
+            priceCurrency: "EUR",
+            unitText: "MONTH",
+          },
+        },
+      ],
+    },
+  ],
 };
 
 export default function MarketingLayout({
@@ -18,5 +84,13 @@ export default function MarketingLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return <>{children}</>;
+  return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      {children}
+    </>
+  );
 }
