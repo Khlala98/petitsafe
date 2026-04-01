@@ -1,0 +1,273 @@
+import { describe, it, expect } from "vitest";
+import {
+  getConformiteTemperature,
+  getConformitePlat,
+  getStatutBiberon,
+  isBoiteLaitExpiree,
+  getAlerteDLC,
+  calculerAge,
+  getTachesJour,
+} from "@/lib/business-logic";
+
+// ═══ CONFORMITÉ TEMPÉRATURE ═══
+
+describe("getConformiteTemperature", () => {
+  it("frigo 3.5°C → conforme", () => {
+    expect(getConformiteTemperature(3.5, "REFRIGERATEUR")).toBe("conforme");
+  });
+
+  it("frigo 4.5°C → attention", () => {
+    expect(getConformiteTemperature(4.5, "REFRIGERATEUR")).toBe("attention");
+  });
+
+  it("frigo 5.5°C → alerte", () => {
+    expect(getConformiteTemperature(5.5, "REFRIGERATEUR")).toBe("alerte");
+  });
+
+  it("frigo 0°C (limite basse) → conforme", () => {
+    expect(getConformiteTemperature(0, "REFRIGERATEUR")).toBe("conforme");
+  });
+
+  it("frigo 4°C (limite haute) → conforme", () => {
+    expect(getConformiteTemperature(4, "REFRIGERATEUR")).toBe("conforme");
+  });
+
+  it("congélateur -20°C → conforme", () => {
+    expect(getConformiteTemperature(-20, "CONGELATEUR")).toBe("conforme");
+  });
+
+  it("congélateur -16°C → attention", () => {
+    expect(getConformiteTemperature(-16, "CONGELATEUR")).toBe("attention");
+  });
+
+  it("congélateur -14°C → alerte", () => {
+    expect(getConformiteTemperature(-14, "CONGELATEUR")).toBe("alerte");
+  });
+
+  it("congélateur -18°C (limite) → conforme", () => {
+    expect(getConformiteTemperature(-18, "CONGELATEUR")).toBe("conforme");
+  });
+});
+
+// ═══ CONFORMITÉ PLAT ═══
+
+describe("getConformitePlat", () => {
+  it("65°C après réchauffement → conforme", () => {
+    expect(getConformitePlat(65)).toBe("conforme");
+  });
+
+  it("63°C (limite) → conforme", () => {
+    expect(getConformitePlat(63)).toBe("conforme");
+  });
+
+  it("58°C après réchauffement → alerte", () => {
+    expect(getConformitePlat(58)).toBe("alerte");
+  });
+
+  it("72°C → conforme", () => {
+    expect(getConformitePlat(72)).toBe("conforme");
+  });
+});
+
+// ═══ TIMER ANSES BIBERON ═══
+
+describe("getStatutBiberon", () => {
+  it("préparé il y a 30 min → ok", () => {
+    const maintenant = new Date("2026-04-01T10:30:00");
+    const preparation = new Date("2026-04-01T10:00:00");
+    expect(getStatutBiberon(preparation, maintenant)).toBe("ok");
+  });
+
+  it("préparé il y a 50 min → attention", () => {
+    const maintenant = new Date("2026-04-01T10:50:00");
+    const preparation = new Date("2026-04-01T10:00:00");
+    expect(getStatutBiberon(preparation, maintenant)).toBe("attention");
+  });
+
+  it("préparé il y a 65 min → alerte", () => {
+    const maintenant = new Date("2026-04-01T11:05:00");
+    const preparation = new Date("2026-04-01T10:00:00");
+    expect(getStatutBiberon(preparation, maintenant)).toBe("alerte");
+  });
+
+  it("préparé il y a 45 min exactement → attention", () => {
+    const maintenant = new Date("2026-04-01T10:46:00"); // 46 min > 45
+    const preparation = new Date("2026-04-01T10:00:00");
+    expect(getStatutBiberon(preparation, maintenant)).toBe("attention");
+  });
+
+  it("préparé il y a 60 min exactement → attention (pas encore alerte)", () => {
+    const maintenant = new Date("2026-04-01T11:00:00"); // pile 60 min
+    const preparation = new Date("2026-04-01T10:00:00");
+    // 60 min n'est PAS > 60, donc pas alerte
+    expect(getStatutBiberon(preparation, maintenant)).toBe("attention");
+  });
+
+  it("préparé il y a 61 min → alerte", () => {
+    const maintenant = new Date("2026-04-01T11:01:00");
+    const preparation = new Date("2026-04-01T10:00:00");
+    expect(getStatutBiberon(preparation, maintenant)).toBe("alerte");
+  });
+});
+
+// ═══ BOÎTE LAIT ═══
+
+describe("isBoiteLaitExpiree", () => {
+  it("ouverte depuis 25 jours → pas expirée", () => {
+    const maintenant = new Date("2026-04-26T10:00:00");
+    const ouverture = new Date("2026-04-01T10:00:00");
+    expect(isBoiteLaitExpiree(ouverture, maintenant)).toBe(false);
+  });
+
+  it("ouverte depuis 35 jours → expirée", () => {
+    const maintenant = new Date("2026-05-06T10:00:00");
+    const ouverture = new Date("2026-04-01T10:00:00");
+    expect(isBoiteLaitExpiree(ouverture, maintenant)).toBe(true);
+  });
+
+  it("ouverte depuis 30 jours exactement → pas expirée", () => {
+    const maintenant = new Date("2026-05-01T10:00:00");
+    const ouverture = new Date("2026-04-01T10:00:00");
+    expect(isBoiteLaitExpiree(ouverture, maintenant)).toBe(false);
+  });
+
+  it("ouverte depuis 31 jours → expirée", () => {
+    const maintenant = new Date("2026-05-02T10:00:00");
+    const ouverture = new Date("2026-04-01T10:00:00");
+    expect(isBoiteLaitExpiree(ouverture, maintenant)).toBe(true);
+  });
+});
+
+// ═══ DLC ═══
+
+describe("getAlerteDLC", () => {
+  it("DLC dans 5 jours → null", () => {
+    const maintenant = new Date("2026-04-01T10:00:00");
+    const dlc = new Date("2026-04-06T00:00:00");
+    expect(getAlerteDLC(dlc, maintenant)).toBeNull();
+  });
+
+  it("DLC dans 2 jours → warning", () => {
+    const maintenant = new Date("2026-04-01T10:00:00");
+    const dlc = new Date("2026-04-03T00:00:00");
+    expect(getAlerteDLC(dlc, maintenant)).toBe("warning");
+  });
+
+  it("DLC dans 1 jour → warning", () => {
+    const maintenant = new Date("2026-04-01T10:00:00");
+    const dlc = new Date("2026-04-02T00:00:00");
+    expect(getAlerteDLC(dlc, maintenant)).toBe("warning");
+  });
+
+  it("DLC aujourd'hui → alerte", () => {
+    const maintenant = new Date("2026-04-01T14:00:00");
+    const dlc = new Date("2026-04-01T00:00:00");
+    expect(getAlerteDLC(dlc, maintenant)).toBe("alerte");
+  });
+
+  it("DLC hier → critique", () => {
+    const maintenant = new Date("2026-04-02T10:00:00");
+    const dlc = new Date("2026-04-01T00:00:00");
+    expect(getAlerteDLC(dlc, maintenant)).toBe("critique");
+  });
+
+  it("DLC dans 3 jours → null (> DLC_ALERTE_JOURS)", () => {
+    const maintenant = new Date("2026-04-01T10:00:00");
+    const dlc = new Date("2026-04-04T00:00:00");
+    expect(getAlerteDLC(dlc, maintenant)).toBeNull();
+  });
+});
+
+// ═══ ÂGE ═══
+
+describe("calculerAge", () => {
+  it("né il y a 8 mois → '8 mois'", () => {
+    const maintenant = new Date("2026-04-01T10:00:00");
+    const naissance = new Date("2025-08-01T00:00:00");
+    expect(calculerAge(naissance, maintenant)).toBe("8 mois");
+  });
+
+  it("né il y a 26 mois → '2 ans'", () => {
+    const maintenant = new Date("2026-04-01T10:00:00");
+    const naissance = new Date("2024-02-01T00:00:00");
+    expect(calculerAge(naissance, maintenant)).toBe("2 ans");
+  });
+
+  it("né il y a 12 mois → '12 mois'", () => {
+    const maintenant = new Date("2026-04-01T10:00:00");
+    const naissance = new Date("2025-04-01T00:00:00");
+    expect(calculerAge(naissance, maintenant)).toBe("12 mois");
+  });
+
+  it("né il y a 24 mois → '2 ans'", () => {
+    const maintenant = new Date("2026-04-01T10:00:00");
+    const naissance = new Date("2024-04-01T00:00:00");
+    expect(calculerAge(naissance, maintenant)).toBe("2 ans");
+  });
+
+  it("né il y a 36 mois → '3 ans'", () => {
+    const maintenant = new Date("2026-04-01T10:00:00");
+    const naissance = new Date("2023-04-01T00:00:00");
+    expect(calculerAge(naissance, maintenant)).toBe("3 ans");
+  });
+});
+
+// ═══ TÂCHES NETTOYAGE (fréquence) ═══
+
+describe("getTachesJour", () => {
+  const taches = [
+    { frequence: "QUOTIDIEN" as const, actif: true },
+    { frequence: "HEBDO" as const, actif: true },
+    { frequence: "MENSUEL" as const, actif: true },
+    { frequence: "BIQUOTIDIEN" as const, actif: true },
+    { frequence: "APRES_UTILISATION" as const, actif: true },
+    { frequence: "BIMENSUEL" as const, actif: true },
+    { frequence: "QUOTIDIEN" as const, actif: false }, // inactive
+  ];
+
+  it("un lundi non 1er → QUOTIDIEN + HEBDO + BIQUOTIDIEN + APRES_UTILISATION, pas MENSUEL", () => {
+    // 6 avril 2026 = lundi, pas le 1er
+    const lundi = new Date("2026-04-06T10:00:00");
+    const result = getTachesJour(taches, lundi);
+    expect(result).toContainEqual({ frequence: "QUOTIDIEN", actif: true });
+    expect(result).toContainEqual({ frequence: "HEBDO", actif: true });
+    expect(result).toContainEqual({ frequence: "BIQUOTIDIEN", actif: true });
+    expect(result).toContainEqual({ frequence: "APRES_UTILISATION", actif: true });
+    expect(result).not.toContainEqual({ frequence: "MENSUEL", actif: true });
+  });
+
+  it("un 1er du mois (pas lundi) → QUOTIDIEN + MENSUEL + BIMENSUEL, pas HEBDO", () => {
+    // 1er avril 2026 = mercredi
+    const premier = new Date("2026-04-01T10:00:00");
+    const result = getTachesJour(taches, premier);
+    expect(result).toContainEqual({ frequence: "QUOTIDIEN", actif: true });
+    expect(result).toContainEqual({ frequence: "MENSUEL", actif: true });
+    expect(result).toContainEqual({ frequence: "BIMENSUEL", actif: true });
+    expect(result).not.toContainEqual({ frequence: "HEBDO", actif: true });
+  });
+
+  it("un 15 du mois → inclut BIMENSUEL", () => {
+    const quinze = new Date("2026-04-15T10:00:00");
+    const result = getTachesJour(taches, quinze);
+    expect(result).toContainEqual({ frequence: "BIMENSUEL", actif: true });
+  });
+
+  it("exclut les tâches inactives", () => {
+    const date = new Date("2026-04-01T10:00:00");
+    const result = getTachesJour(taches, date);
+    expect(result).not.toContainEqual({ frequence: "QUOTIDIEN", actif: false });
+  });
+
+  it("un mardi 7 → QUOTIDIEN + BIQUOTIDIEN + APRES_UTILISATION seulement", () => {
+    // 7 avril 2026 = mardi, pas le 1er ni le 15
+    const mardi = new Date("2026-04-07T10:00:00");
+    const result = getTachesJour(taches, mardi);
+    const frequences = result.map((t) => t.frequence);
+    expect(frequences).toContain("QUOTIDIEN");
+    expect(frequences).toContain("BIQUOTIDIEN");
+    expect(frequences).toContain("APRES_UTILISATION");
+    expect(frequences).not.toContain("HEBDO");
+    expect(frequences).not.toContain("MENSUEL");
+    expect(frequences).not.toContain("BIMENSUEL");
+  });
+});

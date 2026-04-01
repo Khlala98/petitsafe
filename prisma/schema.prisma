@@ -1,0 +1,523 @@
+// PetitSafe — Schéma Prisma complet
+// Source unique de vérité pour tous les modèles de données
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// ═══ ENUMS ═══
+
+enum StructureType {
+  CRECHE
+  MICRO_CRECHE
+  MAM
+  ASS_MAT
+}
+
+enum Role {
+  GESTIONNAIRE
+  PROFESSIONNEL
+  PARENT
+}
+
+enum Sexe {
+  FILLE
+  GARCON
+}
+
+enum Severite {
+  LEGERE
+  MODEREE
+  SEVERE
+}
+
+enum TypeRepas {
+  PETIT_DEJ
+  DEJEUNER
+  GOUTER
+  DINER
+}
+
+enum Quantite {
+  TOUT
+  BIEN
+  PEU
+  RIEN
+}
+
+enum TypeChange {
+  MOUILLEE
+  SELLE
+  LES_DEUX
+}
+
+enum QualiteSieste {
+  CALME
+  AGITE
+  DIFFICILE
+  REVEILS
+}
+
+enum TypeEquipement {
+  REFRIGERATEUR
+  CONGELATEUR
+}
+
+enum StatutProduit {
+  EN_STOCK
+  UTILISE
+  JETE
+  RAPPELE
+}
+
+enum Frequence {
+  APRES_UTILISATION
+  QUOTIDIEN
+  BIQUOTIDIEN
+  HEBDO
+  BIMENSUEL
+  MENSUEL
+}
+
+enum TypeMouvement {
+  ENTREE
+  SORTIE
+}
+
+enum TypeTransmission {
+  GENERAL
+  ENFANT
+  EQUIPE
+}
+
+enum TypeExport {
+  DDPP
+  PMI
+  INTERNE
+}
+
+enum CategorieStock {
+  COUCHES
+  ENTRETIEN
+  LAIT
+  COMPOTES
+  AUTRE
+}
+
+// ═══ MULTI-TENANT ═══
+
+model Structure {
+  id               String        @id @default(uuid())
+  nom              String
+  type             StructureType
+  adresse          String?
+  code_postal      String?
+  ville            String?
+  telephone        String?
+  email            String?
+  capacite_accueil Int?
+  numero_agrement  String?
+  created_at       DateTime      @default(now())
+
+  users            UserStructure[]
+  enfants          Enfant[]
+  equipements      Equipement[]
+  zones_nettoyage  ZoneNettoyage[]
+  stocks           Stock[]
+  transmissions    Transmission[]
+  protocoles       Protocole[]
+  exports          ExportPDF[]
+  demandes_demo    DemandeDemo[]
+  biberons         Biberon[]
+  repas            Repas[]
+  changes          Change[]
+  siestes          Sieste[]
+  releves_temp     ReleveTemperature[]
+  releves_plat     RelevePlat[]
+  receptions       ReceptionMarchandise[]
+}
+
+model UserStructure {
+  id           String    @id @default(uuid())
+  user_id      String
+  structure_id String
+  role         Role
+  structure    Structure @relation(fields: [structure_id], references: [id], onDelete: Cascade)
+
+  @@unique([user_id, structure_id])
+  @@index([user_id])
+  @@index([structure_id])
+}
+
+// ═══ ENFANTS ═══
+
+model Enfant {
+  id             String   @id @default(uuid())
+  structure_id   String
+  prenom         String
+  nom            String
+  date_naissance DateTime
+  sexe           Sexe?
+  groupe         String?
+  photo_url      String?
+  actif          Boolean  @default(true)
+  date_entree    DateTime?
+
+  structure      Structure        @relation(fields: [structure_id], references: [id], onDelete: Cascade)
+  allergies      AllergieEnfant[]
+  contacts       ContactUrgence[]
+  biberons       Biberon[]
+  repas          Repas[]
+  changes        Change[]
+  siestes        Sieste[]
+  transmissions  Transmission[]
+
+  @@index([structure_id])
+  @@index([structure_id, actif])
+}
+
+model AllergieEnfant {
+  id           String   @id @default(uuid())
+  enfant_id    String
+  allergene    String
+  severite     Severite
+  protocole    String?
+  document_pai String?
+
+  enfant       Enfant @relation(fields: [enfant_id], references: [id], onDelete: Cascade)
+
+  @@index([enfant_id])
+}
+
+model ContactUrgence {
+  id                     String  @id @default(uuid())
+  enfant_id              String
+  nom                    String
+  lien                   String
+  telephone              String
+  est_autorise_recuperer Boolean @default(true)
+  ordre_priorite         Int     @default(1)
+
+  enfant                 Enfant @relation(fields: [enfant_id], references: [id], onDelete: Cascade)
+
+  @@index([enfant_id])
+}
+
+// ═══ SUIVI QUOTIDIEN ═══
+
+model Biberon {
+  id                   String    @id @default(uuid())
+  structure_id         String
+  enfant_id            String
+  date                 DateTime
+  heure_preparation    DateTime
+  type_lait            String
+  nom_lait             String?
+  numero_lot           String
+  date_peremption_lait DateTime?
+  date_ouverture_boite DateTime?
+  nombre_dosettes      Int?
+  quantite_preparee_ml Int
+  heure_service        DateTime?
+  quantite_bue_ml      Int?
+  nettoyage_effectue   Boolean   @default(false)
+  heure_nettoyage      DateTime?
+  preparateur_nom      String
+  conforme_anses       Boolean   @default(true)
+  observations         String?
+  professionnel_id     String
+
+  structure            Structure @relation(fields: [structure_id], references: [id], onDelete: Cascade)
+  enfant               Enfant    @relation(fields: [enfant_id], references: [id], onDelete: Cascade)
+
+  @@index([structure_id, date])
+  @@index([enfant_id, date])
+}
+
+model Repas {
+  id               String     @id @default(uuid())
+  structure_id     String
+  enfant_id        String
+  date             DateTime
+  type_repas       TypeRepas
+  entree           String?
+  entree_quantite  Quantite?
+  plat             String?
+  plat_quantite    Quantite?
+  dessert          String?
+  dessert_quantite Quantite?
+  observations     String?
+  professionnel_id String
+
+  structure        Structure @relation(fields: [structure_id], references: [id], onDelete: Cascade)
+  enfant           Enfant    @relation(fields: [enfant_id], references: [id], onDelete: Cascade)
+
+  @@index([structure_id, date])
+  @@index([enfant_id, date])
+}
+
+model Change {
+  id               String     @id @default(uuid())
+  structure_id     String
+  enfant_id        String
+  date             DateTime
+  heure            DateTime
+  type_change      TypeChange
+  observations     String?
+  professionnel_id String
+
+  structure        Structure @relation(fields: [structure_id], references: [id], onDelete: Cascade)
+  enfant           Enfant    @relation(fields: [enfant_id], references: [id], onDelete: Cascade)
+
+  @@index([structure_id, date])
+  @@index([enfant_id, date])
+}
+
+model Sieste {
+  id               String         @id @default(uuid())
+  structure_id     String
+  enfant_id        String
+  date             DateTime
+  heure_debut      DateTime
+  heure_fin        DateTime?
+  duree_minutes    Int?
+  qualite          QualiteSieste?
+  professionnel_id String
+
+  structure        Structure @relation(fields: [structure_id], references: [id], onDelete: Cascade)
+  enfant           Enfant    @relation(fields: [enfant_id], references: [id], onDelete: Cascade)
+
+  @@index([structure_id, date])
+  @@index([enfant_id, date])
+}
+
+// ═══ TEMPÉRATURES ═══
+
+model Equipement {
+  id              String         @id @default(uuid())
+  structure_id    String
+  nom             String
+  type            TypeEquipement
+  temperature_max Float
+  actif           Boolean        @default(true)
+
+  structure       Structure           @relation(fields: [structure_id], references: [id], onDelete: Cascade)
+  releves         ReleveTemperature[]
+
+  @@index([structure_id])
+}
+
+model ReleveTemperature {
+  id                String    @id @default(uuid())
+  structure_id      String
+  equipement_id     String
+  date              DateTime
+  heure             DateTime
+  heure_modifiee    DateTime?
+  temperature       Float
+  conforme          Boolean
+  action_corrective String?
+  professionnel_id  String
+
+  structure         Structure  @relation(fields: [structure_id], references: [id], onDelete: Cascade)
+  equipement        Equipement @relation(fields: [equipement_id], references: [id], onDelete: Cascade)
+
+  @@index([structure_id, date])
+  @@index([equipement_id, date])
+}
+
+model RelevePlat {
+  id                String   @id @default(uuid())
+  structure_id      String
+  date              DateTime
+  nom_plat          String
+  temperature_avant Float
+  heure_avant       DateTime
+  temperature_apres Float
+  heure_apres       DateTime
+  conforme          Boolean
+  action_corrective String?
+  professionnel_id  String
+
+  structure         Structure @relation(fields: [structure_id], references: [id], onDelete: Cascade)
+
+  @@index([structure_id, date])
+}
+
+// ═══ TRAÇABILITÉ ALIMENTAIRE ═══
+
+model ReceptionMarchandise {
+  id                   String        @id @default(uuid())
+  structure_id         String
+  date                 DateTime
+  fournisseur          String
+  nom_produit          String
+  numero_lot           String
+  dlc                  DateTime
+  temperature_reception Float?
+  emballage_conforme   Boolean       @default(true)
+  photo_etiquette_url  String?
+  photo_bon_livraison  String?
+  conforme             Boolean       @default(true)
+  motif_non_conformite String?
+  statut               StatutProduit @default(EN_STOCK)
+  motif_destruction    String?
+  professionnel_id     String
+
+  structure            Structure @relation(fields: [structure_id], references: [id], onDelete: Cascade)
+
+  @@index([structure_id, date])
+  @@index([structure_id, dlc])
+}
+
+// ═══ NETTOYAGE ═══
+
+model ZoneNettoyage {
+  id           String  @id @default(uuid())
+  structure_id String
+  nom          String
+  couleur_code String?
+  ordre        Int     @default(0)
+
+  structure    Structure        @relation(fields: [structure_id], references: [id], onDelete: Cascade)
+  taches       TacheNettoyage[]
+
+  @@index([structure_id])
+}
+
+model TacheNettoyage {
+  id          String    @id @default(uuid())
+  zone_id     String
+  nom         String
+  frequence   Frequence
+  methode     String
+  produit     String?
+  notes       String?
+  actif       Boolean   @default(true)
+
+  zone        ZoneNettoyage        @relation(fields: [zone_id], references: [id], onDelete: Cascade)
+  validations ValidationNettoyage[]
+
+  @@index([zone_id])
+}
+
+model ValidationNettoyage {
+  id               String   @id @default(uuid())
+  tache_id         String
+  date             DateTime
+  heure            DateTime
+  professionnel_id String
+  professionnel_nom String
+  observations     String?
+
+  tache            TacheNettoyage @relation(fields: [tache_id], references: [id], onDelete: Cascade)
+
+  @@index([tache_id, date])
+}
+
+// ═══ STOCKS ═══
+
+model Stock {
+  id           String         @id @default(uuid())
+  structure_id String
+  categorie    CategorieStock
+  produit_nom  String
+  quantite     Float
+  unite        String
+  seuil_alerte Float
+  derniere_maj DateTime
+  maj_par      String
+
+  structure    Structure        @relation(fields: [structure_id], references: [id], onDelete: Cascade)
+  mouvements   MouvementStock[]
+
+  @@index([structure_id])
+}
+
+model MouvementStock {
+  id       String        @id @default(uuid())
+  stock_id String
+  date     DateTime
+  type_mouv TypeMouvement
+  quantite Float
+  motif    String?
+  par      String
+
+  stock    Stock @relation(fields: [stock_id], references: [id], onDelete: Cascade)
+
+  @@index([stock_id])
+}
+
+// ═══ TRANSMISSIONS ═══
+
+model Transmission {
+  id           String           @id @default(uuid())
+  structure_id String
+  enfant_id    String?
+  date         DateTime
+  contenu      String
+  auteur       String
+  type_transm  TypeTransmission
+
+  structure    Structure @relation(fields: [structure_id], references: [id], onDelete: Cascade)
+  enfant       Enfant?   @relation(fields: [enfant_id], references: [id], onDelete: SetNull)
+
+  @@index([structure_id, date])
+  @@index([enfant_id, date])
+}
+
+// ═══ PROTOCOLES ═══
+
+model Protocole {
+  id               String   @id @default(uuid())
+  structure_id     String
+  titre            String
+  categorie        String
+  contenu_markdown String
+  version          Int      @default(1)
+  actif            Boolean  @default(true)
+  cree_par         String
+  date_creation    DateTime @default(now())
+
+  structure        Structure @relation(fields: [structure_id], references: [id], onDelete: Cascade)
+
+  @@index([structure_id])
+}
+
+// ═══ EXPORTS ═══
+
+model ExportPDF {
+  id            String     @id @default(uuid())
+  structure_id  String
+  type_export   TypeExport
+  periode_debut DateTime
+  periode_fin   DateTime
+  genere_par    String
+  url           String
+  created_at    DateTime   @default(now())
+
+  structure     Structure @relation(fields: [structure_id], references: [id], onDelete: Cascade)
+
+  @@index([structure_id])
+}
+
+// ═══ DEMANDES DÉMO (site marketing) ═══
+
+model DemandeDemo {
+  id                String    @id @default(uuid())
+  nom               String
+  email             String
+  telephone         String
+  type_structure    String
+  nombre_structures String
+  date_demande      DateTime  @default(now())
+  structure_id      String?
+
+  structure         Structure? @relation(fields: [structure_id], references: [id], onDelete: SetNull)
+}
