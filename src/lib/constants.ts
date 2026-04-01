@@ -62,3 +62,26 @@ export const TYPES_LAIT = [
 
 /** Quantités rapides biberon (ml) */
 export const QUANTITES_BIBERON_ML = [90, 120, 150, 180, 210, 240] as const;
+
+/** Modules disponibles — chaque structure active/désactive individuellement */
+export const MODULES_DISPONIBLES = {
+  temperatures:  { label: "Températures",   icon: "Thermometer",     categorie: "haccp"   as const, description: "Relevés frigo, congélateur, plats" },
+  tracabilite:   { label: "Traçabilité",    icon: "Package",         categorie: "haccp"   as const, description: "Réceptions, lots, DLC, fournisseurs" },
+  nettoyage:     { label: "Nettoyage",      icon: "Sparkles",        categorie: "haccp"   as const, description: "Plan de nettoyage, validations" },
+  biberonnerie:  { label: "Biberonnerie",   icon: "Baby",            categorie: "haccp"   as const, description: "Préparation, timer ANSES, traçabilité lait" },
+  repas:         { label: "Repas",          icon: "UtensilsCrossed", categorie: "suivi"   as const, description: "Suivi repas enfants" },
+  changes:       { label: "Changes",        icon: "Baby",            categorie: "suivi"   as const, description: "Suivi changes" },
+  siestes:       { label: "Siestes",        icon: "Moon",            categorie: "suivi"   as const, description: "Suivi siestes" },
+  transmissions: { label: "Transmissions",  icon: "MessageSquare",   categorie: "suivi"   as const, description: "Notes et transmissions" },
+  stocks:        { label: "Stocks",         icon: "Boxes",           categorie: "gestion" as const, description: "Gestion des stocks consommables" },
+  protocoles:    { label: "Protocoles",     icon: "FileText",        categorie: "gestion" as const, description: "Documents et protocoles internes" },
+} as const;
+
+export type ModuleId = keyof typeof MODULES_DISPONIBLES;
+export type CategorieModule = "haccp" | "suivi" | "gestion";
+
+/** Presets de modules — raccourcis pour l'inscription et les paramètres */
+export const PRESETS_MODULES = {
+  haccp_essentiel: ["temperatures", "tracabilite", "nettoyage", "biberonnerie"] as ModuleId[],
+  complet: ["temperatures", "tracabilite", "nettoyage", "biberonnerie", "repas", "changes", "siestes", "transmissions", "stocks", "protocoles"] as ModuleId[],
+} as const;

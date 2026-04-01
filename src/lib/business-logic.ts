@@ -4,6 +4,9 @@ import {
   DELAI_BIBERON_ATTENTION_MINUTES,
   DELAI_BOITE_LAIT_JOURS,
   DLC_ALERTE_JOURS,
+  MODULES_DISPONIBLES,
+  type ModuleId,
+  type CategorieModule,
 } from "./constants";
 
 export type StatutConformite = "conforme" | "attention" | "alerte";
@@ -158,4 +161,33 @@ export function getTachesJour<T extends TacheNettoyageMinimal>(
         return false;
     }
   });
+}
+
+/**
+ * Vérifie si un module est actif pour une structure.
+ */
+export function isModuleActif(modulesActifs: string[], moduleId: ModuleId): boolean {
+  return modulesActifs.includes(moduleId);
+}
+
+/**
+ * Regroupe les modules actifs par catégorie (haccp, suivi, gestion).
+ */
+export function getModulesParCategorie(
+  modulesActifs: string[]
+): Record<CategorieModule, ModuleId[]> {
+  const result: Record<CategorieModule, ModuleId[]> = {
+    haccp: [],
+    suivi: [],
+    gestion: [],
+  };
+
+  for (const moduleId of modulesActifs) {
+    const module = MODULES_DISPONIBLES[moduleId as ModuleId];
+    if (module) {
+      result[module.categorie].push(moduleId as ModuleId);
+    }
+  }
+
+  return result;
 }

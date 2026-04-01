@@ -123,6 +123,7 @@ model Structure {
   email            String?
   capacite_accueil Int?
   numero_agrement  String?
+  modules_actifs   String[]      @default(["temperatures", "tracabilite", "nettoyage", "biberonnerie", "repas", "changes", "siestes", "transmissions", "stocks", "protocoles"])
   created_at       DateTime      @default(now())
 
   users            UserStructure[]

@@ -7,7 +7,10 @@ import {
   getAlerteDLC,
   calculerAge,
   getTachesJour,
+  isModuleActif,
+  getModulesParCategorie,
 } from "@/lib/business-logic";
+import { PRESETS_MODULES } from "@/lib/constants";
 
 // ═══ CONFORMITÉ TEMPÉRATURE ═══
 
@@ -269,5 +272,44 @@ describe("getTachesJour", () => {
     expect(frequences).not.toContain("HEBDO");
     expect(frequences).not.toContain("MENSUEL");
     expect(frequences).not.toContain("BIMENSUEL");
+  });
+});
+
+// ═══ MODULES ═══
+
+describe("isModuleActif", () => {
+  it("temperatures actif → true", () => {
+    expect(isModuleActif(["temperatures", "nettoyage"], "temperatures")).toBe(true);
+  });
+
+  it("repas pas actif → false", () => {
+    expect(isModuleActif(["temperatures", "nettoyage"], "repas")).toBe(false);
+  });
+
+  it("tableau vide → false", () => {
+    expect(isModuleActif([], "temperatures")).toBe(false);
+  });
+});
+
+describe("getModulesParCategorie", () => {
+  it("preset haccp_essentiel → 4 modules haccp, 0 suivi, 0 gestion", () => {
+    const result = getModulesParCategorie(PRESETS_MODULES.haccp_essentiel);
+    expect(result.haccp).toEqual(["temperatures", "tracabilite", "nettoyage", "biberonnerie"]);
+    expect(result.suivi).toEqual([]);
+    expect(result.gestion).toEqual([]);
+  });
+
+  it("preset complet → tous les modules répartis", () => {
+    const result = getModulesParCategorie(PRESETS_MODULES.complet);
+    expect(result.haccp).toHaveLength(4);
+    expect(result.suivi).toHaveLength(4);
+    expect(result.gestion).toHaveLength(2);
+  });
+
+  it("tableau vide → tout vide", () => {
+    const result = getModulesParCategorie([]);
+    expect(result.haccp).toEqual([]);
+    expect(result.suivi).toEqual([]);
+    expect(result.gestion).toEqual([]);
   });
 });
