@@ -36,7 +36,7 @@ export function EnfantForm({ mode, initial }: EnfantFormProps) {
   const removeAllergie = (i: number) => setAllergies(allergies.filter((_, idx) => idx !== i));
   const updateAllergie = (i: number, field: string, value: string) => {
     const copy = [...allergies];
-    (copy[i] as Record<string, string>)[field] = value;
+    copy[i] = { ...copy[i], [field]: value };
     setAllergies(copy);
   };
 
@@ -44,7 +44,7 @@ export function EnfantForm({ mode, initial }: EnfantFormProps) {
   const removeContact = (i: number) => setContacts(contacts.filter((_, idx) => idx !== i));
   const updateContact = (i: number, field: string, value: string | boolean | number) => {
     const copy = [...contacts];
-    (copy[i] as Record<string, string | boolean | number>)[field] = value;
+    copy[i] = { ...copy[i], [field]: value };
     setContacts(copy);
   };
 
