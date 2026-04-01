@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { PastilleStatut } from "@/components/shared/pastille-statut";
 import { useRealtimeSubscription } from "@/hooks/use-realtime-subscription";
+import { getNettoyageKpi } from "@/app/actions/nettoyage";
 import { Thermometer, Sparkles, Package, Baby, AlertTriangle, Clock } from "lucide-react";
 
 interface KpiData {
@@ -59,7 +60,13 @@ export default function DashboardPage() {
     const { data: transmissions } = await supabase.from("Transmission").select("contenu, auteur, date")
       .eq("structure_id", structureId).gte("date", todayStart.toISOString()).order("date", { ascending: false }).limit(5);
 
-    setKpi({ tempNonConformes: tempNC, nettoyagePct: 0, nettoyageFait: 0, nettoyageTotal: 0, alertesDlc: dlcAlerts, biberonsAujourdhui: biberons });
+    let nettPct = 0, nettFait = 0, nettTotal = 0;
+    if (isActif("nettoyage")) {
+      const nettRes = await getNettoyageKpi(structureId);
+      if (nettRes.success && nettRes.data) { nettPct = nettRes.data.pct; nettFait = nettRes.data.fait; nettTotal = nettRes.data.total; }
+    }
+
+    setKpi({ tempNonConformes: tempNC, nettoyagePct: nettPct, nettoyageFait: nettFait, nettoyageTotal: nettTotal, alertesDlc: dlcAlerts, biberonsAujourdhui: biberons });
     setRecentActivity((transmissions ?? []).map((t) => ({
       heure: new Date(t.date).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" }),
       description: `${t.auteur} : ${t.contenu.substring(0, 80)}${t.contenu.length > 80 ? "…" : ""}`,
@@ -73,6 +80,7 @@ export default function DashboardPage() {
   useRealtimeSubscription("ReleveTemperature", isActif("temperatures") ? structureId : null, { onInsert: () => fetchKpis() });
   useRealtimeSubscription("Biberon", isActif("biberonnerie") ? structureId : null, { onInsert: () => fetchKpis() });
   useRealtimeSubscription("ReceptionMarchandise", isActif("tracabilite") ? structureId : null, { onInsert: () => fetchKpis() });
+  useRealtimeSubscription("ValidationNettoyage", isActif("nettoyage") ? structureId : null, { onInsert: () => fetchKpis() });
 
   // Count active KPI cards for grid
   const kpiCards: JSX.Element[] = [];
@@ -87,10 +95,11 @@ export default function DashboardPage() {
     );
   }
   if (isActif("nettoyage")) {
+    const nettStatus = kpi.nettoyageTotal === 0 ? "conforme" : kpi.nettoyagePct === 100 ? "conforme" : kpi.nettoyagePct >= 50 ? "attention" : "alerte";
     kpiCards.push(
       <div key="nett" className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
         <div className="flex items-center gap-2 mb-3"><Sparkles size={20} className="text-petitsafe-secondary" /><span className="text-sm font-medium text-gray-600">Nettoyage</span></div>
-        <span className="text-sm font-semibold">{kpi.nettoyageTotal === 0 ? "Aucune tâche configurée" : `${kpi.nettoyagePct}% — ${kpi.nettoyageFait}/${kpi.nettoyageTotal}`}</span>
+        <div className="flex items-center gap-2"><PastilleStatut status={nettStatus} /><span className="text-sm font-semibold">{kpi.nettoyageTotal === 0 ? "Aucune tâche configurée" : `${kpi.nettoyagePct}% — ${kpi.nettoyageFait}/${kpi.nettoyageTotal}`}</span></div>
       </div>
     );
   }

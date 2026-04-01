@@ -3,9 +3,10 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { getEnfant, supprimerEnfant } from "@/app/actions/enfants";
+import { getTransmissionsEnfant } from "@/app/actions/transmissions";
 import { calculerAge } from "@/lib/business-logic";
 import { BadgeAllergie } from "@/components/shared/badge-allergie";
-import { Loader2, ArrowLeft, Edit, Trash2, Phone, User } from "lucide-react";
+import { Loader2, ArrowLeft, Edit, Trash2, Phone, User, MessageSquare } from "lucide-react";
 import { toast } from "sonner";
 
 interface Enfant {
@@ -15,7 +16,11 @@ interface Enfant {
   contacts: { id: string; nom: string; lien: string; telephone: string; est_autorise_recuperer: boolean; ordre_priorite: number }[];
 }
 
-const TABS = ["Infos générales", "Allergies & Santé", "Contacts urgence"];
+interface TransmissionEnfant {
+  id: string; contenu: string; auteur: string; date: string; type_transm: string;
+}
+
+const TABS = ["Infos générales", "Allergies & Santé", "Contacts urgence", "Transmissions"];
 const SEVERITE_LABELS: Record<string, string> = { LEGERE: "Légère", MODEREE: "Modérée", SEVERE: "Sévère" };
 const COULEURS_AVATAR = ["#2E86C1", "#27AE60", "#F4A261", "#E53E3E", "#8E44AD", "#F39C12"];
 
@@ -25,21 +30,28 @@ export default function FicheEnfantPage() {
   const structureId = params.structureId as string;
   const enfantId = params.id as string;
   const [enfant, setEnfant] = useState<Enfant | null>(null);
+  const [transmissions, setTransmissions] = useState<TransmissionEnfant[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState(0);
 
   useEffect(() => {
-    const fetch = async () => {
-      const result = await getEnfant(enfantId, structureId);
+    const fetchData = async () => {
+      const [result, transRes] = await Promise.all([
+        getEnfant(enfantId, structureId),
+        getTransmissionsEnfant(structureId, enfantId),
+      ]);
       if (result.success && result.data) {
         setEnfant({ ...result.data, date_naissance: result.data.date_naissance.toISOString() });
       } else {
         toast.error(result.error ?? "Enfant non trouvé.");
         router.push(`/dashboard/${structureId}/enfants`);
       }
+      if (transRes.success && transRes.data) {
+        setTransmissions(transRes.data.map((t) => ({ ...t, date: (t.date as unknown as Date).toISOString?.() ?? String(t.date) })) as TransmissionEnfant[]);
+      }
       setLoading(false);
     };
-    fetch();
+    fetchData();
   }, [enfantId, structureId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleDelete = async () => {
@@ -154,6 +166,27 @@ export default function FicheEnfantPage() {
                     </div>
                   </div>
                   <span className="text-xs text-gray-400">#{c.ordre_priorite}</span>
+                </div>
+              ))
+            )}
+          </div>
+        )}
+
+        {activeTab === 3 && (
+          <div className="space-y-3">
+            {transmissions.length === 0 ? (
+              <div className="text-center py-8">
+                <MessageSquare size={32} className="mx-auto text-gray-200 mb-2" />
+                <p className="text-gray-400 text-sm">Aucune transmission pour cet enfant.</p>
+              </div>
+            ) : (
+              transmissions.map((t) => (
+                <div key={t.id} className="p-3 rounded-lg bg-gray-50">
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="text-sm font-medium text-gray-800">{t.auteur}</span>
+                    <span className="text-xs text-gray-400">{new Date(t.date).toLocaleDateString("fr-FR")} à {new Date(t.date).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}</span>
+                  </div>
+                  <p className="text-sm text-gray-600 whitespace-pre-wrap">{t.contenu}</p>
                 </div>
               ))
             )}
