@@ -7,6 +7,7 @@ import { useParams, useRouter } from "next/navigation";
 import { getEnfants } from "@/app/actions/enfants";
 import { calculerAge } from "@/lib/business-logic";
 import { BadgeAllergie } from "@/components/shared/badge-allergie";
+import { BadgeRegime } from "@/components/shared/badge-regime";
 import { BoutonAction } from "@/components/shared/bouton-action";
 import { GROUPES_ENFANTS } from "@/lib/constants";
 import { Plus, Search, Upload, Loader2, AlertTriangle } from "lucide-react";
@@ -21,6 +22,7 @@ interface Enfant {
   groupe?: string | null;
   photo_url?: string | null;
   allergies: { id: string; allergene: string; severite: "LEGERE" | "MODEREE" | "SEVERE" }[];
+  regimes: string[];
 }
 
 const COULEURS_AVATAR = ["#2E86C1", "#27AE60", "#F4A261", "#E53E3E", "#8E44AD", "#F39C12"];
@@ -119,9 +121,10 @@ export default function EnfantsPage() {
                     <AlertTriangle size={18} className="text-red-500 shrink-0 mt-1" aria-label="Allergies" />
                   )}
                 </div>
-                {enfant.allergies.length > 0 && (
-                  <div className="mt-3">
-                    <BadgeAllergie enfant={enfant} />
+                {(enfant.allergies.length > 0 || enfant.regimes.length > 0) && (
+                  <div className="mt-3 space-y-2">
+                    {enfant.allergies.length > 0 && <BadgeAllergie enfant={enfant} />}
+                    {enfant.regimes.length > 0 && <BadgeRegime enfant={enfant} />}
                   </div>
                 )}
               </button>

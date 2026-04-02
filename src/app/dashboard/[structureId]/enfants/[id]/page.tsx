@@ -8,6 +8,7 @@ import { getEnfant, supprimerEnfant } from "@/app/actions/enfants";
 import { getTransmissionsEnfant } from "@/app/actions/transmissions";
 import { calculerAge } from "@/lib/business-logic";
 import { BadgeAllergie } from "@/components/shared/badge-allergie";
+import { BadgeRegime } from "@/components/shared/badge-regime";
 import { Loader2, ArrowLeft, Edit, Trash2, Phone, User, MessageSquare } from "lucide-react";
 import { toast } from "sonner";
 
@@ -16,6 +17,7 @@ interface Enfant {
   groupe?: string | null; photo_url?: string | null;
   allergies: { id: string; allergene: string; severite: "LEGERE" | "MODEREE" | "SEVERE"; protocole?: string | null; document_pai?: string | null }[];
   contacts: { id: string; nom: string; lien: string; telephone: string; est_autorise_recuperer: boolean; ordre_priorite: number }[];
+  regimes: string[];
 }
 
 interface TransmissionEnfant {
@@ -101,8 +103,9 @@ export default function FicheEnfantPage() {
         </div>
       </div>
 
-      {/* Allergie banner */}
+      {/* Allergie & régime banners */}
       {enfant.allergies.length > 0 && <BadgeAllergie enfant={enfant} />}
+      {enfant.regimes.length > 0 && <BadgeRegime enfant={enfant} />}
 
       {/* Tabs */}
       <div className="flex gap-1 border-b border-gray-200">
@@ -130,23 +133,41 @@ export default function FicheEnfantPage() {
         )}
 
         {activeTab === 1 && (
-          <div className="space-y-4">
-            {enfant.allergies.length === 0 ? (
-              <p className="text-gray-400 text-sm">Aucune allergie enregistrée.</p>
-            ) : (
-              enfant.allergies.map((a) => (
-                <div key={a.id} className="p-4 rounded-lg bg-red-50 border border-red-200">
-                  <div className="flex items-center justify-between">
-                    <p className="font-semibold text-red-800">{a.allergene}</p>
-                    <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${a.severite === "SEVERE" ? "bg-red-200 text-red-800" : a.severite === "MODEREE" ? "bg-orange-200 text-orange-800" : "bg-yellow-200 text-yellow-800"}`}>
-                      {SEVERITE_LABELS[a.severite]}
-                    </span>
+          <div className="space-y-6">
+            {/* Allergies */}
+            <div className="space-y-3">
+              <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide">Allergies</h3>
+              {enfant.allergies.length === 0 ? (
+                <p className="text-gray-400 text-sm">Aucune allergie enregistrée.</p>
+              ) : (
+                enfant.allergies.map((a) => (
+                  <div key={a.id} className="p-4 rounded-lg bg-red-50 border border-red-200">
+                    <div className="flex items-center justify-between">
+                      <p className="font-semibold text-red-800">{a.allergene}</p>
+                      <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${a.severite === "SEVERE" ? "bg-red-200 text-red-800" : a.severite === "MODEREE" ? "bg-orange-200 text-orange-800" : "bg-yellow-200 text-yellow-800"}`}>
+                        {SEVERITE_LABELS[a.severite]}
+                      </span>
+                    </div>
+                    {a.protocole && <p className="text-sm text-red-700 mt-2">{a.protocole}</p>}
+                    {a.document_pai && <a href={a.document_pai} target="_blank" rel="noreferrer" className="text-sm text-petitsafe-primary hover:underline mt-1 block">Voir le PAI</a>}
                   </div>
-                  {a.protocole && <p className="text-sm text-red-700 mt-2">{a.protocole}</p>}
-                  {a.document_pai && <a href={a.document_pai} target="_blank" rel="noreferrer" className="text-sm text-petitsafe-primary hover:underline mt-1 block">Voir le PAI</a>}
+                ))
+              )}
+            </div>
+
+            {/* Régimes alimentaires */}
+            <div className="space-y-3">
+              <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide">Régimes alimentaires</h3>
+              {enfant.regimes.length === 0 ? (
+                <p className="text-gray-400 text-sm">Aucun régime particulier.</p>
+              ) : (
+                <div className="flex flex-wrap gap-2">
+                  {enfant.regimes.map((r) => (
+                    <span key={r} className="px-3 py-1.5 rounded-full text-sm font-medium bg-blue-100 text-blue-800">{r}</span>
+                  ))}
                 </div>
-              ))
-            )}
+              )}
+            </div>
           </div>
         )}
 

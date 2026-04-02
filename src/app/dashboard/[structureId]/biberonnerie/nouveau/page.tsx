@@ -8,12 +8,14 @@ import { isBoiteLaitExpiree } from "@/lib/business-logic";
 import { TYPES_LAIT, QUANTITES_BIBERON_ML } from "@/lib/constants";
 import { useAuth } from "@/hooks/use-auth";
 import { BadgeAllergie } from "@/components/shared/badge-allergie";
+import { BadgeRegime } from "@/components/shared/badge-regime";
 import { toast } from "sonner";
 import { Loader2, ArrowLeft, AlertTriangle } from "lucide-react";
 
 interface Enfant {
   id: string; prenom: string; nom: string;
   allergies: { id: string; allergene: string; severite: "LEGERE" | "MODEREE" | "SEVERE" }[];
+  regimes: string[];
 }
 
 const PLV_KEYWORDS = ["lait de vache", "plv", "protéines de lait", "lactose", "caséine"];
@@ -53,7 +55,7 @@ function NouveauBiberonContent() {
     const fetch = async () => {
       const result = await getEnfants(structureId);
       if (result.success && result.data) {
-        setEnfants(result.data.map((e) => ({ id: e.id, prenom: e.prenom, nom: e.nom, allergies: e.allergies })));
+        setEnfants(result.data.map((e) => ({ id: e.id, prenom: e.prenom, nom: e.nom, allergies: e.allergies, regimes: e.regimes })));
       }
       setLoading(false);
     };
@@ -118,6 +120,7 @@ function NouveauBiberonContent() {
         </select>
 
         {selected && selected.allergies.length > 0 && <BadgeAllergie enfant={selected} />}
+        {selected && selected.regimes.length > 0 && <BadgeRegime enfant={selected} />}
       </div>
 
       {selected && (

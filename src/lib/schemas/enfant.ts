@@ -24,6 +24,7 @@ export const enfantSchema = z.object({
   photo_url: z.string().optional().nullable(),
   allergies: z.array(allergieSchema).default([]),
   contacts: z.array(contactSchema).default([]),
+  regimes: z.array(z.string()).default([]),
 });
 
 export const importEnfantSchema = z.object({

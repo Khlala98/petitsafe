@@ -69,6 +69,17 @@ export const TYPES_LAIT = [
 /** Quantités rapides biberon (ml) */
 export const QUANTITES_BIBERON_ML = [90, 120, 150, 180, 210, 240] as const;
 
+/** Régimes alimentaires prédéfinis */
+export const REGIMES_ALIMENTAIRES = [
+  "Sans porc",
+  "Végétarien",
+  "Sans gluten",
+  "Sans lactose",
+  "Halal",
+  "Casher",
+  "Bio uniquement",
+] as const;
+
 /** Modules disponibles — chaque structure active/désactive individuellement */
 export const MODULES_DISPONIBLES = {
   temperatures:  { label: "Températures",   icon: "Thermometer",     categorie: "haccp"   as const, description: "Relevés frigo, congélateur, plats" },

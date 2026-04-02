@@ -18,6 +18,7 @@ export async function creerEnfant(structureId: string, data: z.infer<typeof enfa
         sexe: parsed.data.sexe ?? undefined,
         groupe: parsed.data.groupe ?? undefined,
         photo_url: parsed.data.photo_url ?? undefined,
+        regimes: parsed.data.regimes,
         allergies: {
           create: parsed.data.allergies.map((a) => ({
             allergene: a.allergene,
@@ -62,6 +63,7 @@ export async function modifierEnfant(enfantId: string, structureId: string, data
         sexe: parsed.data.sexe ?? undefined,
         groupe: parsed.data.groupe ?? undefined,
         photo_url: parsed.data.photo_url ?? undefined,
+        regimes: parsed.data.regimes,
         allergies: {
           create: parsed.data.allergies.map((a) => ({
             allergene: a.allergene,

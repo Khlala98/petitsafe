@@ -5,17 +5,19 @@ export const dynamic = 'force-dynamic';
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { getEnfants } from "@/app/actions/enfants";
-import { enregistrerRepas, enregistrerChange, debuterSieste, finirSieste, getSiesteEnCours, enregistrerTransmission } from "@/app/actions/suivi";
+import { enregistrerRepas, enregistrerChange, debuterSieste, finirSieste, getSiesteEnCours, enregistrerTransmission, getHistoriqueDuJour } from "@/app/actions/suivi";
 import { useAuth } from "@/hooks/use-auth";
 import { useModules } from "@/hooks/use-modules";
 import { BadgeAllergie } from "@/components/shared/badge-allergie";
+import { BadgeRegime } from "@/components/shared/badge-regime";
 import { toast } from "sonner";
-import { Loader2, Baby, UtensilsCrossed, Droplets, Moon, MessageSquare } from "lucide-react";
+import { Loader2, Baby, UtensilsCrossed, Droplets, Moon, MessageSquare, Clock } from "lucide-react";
 import Link from "next/link";
 
 interface Enfant {
   id: string; prenom: string; nom: string; date_naissance: string; groupe?: string | null;
   allergies: { id: string; allergene: string; severite: "LEGERE" | "MODEREE" | "SEVERE" }[];
+  regimes: string[];
 }
 
 type ActiveForm = null | "repas" | "change" | "sieste" | "transmission";
@@ -48,6 +50,12 @@ export default function SuiviPage() {
   const [transType, setTransType] = useState("ENFANT");
   const [transContenu, setTransContenu] = useState("");
 
+  // Historique timeline
+  type TimelineItem = { id: string; type: "biberon" | "repas" | "change" | "sieste" | "transmission"; heure: string; details: string };
+  const [historique, setHistorique] = useState<TimelineItem[]>([]);
+  const [historiqueVersion, setHistoriqueVersion] = useState(0);
+  const refreshHistorique = () => setHistoriqueVersion((v) => v + 1);
+
   const proId = user?.id ?? "";
   const selected = enfants.find((e) => e.id === selectedId) ?? null;
 
@@ -76,6 +84,16 @@ export default function SuiviPage() {
     check();
   }, [selectedId, structureId]);
 
+  // Fetch historique du jour
+  useEffect(() => {
+    if (!selectedId) { setHistorique([]); return; }
+    const fetchH = async () => {
+      const result = await getHistoriqueDuJour(structureId, selectedId);
+      if (result.success && result.data) setHistorique(result.data);
+    };
+    fetchH();
+  }, [selectedId, structureId, historiqueVersion]);
+
   // Sieste timer
   useEffect(() => {
     if (!siesteEnCours) { setSiesteTimer(0); return; }
@@ -91,7 +109,7 @@ export default function SuiviPage() {
   const handleChange = async (type: string) => {
     if (!selectedId) return;
     const result = await enregistrerChange({ structure_id: structureId, enfant_id: selectedId, type_change: type, professionnel_id: proId });
-    if (result.success) toast.success("Change enregistré !");
+    if (result.success) { toast.success("Change enregistré !"); refreshHistorique(); }
     else toast.error(result.error);
   };
 
@@ -104,7 +122,7 @@ export default function SuiviPage() {
       dessert: dessert || undefined, dessert_quantite: dessertQte || undefined,
       observations: observations || undefined, professionnel_id: proId,
     });
-    if (result.success) { toast.success("Repas enregistré !"); setActiveForm(null); resetRepas(); }
+    if (result.success) { toast.success("Repas enregistré !"); setActiveForm(null); resetRepas(); refreshHistorique(); }
     else toast.error(result.error);
   };
 
@@ -114,13 +132,14 @@ export default function SuiviPage() {
     if (!selectedId) return;
     if (siesteEnCours) {
       const result = await finirSieste({ sieste_id: siesteEnCours.id });
-      if (result.success) { toast.success("Sieste terminée !"); setSiesteEnCours(null); }
+      if (result.success) { toast.success("Sieste terminée !"); setSiesteEnCours(null); refreshHistorique(); }
       else toast.error(result.error);
     } else {
       const result = await debuterSieste({ structure_id: structureId, enfant_id: selectedId, professionnel_id: proId });
       if (result.success && result.data) {
         toast.success("Sieste démarrée !");
         setSiesteEnCours({ id: result.data.id, heure_debut: result.data.heure_debut.toISOString() });
+        refreshHistorique();
       } else toast.error(result.error);
     }
   };
@@ -131,7 +150,7 @@ export default function SuiviPage() {
       structure_id: structureId, enfant_id: transType === "ENFANT" ? selectedId ?? undefined : undefined,
       contenu: transContenu, type_transm: transType, auteur: user?.user_metadata?.prenom ?? "Pro",
     });
-    if (result.success) { toast.success("Transmission enregistrée !"); setActiveForm(null); setTransContenu(""); }
+    if (result.success) { toast.success("Transmission enregistrée !"); setActiveForm(null); setTransContenu(""); refreshHistorique(); }
     else toast.error(result.error);
   };
 
@@ -177,8 +196,9 @@ export default function SuiviPage() {
 
       {selected && (
         <>
-          {/* Allergie banner */}
+          {/* Allergie & régime banners */}
           {selected.allergies.length > 0 && <BadgeAllergie enfant={selected} />}
+          {selected.regimes.length > 0 && <BadgeRegime enfant={selected} />}
 
           {/* Action buttons */}
           <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
@@ -301,6 +321,50 @@ export default function SuiviPage() {
               <button onClick={handleTransmission} className="w-full h-12 rounded-xl bg-petitsafe-primary text-white font-medium">Enregistrer</button>
             </div>
           )}
+
+          {/* ═══ HISTORIQUE DU JOUR ═══ */}
+          <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+            <div className="flex items-center gap-2 mb-4">
+              <Clock size={18} className="text-gray-400" />
+              <h3 className="font-semibold text-gray-700">Historique du jour</h3>
+              <span className="text-xs text-gray-400 ml-auto">{historique.length} action{historique.length !== 1 ? "s" : ""}</span>
+            </div>
+            {historique.length === 0 ? (
+              <p className="text-sm text-gray-400 text-center py-4">Aucune action enregistrée aujourd&apos;hui.</p>
+            ) : (
+              <div className="relative pl-6">
+                {/* Vertical line */}
+                <div className="absolute left-[9px] top-2 bottom-2 w-0.5 bg-gray-200" />
+                <div className="space-y-4">
+                  {historique.map((item) => {
+                    const config: Record<string, { icon: string; color: string; bg: string }> = {
+                      biberon: { icon: "🍼", color: "bg-blue-500", bg: "bg-blue-50" },
+                      repas: { icon: "🍽️", color: "bg-orange-500", bg: "bg-orange-50" },
+                      change: { icon: "💧", color: "bg-green-500", bg: "bg-green-50" },
+                      sieste: { icon: "😴", color: "bg-purple-500", bg: "bg-purple-50" },
+                      transmission: { icon: "📝", color: "bg-gray-400", bg: "bg-gray-50" },
+                    };
+                    const c = config[item.type];
+                    const labels: Record<string, string> = { biberon: "Biberon", repas: "Repas", change: "Change", sieste: "Sieste", transmission: "Transmission" };
+                    return (
+                      <div key={item.id} className="relative flex items-start gap-3">
+                        {/* Dot on line */}
+                        <div className={`absolute -left-6 top-1.5 h-[14px] w-[14px] rounded-full border-2 border-white ${c.color} shadow-sm`} />
+                        <div className={`flex-1 rounded-lg p-3 ${c.bg}`}>
+                          <div className="flex items-center gap-2">
+                            <span className="text-base">{c.icon}</span>
+                            <span className="text-sm font-semibold text-gray-700">{labels[item.type]}</span>
+                            <span className="text-xs text-gray-400 ml-auto font-mono">{item.heure}</span>
+                          </div>
+                          <p className="text-sm text-gray-600 mt-0.5">{item.details}</p>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+          </div>
         </>
       )}
     </div>

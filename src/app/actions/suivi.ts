@@ -138,6 +138,73 @@ export async function enregistrerTransmission(data: {
   }
 }
 
+// ═══ HISTORIQUE DU JOUR (timeline par enfant) ═══
+
+export async function getHistoriqueDuJour(structureId: string, enfantId: string) {
+  try {
+    const todayStart = new Date(); todayStart.setHours(0, 0, 0, 0);
+    const todayEnd = new Date(); todayEnd.setHours(23, 59, 59, 999);
+    const where = { structure_id: structureId, enfant_id: enfantId, date: { gte: todayStart, lte: todayEnd } };
+
+    const [repas, changes, siestes, biberons, transmissions] = await Promise.all([
+      prisma.repas.findMany({ where, orderBy: { date: "desc" } }),
+      prisma.change.findMany({ where, orderBy: { heure: "desc" } }),
+      prisma.sieste.findMany({ where, orderBy: { heure_debut: "desc" } }),
+      prisma.biberon.findMany({ where, orderBy: { heure_preparation: "desc" } }),
+      prisma.transmission.findMany({ where: { ...where, enfant_id: enfantId }, orderBy: { date: "desc" } }),
+    ]);
+
+    type TimelineItem = {
+      id: string;
+      type: "biberon" | "repas" | "change" | "sieste" | "transmission";
+      heure: string;
+      details: string;
+    };
+
+    const items: TimelineItem[] = [];
+
+    biberons.forEach((b) => {
+      const h = b.heure_preparation ? new Date(b.heure_preparation).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" }) : "--:--";
+      const qte = b.quantite_bue_ml ? `${b.quantite_bue_ml}ml bu` : `${b.quantite_preparee_ml}ml préparé`;
+      items.push({ id: b.id, type: "biberon", heure: h, details: `${b.type_lait || "Lait"} — ${qte}` });
+    });
+
+    repas.forEach((r) => {
+      const h = new Date(r.date).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" });
+      const labels: Record<string, string> = { PETIT_DEJ: "Petit-déj", DEJEUNER: "Déjeuner", GOUTER: "Goûter", DINER: "Dîner" };
+      const parts: string[] = [];
+      const qteLabels: Record<string, string> = { TOUT: "tout mangé", BIEN: "bien mangé", PEU: "peu mangé", RIEN: "pas mangé" };
+      if (r.plat) parts.push(`${r.plat} (${qteLabels[r.plat_quantite || ""] || ""})`);
+      else if (r.entree) parts.push(`${r.entree} (${qteLabels[r.entree_quantite || ""] || ""})`);
+      items.push({ id: r.id, type: "repas", heure: h, details: `${labels[r.type_repas] || r.type_repas}${parts.length ? " — " + parts.join(", ") : ""}` });
+    });
+
+    changes.forEach((c) => {
+      const h = new Date(c.heure).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" });
+      const labels: Record<string, string> = { MOUILLEE: "Mouillée", SELLE: "Selle", LES_DEUX: "Mouillée + Selle" };
+      items.push({ id: c.id, type: "change", heure: h, details: labels[c.type_change] || c.type_change });
+    });
+
+    siestes.forEach((s) => {
+      const h = new Date(s.heure_debut).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" });
+      const duree = s.duree_minutes ? `${s.duree_minutes}min` : "en cours…";
+      items.push({ id: s.id, type: "sieste", heure: h, details: duree });
+    });
+
+    transmissions.forEach((t) => {
+      const h = new Date(t.date).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" });
+      items.push({ id: t.id, type: "transmission", heure: h, details: t.contenu.length > 60 ? t.contenu.slice(0, 60) + "…" : t.contenu });
+    });
+
+    // Sort by time descending (most recent first)
+    items.sort((a, b) => b.heure.localeCompare(a.heure));
+
+    return { success: true as const, data: items };
+  } catch (error) {
+    return { success: false as const, error: "Erreur lors du chargement de l'historique." };
+  }
+}
+
 // ═══ DONNÉES DU JOUR (pour vue groupe) ═══
 
 export async function getSuiviDuJour(structureId: string) {

@@ -18,6 +18,7 @@ export default function ModifierEnfantPage() {
     id: string; prenom: string; nom: string; date_naissance: string; sexe?: string | null; groupe?: string | null;
     allergies: { allergene: string; severite: "LEGERE" | "MODEREE" | "SEVERE"; protocole?: string }[];
     contacts: { nom: string; lien: string; telephone: string; est_autorise_recuperer: boolean; ordre_priorite: number }[];
+    regimes?: string[];
   } | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -30,6 +31,7 @@ export default function ModifierEnfantPage() {
           date_naissance: result.data.date_naissance.toISOString(),
           allergies: result.data.allergies.map((a) => ({ allergene: a.allergene, severite: a.severite, protocole: a.protocole ?? undefined })),
           contacts: result.data.contacts.map((c) => ({ nom: c.nom, lien: c.lien, telephone: c.telephone, est_autorise_recuperer: c.est_autorise_recuperer, ordre_priorite: c.ordre_priorite })),
+          regimes: result.data.regimes,
         });
       } else {
         toast.error("Enfant non trouvé.");

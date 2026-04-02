@@ -3,9 +3,9 @@
 import { useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { creerEnfant, modifierEnfant } from "@/app/actions/enfants";
-import { GROUPES_ENFANTS } from "@/lib/constants";
+import { GROUPES_ENFANTS, REGIMES_ALIMENTAIRES } from "@/lib/constants";
 import { toast } from "sonner";
-import { Loader2, Plus, Trash2, ArrowLeft } from "lucide-react";
+import { Loader2, Plus, Trash2, ArrowLeft, X } from "lucide-react";
 
 interface Allergie { allergene: string; severite: "LEGERE" | "MODEREE" | "SEVERE"; protocole?: string }
 interface Contact { nom: string; lien: string; telephone: string; est_autorise_recuperer: boolean; ordre_priorite: number }
@@ -14,7 +14,7 @@ interface EnfantFormProps {
   mode: "create" | "edit";
   initial?: {
     id: string; prenom: string; nom: string; date_naissance: string; sexe?: string | null; groupe?: string | null;
-    allergies: Allergie[]; contacts: Contact[];
+    allergies: Allergie[]; contacts: Contact[]; regimes?: string[];
   };
 }
 
@@ -31,6 +31,15 @@ export function EnfantForm({ mode, initial }: EnfantFormProps) {
   const [groupe, setGroupe] = useState(initial?.groupe ?? "");
   const [allergies, setAllergies] = useState<Allergie[]>(initial?.allergies ?? []);
   const [contacts, setContacts] = useState<Contact[]>(initial?.contacts ?? []);
+  const [regimes, setRegimes] = useState<string[]>(initial?.regimes ?? []);
+  const [regimeAutre, setRegimeAutre] = useState("");
+
+  const toggleRegime = (r: string) => setRegimes((prev) => prev.includes(r) ? prev.filter((x) => x !== r) : [...prev, r]);
+  const addRegimeAutre = () => {
+    const trimmed = regimeAutre.trim();
+    if (trimmed && !regimes.includes(trimmed)) { setRegimes([...regimes, trimmed]); setRegimeAutre(""); }
+  };
+  const removeRegime = (r: string) => setRegimes(regimes.filter((x) => x !== r));
 
   const addAllergie = () => setAllergies([...allergies, { allergene: "", severite: "MODEREE" }]);
   const removeAllergie = (i: number) => setAllergies(allergies.filter((_, idx) => idx !== i));
@@ -58,6 +67,7 @@ export function EnfantForm({ mode, initial }: EnfantFormProps) {
       groupe: groupe || null, photo_url: null,
       allergies: allergies.filter((a) => a.allergene),
       contacts: contacts.filter((c) => c.nom && c.telephone),
+      regimes,
     };
 
     const result = mode === "create"
@@ -141,6 +151,40 @@ export function EnfantForm({ mode, initial }: EnfantFormProps) {
             </button>
           </div>
         ))}
+      </div>
+
+      {/* Régimes alimentaires */}
+      <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 space-y-4">
+        <h2 className="font-semibold text-gray-700">Régimes alimentaires</h2>
+        <div className="flex flex-wrap gap-2">
+          {REGIMES_ALIMENTAIRES.map((r) => (
+            <button key={r} type="button" onClick={() => toggleRegime(r)}
+              className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${regimes.includes(r) ? "bg-blue-500 text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"}`}>
+              {r}
+            </button>
+          ))}
+        </div>
+        {/* Custom regimes (non-predefined) */}
+        {regimes.filter((r) => !(REGIMES_ALIMENTAIRES as readonly string[]).includes(r)).length > 0 && (
+          <div className="flex flex-wrap gap-2">
+            {regimes.filter((r) => !(REGIMES_ALIMENTAIRES as readonly string[]).includes(r)).map((r) => (
+              <span key={r} className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-sm font-medium bg-blue-500 text-white">
+                {r}
+                <button type="button" onClick={() => removeRegime(r)} className="hover:bg-blue-600 rounded-full p-0.5"><X size={12} /></button>
+              </span>
+            ))}
+          </div>
+        )}
+        <div className="flex gap-2">
+          <input type="text" value={regimeAutre} onChange={(e) => setRegimeAutre(e.target.value)}
+            onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addRegimeAutre(); } }}
+            placeholder="Autre régime..." className={inputClass} />
+          <button type="button" onClick={addRegimeAutre}
+            className="h-12 px-4 rounded-xl bg-gray-100 text-gray-600 hover:bg-gray-200 text-sm font-medium shrink-0 flex items-center gap-1">
+            <Plus size={14} /> Ajouter
+          </button>
+        </div>
+        {regimes.length === 0 && <p className="text-sm text-gray-400">Aucun régime particulier.</p>}
       </div>
 
       {/* Contacts urgence */}
