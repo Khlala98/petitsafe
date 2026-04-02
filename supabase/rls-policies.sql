@@ -1,7 +1,7 @@
 -- ═══════════════════════════════════════════════════════════
--- PetitSafe — Policies RLS Supabase
+-- PetitSafe — Policies RLS Supabase (idempotent)
 -- À exécuter après la première migration Prisma :
---   psql -f supabase/rls-policies.sql
+--   psql $DIRECT_URL -f supabase/rls-policies.sql
 -- ═══════════════════════════════════════════════════════════
 
 -- Activer RLS sur toutes les tables métier
@@ -47,9 +47,31 @@ RETURNS boolean AS $$
     SELECT 1 FROM "UserStructure"
     WHERE user_id = auth.uid()::text
       AND structure_id = p_structure_id::text
-      AND role = ANY(p_roles)
+      AND role::text = ANY(p_roles)
   );
 $$ LANGUAGE sql SECURITY DEFINER STABLE;
+
+-- ═══ DROP ALL EXISTING POLICIES (idempotent) ═══
+
+DO $$ DECLARE
+  r RECORD;
+BEGIN
+  FOR r IN (
+    SELECT schemaname, tablename, policyname
+    FROM pg_policies
+    WHERE schemaname = 'public'
+      AND tablename IN (
+        'Structure', 'UserStructure', 'Enfant', 'AllergieEnfant', 'ContactUrgence',
+        'Biberon', 'Repas', 'Change', 'Sieste', 'Equipement',
+        'ReleveTemperature', 'RelevePlat', 'ReceptionMarchandise',
+        'ZoneNettoyage', 'TacheNettoyage', 'ValidationNettoyage',
+        'Stock', 'MouvementStock', 'Transmission', 'Protocole',
+        'ExportPDF', 'DemandeDemo'
+      )
+  ) LOOP
+    EXECUTE format('DROP POLICY IF EXISTS %I ON %I.%I', r.policyname, r.schemaname, r.tablename);
+  END LOOP;
+END $$;
 
 -- ═══ STRUCTURE ═══
 
@@ -82,11 +104,8 @@ CREATE POLICY "user_structure_delete" ON "UserStructure"
     user_has_role_in_structure(structure_id::uuid, ARRAY['GESTIONNAIRE'])
   );
 
--- ═══ MACRO : Tables avec structure_id (SELECT/INSERT/UPDATE/DELETE) ═══
--- Appliqué à : Enfant, Equipement, ZoneNettoyage, Stock, Transmission, Protocole, ExportPDF,
---              Biberon, Repas, Change, Sieste, ReleveTemperature, RelevePlat, ReceptionMarchandise
+-- ═══ ENFANT ═══
 
--- ENFANT
 CREATE POLICY "enfant_select" ON "Enfant"
   FOR SELECT USING (user_belongs_to_structure(structure_id::uuid));
 
@@ -105,7 +124,8 @@ CREATE POLICY "enfant_delete" ON "Enfant"
     user_has_role_in_structure(structure_id::uuid, ARRAY['GESTIONNAIRE'])
   );
 
--- ALLERGIE_ENFANT (jointure via enfant)
+-- ═══ ALLERGIE_ENFANT (jointure via enfant) ═══
+
 CREATE POLICY "allergie_select" ON "AllergieEnfant"
   FOR SELECT USING (
     EXISTS (
@@ -142,7 +162,8 @@ CREATE POLICY "allergie_delete" ON "AllergieEnfant"
     )
   );
 
--- CONTACT_URGENCE (jointure via enfant)
+-- ═══ CONTACT_URGENCE (jointure via enfant) ═══
+
 CREATE POLICY "contact_select" ON "ContactUrgence"
   FOR SELECT USING (
     EXISTS (
@@ -179,7 +200,8 @@ CREATE POLICY "contact_delete" ON "ContactUrgence"
     )
   );
 
--- BIBERON
+-- ═══ BIBERON ═══
+
 CREATE POLICY "biberon_select" ON "Biberon"
   FOR SELECT USING (user_belongs_to_structure(structure_id::uuid));
 
@@ -198,7 +220,8 @@ CREATE POLICY "biberon_delete" ON "Biberon"
     user_has_role_in_structure(structure_id::uuid, ARRAY['GESTIONNAIRE'])
   );
 
--- REPAS
+-- ═══ REPAS ═══
+
 CREATE POLICY "repas_select" ON "Repas"
   FOR SELECT USING (user_belongs_to_structure(structure_id::uuid));
 
@@ -217,7 +240,8 @@ CREATE POLICY "repas_delete" ON "Repas"
     user_has_role_in_structure(structure_id::uuid, ARRAY['GESTIONNAIRE'])
   );
 
--- CHANGE
+-- ═══ CHANGE ═══
+
 CREATE POLICY "change_select" ON "Change"
   FOR SELECT USING (user_belongs_to_structure(structure_id::uuid));
 
@@ -236,7 +260,8 @@ CREATE POLICY "change_delete" ON "Change"
     user_has_role_in_structure(structure_id::uuid, ARRAY['GESTIONNAIRE'])
   );
 
--- SIESTE
+-- ═══ SIESTE ═══
+
 CREATE POLICY "sieste_select" ON "Sieste"
   FOR SELECT USING (user_belongs_to_structure(structure_id::uuid));
 
@@ -255,7 +280,8 @@ CREATE POLICY "sieste_delete" ON "Sieste"
     user_has_role_in_structure(structure_id::uuid, ARRAY['GESTIONNAIRE'])
   );
 
--- EQUIPEMENT
+-- ═══ EQUIPEMENT ═══
+
 CREATE POLICY "equipement_select" ON "Equipement"
   FOR SELECT USING (user_belongs_to_structure(structure_id::uuid));
 
@@ -274,7 +300,8 @@ CREATE POLICY "equipement_delete" ON "Equipement"
     user_has_role_in_structure(structure_id::uuid, ARRAY['GESTIONNAIRE'])
   );
 
--- RELEVE_TEMPERATURE
+-- ═══ RELEVE_TEMPERATURE ═══
+
 CREATE POLICY "releve_temp_select" ON "ReleveTemperature"
   FOR SELECT USING (user_belongs_to_structure(structure_id::uuid));
 
@@ -293,7 +320,8 @@ CREATE POLICY "releve_temp_delete" ON "ReleveTemperature"
     user_has_role_in_structure(structure_id::uuid, ARRAY['GESTIONNAIRE'])
   );
 
--- RELEVE_PLAT
+-- ═══ RELEVE_PLAT ═══
+
 CREATE POLICY "releve_plat_select" ON "RelevePlat"
   FOR SELECT USING (user_belongs_to_structure(structure_id::uuid));
 
@@ -312,7 +340,8 @@ CREATE POLICY "releve_plat_delete" ON "RelevePlat"
     user_has_role_in_structure(structure_id::uuid, ARRAY['GESTIONNAIRE'])
   );
 
--- RECEPTION_MARCHANDISE
+-- ═══ RECEPTION_MARCHANDISE ═══
+
 CREATE POLICY "reception_select" ON "ReceptionMarchandise"
   FOR SELECT USING (user_belongs_to_structure(structure_id::uuid));
 
@@ -331,7 +360,8 @@ CREATE POLICY "reception_delete" ON "ReceptionMarchandise"
     user_has_role_in_structure(structure_id::uuid, ARRAY['GESTIONNAIRE'])
   );
 
--- ZONE_NETTOYAGE
+-- ═══ ZONE_NETTOYAGE ═══
+
 CREATE POLICY "zone_nettoyage_select" ON "ZoneNettoyage"
   FOR SELECT USING (user_belongs_to_structure(structure_id::uuid));
 
@@ -350,7 +380,8 @@ CREATE POLICY "zone_nettoyage_delete" ON "ZoneNettoyage"
     user_has_role_in_structure(structure_id::uuid, ARRAY['GESTIONNAIRE'])
   );
 
--- TACHE_NETTOYAGE (jointure via zone)
+-- ═══ TACHE_NETTOYAGE (jointure via zone) ═══
+
 CREATE POLICY "tache_nettoyage_select" ON "TacheNettoyage"
   FOR SELECT USING (
     EXISTS (
@@ -387,7 +418,8 @@ CREATE POLICY "tache_nettoyage_delete" ON "TacheNettoyage"
     )
   );
 
--- VALIDATION_NETTOYAGE (jointure via tache → zone)
+-- ═══ VALIDATION_NETTOYAGE (jointure via tache → zone) ═══
+
 CREATE POLICY "validation_nettoyage_select" ON "ValidationNettoyage"
   FOR SELECT USING (
     EXISTS (
@@ -418,7 +450,8 @@ CREATE POLICY "validation_nettoyage_delete" ON "ValidationNettoyage"
     )
   );
 
--- STOCK
+-- ═══ STOCK ═══
+
 CREATE POLICY "stock_select" ON "Stock"
   FOR SELECT USING (user_belongs_to_structure(structure_id::uuid));
 
@@ -437,7 +470,8 @@ CREATE POLICY "stock_delete" ON "Stock"
     user_has_role_in_structure(structure_id::uuid, ARRAY['GESTIONNAIRE'])
   );
 
--- MOUVEMENT_STOCK (jointure via stock)
+-- ═══ MOUVEMENT_STOCK (jointure via stock) ═══
+
 CREATE POLICY "mouvement_stock_select" ON "MouvementStock"
   FOR SELECT USING (
     EXISTS (
@@ -465,7 +499,8 @@ CREATE POLICY "mouvement_stock_delete" ON "MouvementStock"
     )
   );
 
--- TRANSMISSION
+-- ═══ TRANSMISSION ═══
+
 CREATE POLICY "transmission_select" ON "Transmission"
   FOR SELECT USING (user_belongs_to_structure(structure_id::uuid));
 
@@ -484,7 +519,8 @@ CREATE POLICY "transmission_delete" ON "Transmission"
     user_has_role_in_structure(structure_id::uuid, ARRAY['GESTIONNAIRE'])
   );
 
--- PROTOCOLE
+-- ═══ PROTOCOLE ═══
+
 CREATE POLICY "protocole_select" ON "Protocole"
   FOR SELECT USING (user_belongs_to_structure(structure_id::uuid));
 
@@ -503,7 +539,8 @@ CREATE POLICY "protocole_delete" ON "Protocole"
     user_has_role_in_structure(structure_id::uuid, ARRAY['GESTIONNAIRE'])
   );
 
--- EXPORT_PDF
+-- ═══ EXPORT_PDF ═══
+
 CREATE POLICY "export_select" ON "ExportPDF"
   FOR SELECT USING (user_belongs_to_structure(structure_id::uuid));
 
@@ -517,7 +554,8 @@ CREATE POLICY "export_delete" ON "ExportPDF"
     user_has_role_in_structure(structure_id::uuid, ARRAY['GESTIONNAIRE'])
   );
 
--- DEMANDE_DEMO (publique en INSERT, visible uniquement par gestionnaire)
+-- ═══ DEMANDE_DEMO (publique en INSERT, visible uniquement par gestionnaire) ═══
+
 CREATE POLICY "demo_insert" ON "DemandeDemo"
   FOR INSERT WITH CHECK (true); -- formulaire public
 
@@ -527,7 +565,7 @@ CREATE POLICY "demo_select" ON "DemandeDemo"
     OR user_has_role_in_structure(structure_id::uuid, ARRAY['GESTIONNAIRE'])
   );
 
--- ═══ POLICIES SPÉCIFIQUES PARENT ═══
+-- ═══ NOTE ═══
 -- Les parents ne voient que les données de LEURS enfants
 -- via les policies _select ci-dessus (user_belongs_to_structure inclut les parents)
 -- Mais les parents n'ont AUCUN droit INSERT/UPDATE/DELETE (pas dans les arrays de rôles)

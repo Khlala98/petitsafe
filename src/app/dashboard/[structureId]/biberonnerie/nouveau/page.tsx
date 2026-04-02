@@ -41,7 +41,7 @@ function NouveauBiberonContent() {
   const [nomLait, setNomLait] = useState("");
   const [numeroLot, setNumeroLot] = useState("");
   const [datePeremption, setDatePeremption] = useState("");
-  const [dateOuverture, setDateOuverture] = useState("");
+  const [dateOuverture, setDateOuverture] = useState(new Date().toISOString().split("T")[0]);
   const [dosettes, setDosettes] = useState<number | "">("");
   const [quantite, setQuantite] = useState<number | "">("");
   const [preparateur, setPreparateur] = useState(user?.user_metadata?.prenom ?? "");

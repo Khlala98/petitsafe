@@ -55,20 +55,37 @@ describe("getConformiteTemperature", () => {
 // ═══ CONFORMITÉ PLAT ═══
 
 describe("getConformitePlat", () => {
-  it("65°C après réchauffement → conforme", () => {
+  it("plat chaud 65°C → conforme", () => {
+    expect(getConformitePlat(65, "CHAUD")).toBe("conforme");
+  });
+
+  it("plat chaud 63°C (limite) → conforme", () => {
+    expect(getConformitePlat(63, "CHAUD")).toBe("conforme");
+  });
+
+  it("plat chaud 58°C → alerte", () => {
+    expect(getConformitePlat(58, "CHAUD")).toBe("alerte");
+  });
+
+  it("plat chaud 72°C → conforme", () => {
+    expect(getConformitePlat(72, "CHAUD")).toBe("conforme");
+  });
+
+  it("plat froid 2°C → conforme", () => {
+    expect(getConformitePlat(2, "FROID")).toBe("conforme");
+  });
+
+  it("plat froid 3°C (limite) → conforme", () => {
+    expect(getConformitePlat(3, "FROID")).toBe("conforme");
+  });
+
+  it("plat froid 8°C → alerte", () => {
+    expect(getConformitePlat(8, "FROID")).toBe("alerte");
+  });
+
+  it("défaut (sans type) → se comporte comme CHAUD", () => {
     expect(getConformitePlat(65)).toBe("conforme");
-  });
-
-  it("63°C (limite) → conforme", () => {
-    expect(getConformitePlat(63)).toBe("conforme");
-  });
-
-  it("58°C après réchauffement → alerte", () => {
     expect(getConformitePlat(58)).toBe("alerte");
-  });
-
-  it("72°C → conforme", () => {
-    expect(getConformitePlat(72)).toBe("conforme");
   });
 });
 
@@ -190,10 +207,10 @@ describe("calculerAge", () => {
     expect(calculerAge(naissance, maintenant)).toBe("8 mois");
   });
 
-  it("né il y a 26 mois → '2 ans'", () => {
+  it("né il y a 26 mois → '2 ans et 2 mois'", () => {
     const maintenant = new Date("2026-04-01T10:00:00");
     const naissance = new Date("2024-02-01T00:00:00");
-    expect(calculerAge(naissance, maintenant)).toBe("2 ans");
+    expect(calculerAge(naissance, maintenant)).toBe("2 ans et 2 mois");
   });
 
   it("né il y a 12 mois → '12 mois'", () => {
@@ -212,6 +229,18 @@ describe("calculerAge", () => {
     const maintenant = new Date("2026-04-01T10:00:00");
     const naissance = new Date("2023-04-01T00:00:00");
     expect(calculerAge(naissance, maintenant)).toBe("3 ans");
+  });
+
+  it("né il y a 7 ans (84 mois) → '7 ans'", () => {
+    const maintenant = new Date("2026-04-01T10:00:00");
+    const naissance = new Date("2019-04-01T00:00:00");
+    expect(calculerAge(naissance, maintenant)).toBe("7 ans");
+  });
+
+  it("né il y a 5 ans et 6 mois → '5 ans et 6 mois'", () => {
+    const maintenant = new Date("2026-04-01T10:00:00");
+    const naissance = new Date("2020-10-01T00:00:00");
+    expect(calculerAge(naissance, maintenant)).toBe("5 ans et 6 mois");
   });
 });
 

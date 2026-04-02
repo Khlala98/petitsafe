@@ -6,7 +6,7 @@ export const stockSchema = z.object({
     errorMap: () => ({ message: "Catégorie requise" }),
   }),
   produit_nom: z.string().min(1, "Nom du produit requis"),
-  quantite: z.number().min(0, "Quantité doit être ≥ 0"),
+  quantite: z.number().int("Quantité doit être un nombre entier").min(0, "Quantité doit être ≥ 0").max(99999, "Quantité ne peut pas dépasser 99 999"),
   unite: z.string().min(1, "Unité requise"),
   seuil_alerte: z.number().min(0, "Seuil doit être ≥ 0"),
   maj_par: z.string().min(1, "Responsable requis"),

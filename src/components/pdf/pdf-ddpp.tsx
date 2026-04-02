@@ -10,11 +10,12 @@ function formatHeure(iso: string) {
   return new Date(iso).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" });
 }
 
-function Footer({ date }: { date: string }) {
+function Footer() {
   return (
-    <Text style={s.footer} fixed>
-      Généré par PetitSafe — {formatDate(date)} — Document à valeur probante
-    </Text>
+    <View style={s.footer} fixed>
+      <Text style={s.footerLeft}>PetitSafe — Gestion HACCP</Text>
+      <Text style={s.footerRight} render={({ pageNumber, totalPages }) => `Page ${pageNumber}/${totalPages}`} />
+    </View>
   );
 }
 
@@ -27,15 +28,16 @@ export function PdfDDPP({ data }: { data: ExportDDPPData }) {
       <Page size="A4" style={s.coverPage}>
         <Text style={s.coverTitle}>PetitSafe</Text>
         <Text style={s.coverSubtitle}>Rapport DDPP — Contrôle sanitaire</Text>
-        <Text style={s.coverInfo}>{data.structure.nom}</Text>
+        <Text style={{ ...s.coverInfo, fontSize: 16, fontFamily: "Helvetica-Bold", color: "#1A202C", marginBottom: 10 }}>{data.structure.nom}</Text>
         <Text style={s.coverInfo}>{typeLabel}</Text>
         {data.structure.adresse && <Text style={s.coverInfo}>{data.structure.adresse}</Text>}
         {data.structure.numero_agrement && <Text style={s.coverInfo}>Agrément : {data.structure.numero_agrement}</Text>}
-        <Text style={{ ...s.coverInfo, marginTop: 30 }}>
+        <Text style={{ ...s.coverInfo, marginTop: 30, fontFamily: "Helvetica-Bold" }}>
           Période : {formatDate(data.periode.debut)} — {formatDate(data.periode.fin)}
         </Text>
-        <Text style={s.coverInfo}>Généré le {formatDate(data.dateGeneration)}</Text>
-        <Footer date={data.dateGeneration} />
+        <Text style={s.coverInfo}>Date de génération : {formatDate(data.dateGeneration)}</Text>
+        <Text style={s.coverMention}>Rapport généré automatiquement par PetitSafe — www.petitsafe.fr</Text>
+        <Footer />
       </Page>
 
       {/* Section 1 : Relevés température */}
@@ -94,7 +96,7 @@ export function PdfDDPP({ data }: { data: ExportDDPPData }) {
             ))}
           </View>
         )}
-        <Footer date={data.dateGeneration} />
+        <Footer />
       </Page>
 
       {/* Section 3 : Réceptions marchandises */}
@@ -151,7 +153,7 @@ export function PdfDDPP({ data }: { data: ExportDDPPData }) {
             ))}
           </View>
         )}
-        <Footer date={data.dateGeneration} />
+        <Footer />
       </Page>
 
       {/* Section 5+6+7 : Biberonnerie, alertes DLC, produits jetés */}
@@ -227,7 +229,7 @@ export function PdfDDPP({ data }: { data: ExportDDPPData }) {
             ))}
           </View>
         )}
-        <Footer date={data.dateGeneration} />
+        <Footer />
       </Page>
     </Document>
   );

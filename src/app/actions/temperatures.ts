@@ -1,6 +1,7 @@
 "use server";
 
 import { prisma } from "@/lib/supabase/prisma";
+import { validerPlageTemperature } from "@/lib/business-logic";
 
 export async function getEquipements(structureId: string) {
   try {
@@ -44,11 +45,20 @@ export async function getReleves(structureId: string, date: string) {
 export async function creerReleve(data: {
   structure_id: string; equipement_id: string; temperature: number;
   conforme: boolean; action_corrective?: string; professionnel_id: string;
-  heure?: string;
+  heure?: string; plage_confirmee?: boolean;
 }) {
   try {
     if (!data.conforme && !data.action_corrective) {
       return { success: false as const, error: "Action corrective obligatoire si non conforme." };
+    }
+
+    // Validation côté serveur de la plage de température
+    const equipement = await prisma.equipement.findUnique({ where: { id: data.equipement_id } });
+    if (equipement) {
+      const plageErreur = validerPlageTemperature(data.temperature, equipement.type);
+      if (plageErreur && !data.plage_confirmee) {
+        return { success: false as const, error: plageErreur };
+      }
     }
 
     const now = new Date();
@@ -88,7 +98,8 @@ export async function getRelevesPlat(structureId: string, date: string) {
 }
 
 export async function creerRelevePlat(data: {
-  structure_id: string; nom_plat: string; temperature_avant: number; heure_avant: string;
+  structure_id: string; nom_plat: string; type_plat: "CHAUD" | "FROID";
+  temperature_avant: number; heure_avant: string;
   temperature_apres: number; heure_apres: string; conforme: boolean;
   action_corrective?: string; professionnel_id: string;
 }) {
@@ -102,6 +113,7 @@ export async function creerRelevePlat(data: {
         structure_id: data.structure_id,
         date: new Date(),
         nom_plat: data.nom_plat,
+        type_plat: data.type_plat,
         temperature_avant: data.temperature_avant,
         heure_avant: new Date(data.heure_avant),
         temperature_apres: data.temperature_apres,

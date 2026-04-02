@@ -5,7 +5,7 @@ export const dynamic = 'force-dynamic';
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { getEquipements, creerEquipement, getReleves, creerReleve, getRelevesPlat, creerRelevePlat, getRelevesHistorique } from "@/app/actions/temperatures";
-import { getConformiteTemperature, getConformitePlat } from "@/lib/business-logic";
+import { getConformiteTemperature, getConformitePlat, validerPlageTemperature } from "@/lib/business-logic";
 import { SEUILS_TEMPERATURE } from "@/lib/constants";
 import { PastilleStatut } from "@/components/shared/pastille-statut";
 import { useAuth } from "@/hooks/use-auth";
@@ -16,7 +16,7 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 
 interface Equipement { id: string; nom: string; type: "REFRIGERATEUR" | "CONGELATEUR"; temperature_max: number }
 interface Releve { id: string; equipement_id: string; temperature: number; conforme: boolean; heure: string; action_corrective?: string | null; equipement: { nom: string; type: string } }
-interface RelevePlat { id: string; nom_plat: string; temperature_avant: number; temperature_apres: number; conforme: boolean; heure_avant: string; heure_apres: string; action_corrective?: string | null }
+interface RelevePlat { id: string; nom_plat: string; type_plat: "CHAUD" | "FROID"; temperature_avant: number; temperature_apres: number; conforme: boolean; heure_avant: string; heure_apres: string; action_corrective?: string | null }
 
 export default function TemperaturesPage() {
   const params = useParams();
@@ -38,6 +38,8 @@ export default function TemperaturesPage() {
   const [formTemp, setFormTemp] = useState<number | "">("");
   const [formHeure, setFormHeure] = useState(new Date().toTimeString().slice(0, 5));
   const [formAction, setFormAction] = useState("");
+  const [formPlageWarning, setFormPlageWarning] = useState<string | null>(null);
+  const [formPlageConfirmed, setFormPlageConfirmed] = useState(false);
 
   // Form plat
   const [showFormPlat, setShowFormPlat] = useState(false);
@@ -46,6 +48,7 @@ export default function TemperaturesPage() {
   const [platHeureAvant, setPlatHeureAvant] = useState("");
   const [platApres, setPlatApres] = useState<number | "">("");
   const [platHeureApres, setPlatHeureApres] = useState("");
+  const [platType, setPlatType] = useState<"CHAUD" | "FROID">("CHAUD");
   const [platAction, setPlatAction] = useState("");
 
   // Add equipement
@@ -87,10 +90,23 @@ export default function TemperaturesPage() {
   // Conformity calc for form
   const selectedEquip = equipements.find((e) => e.id === formEquipId);
   const formConformite = selectedEquip && formTemp !== "" ? getConformiteTemperature(Number(formTemp), selectedEquip.type) : null;
-  const platConformite = platApres !== "" ? getConformitePlat(Number(platApres)) : null;
+  const platConformite = platApres !== "" ? getConformitePlat(Number(platApres), platType) : null;
+
+  // Range validation — update warning when equipment or temp changes
+  useEffect(() => {
+    if (selectedEquip && formTemp !== "") {
+      const warning = validerPlageTemperature(Number(formTemp), selectedEquip.type);
+      setFormPlageWarning(warning);
+      if (!warning) setFormPlageConfirmed(false);
+    } else {
+      setFormPlageWarning(null);
+      setFormPlageConfirmed(false);
+    }
+  }, [formTemp, selectedEquip]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleSubmitReleve = async () => {
     if (!formEquipId || formTemp === "") { toast.error("Sélectionnez un équipement et une température."); return; }
+    if (formPlageWarning && !formPlageConfirmed) { toast.error("Confirmez que la valeur hors plage est correcte avant d'enregistrer."); return; }
     const conforme = formConformite === "conforme";
     if (!conforme && formConformite === "alerte" && !formAction.trim()) { toast.error("Action corrective obligatoire pour une température non conforme."); return; }
 
@@ -102,8 +118,9 @@ export default function TemperaturesPage() {
       structure_id: structureId, equipement_id: formEquipId, temperature: Number(formTemp),
       conforme: formConformite !== "alerte", action_corrective: formAction || undefined,
       professionnel_id: proId, heure: today.toISOString(),
+      plage_confirmee: formPlageConfirmed,
     });
-    if (result.success) { toast.success("Relevé enregistré !"); setShowForm(false); setFormTemp(""); setFormAction(""); fetchData(); }
+    if (result.success) { toast.success("Relevé enregistré !"); setShowForm(false); setFormTemp(""); setFormAction(""); setFormPlageWarning(null); setFormPlageConfirmed(false); fetchData(); }
     else toast.error(result.error);
   };
 
@@ -114,12 +131,12 @@ export default function TemperaturesPage() {
 
     const now = new Date();
     const result = await creerRelevePlat({
-      structure_id: structureId, nom_plat: platNom,
+      structure_id: structureId, nom_plat: platNom, type_plat: platType,
       temperature_avant: Number(platAvant), heure_avant: platHeureAvant || now.toISOString(),
       temperature_apres: Number(platApres), heure_apres: platHeureApres || now.toISOString(),
       conforme, action_corrective: platAction || undefined, professionnel_id: proId,
     });
-    if (result.success) { toast.success("Relevé plat enregistré !"); setShowFormPlat(false); setPlatNom(""); setPlatAvant(""); setPlatApres(""); setPlatAction(""); fetchData(); }
+    if (result.success) { toast.success("Relevé plat enregistré !"); setShowFormPlat(false); setPlatNom(""); setPlatType("CHAUD"); setPlatAvant(""); setPlatApres(""); setPlatAction(""); fetchData(); }
     else toast.error(result.error);
   };
 
@@ -219,6 +236,16 @@ export default function TemperaturesPage() {
                   <input type="time" value={formHeure} onChange={(e) => setFormHeure(e.target.value)} className={inputClass} />
                 </div>
               </div>
+              {formPlageWarning && (
+                <div className="space-y-2">
+                  <p className="text-sm text-red-600 font-medium">{formPlageWarning}</p>
+                  <label className="flex items-center gap-2 text-sm text-gray-700">
+                    <input type="checkbox" checked={formPlageConfirmed} onChange={(e) => setFormPlageConfirmed(e.target.checked)}
+                      className="rounded border-gray-300 text-petitsafe-primary focus:ring-petitsafe-primary" />
+                    Cette valeur semble anormale. Je confirme qu&apos;elle est correcte.
+                  </label>
+                </div>
+              )}
               {formConformite && (
                 <div className="flex items-center gap-2">
                   <PastilleStatut status={formConformite} />
@@ -315,6 +342,10 @@ export default function TemperaturesPage() {
             <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 space-y-4">
               <h3 className="font-semibold text-gray-700">Relevé plat témoin</h3>
               <input type="text" value={platNom} onChange={(e) => setPlatNom(e.target.value)} placeholder="Nom du plat" className={inputClass} />
+              <div className="flex gap-2">
+                <button onClick={() => setPlatType("CHAUD")} className={`flex-1 h-10 rounded-lg text-sm font-medium ${platType === "CHAUD" ? "bg-petitsafe-primary text-white" : "bg-gray-100 text-gray-600"}`}>Plat chaud</button>
+                <button onClick={() => setPlatType("FROID")} className={`flex-1 h-10 rounded-lg text-sm font-medium ${platType === "FROID" ? "bg-petitsafe-primary text-white" : "bg-gray-100 text-gray-600"}`}>Plat froid</button>
+              </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">T° avant (°C)</label>
@@ -328,7 +359,7 @@ export default function TemperaturesPage() {
               {platConformite && (
                 <div className="flex items-center gap-2">
                   <PastilleStatut status={platConformite === "conforme" ? "conforme" : "alerte"} />
-                  <span className="text-sm">{platConformite === "conforme" ? "Conforme (≥63°C)" : "Non conforme (<63°C)"}</span>
+                  <span className="text-sm">{platConformite === "conforme" ? "Conforme" : "Non conforme"} ({platType === "CHAUD" ? "seuil ≥ 63°C" : "seuil ≤ 3°C"})</span>
                 </div>
               )}
               {platConformite === "alerte" && (
@@ -353,6 +384,7 @@ export default function TemperaturesPage() {
                   <div className="flex items-center gap-3">
                     <PastilleStatut status={r.conforme ? "conforme" : "alerte"} />
                     <span className="font-semibold text-gray-800">{r.nom_plat}</span>
+                    <span className="text-xs text-gray-400">{r.type_plat === "FROID" ? "Froid" : "Chaud"}</span>
                   </div>
                   <p className="text-sm text-gray-500 mt-1">Avant : {r.temperature_avant}°C → Après : {r.temperature_apres}°C</p>
                   {r.action_corrective && <p className="text-xs text-red-500 mt-1">⚠️ {r.action_corrective}</p>}

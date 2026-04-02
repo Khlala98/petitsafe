@@ -18,7 +18,7 @@ export default function RegisterPage() {
   const [nom, setNom] = useState("");
   const [typeStructure, setTypeStructure] = useState("");
   const [nomStructure, setNomStructure] = useState("");
-  const [modulesActifs, setModulesActifs] = useState<ModuleId[]>([...PRESETS_MODULES.haccp_essentiel]);
+  const [modulesActifs, setModulesActifs] = useState<ModuleId[]>([...PRESETS_MODULES.complet]);
   const [showCustomModules, setShowCustomModules] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);

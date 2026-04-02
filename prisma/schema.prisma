@@ -69,6 +69,11 @@ enum TypeEquipement {
   CONGELATEUR
 }
 
+enum TypePlat {
+  CHAUD
+  FROID
+}
+
 enum StatutProduit {
   EN_STOCK
   UTILISE
@@ -334,10 +339,11 @@ model ReleveTemperature {
 }
 
 model RelevePlat {
-  id                String   @id @default(uuid())
+  id                String    @id @default(uuid())
   structure_id      String
   date              DateTime
   nom_plat          String
+  type_plat         TypePlat  @default(CHAUD)
   temperature_avant Float
   heure_avant       DateTime
   temperature_apres Float

@@ -56,11 +56,38 @@ export function getConformiteTemperature(
 }
 
 /**
- * Calcule la conformité d'un plat après réchauffement.
- * Conforme si température ≥ 63°C.
+ * Vérifie si la température est dans la plage physiquement plausible pour le type d'équipement.
+ * Retourne null si OK, ou un message d'erreur si hors plage.
  */
-export function getConformitePlat(temperatureApres: number): "conforme" | "alerte" {
-  return temperatureApres >= SEUILS_TEMPERATURE.plat_min_apres ? "conforme" : "alerte";
+export function validerPlageTemperature(
+  temperature: number,
+  type: "REFRIGERATEUR" | "CONGELATEUR"
+): string | null {
+  if (type === "REFRIGERATEUR") {
+    if (temperature < SEUILS_TEMPERATURE.frigo_plage_min || temperature > SEUILS_TEMPERATURE.frigo_plage_max) {
+      return `Température hors plage pour un réfrigérateur (attendu : ${SEUILS_TEMPERATURE.frigo_plage_min}°C à ${SEUILS_TEMPERATURE.frigo_plage_max}°C)`;
+    }
+  } else {
+    if (temperature < SEUILS_TEMPERATURE.congel_plage_min || temperature > SEUILS_TEMPERATURE.congel_plage_max) {
+      return `Température hors plage pour un congélateur (attendu : ${SEUILS_TEMPERATURE.congel_plage_min}°C à ${SEUILS_TEMPERATURE.congel_plage_max}°C)`;
+    }
+  }
+  return null;
+}
+
+/**
+ * Calcule la conformité d'un plat témoin selon son type.
+ * - Plat chaud : T° de service ≥ 63°C
+ * - Plat froid : T° de service ≤ 3°C
+ */
+export function getConformitePlat(
+  temperatureApres: number,
+  typePlat: "CHAUD" | "FROID" = "CHAUD"
+): "conforme" | "alerte" {
+  if (typePlat === "FROID") {
+    return temperatureApres <= SEUILS_TEMPERATURE.plat_froid_max ? "conforme" : "alerte";
+  }
+  return temperatureApres >= SEUILS_TEMPERATURE.plat_chaud_min ? "conforme" : "alerte";
 }
 
 /**
@@ -113,8 +140,9 @@ export function getAlerteDLC(dlc: Date, maintenant: Date): AlerteDLC {
 
 /**
  * Calcule l'âge lisible d'un enfant.
- * - < 24 mois → "X mois"
- * - ≥ 24 mois → "X ans"
+ * - < 2 ans → "X mois"
+ * - 2–6 ans → "X ans et Y mois"
+ * - > 6 ans → "X ans"
  */
 export function calculerAge(dateNaissance: Date, maintenant: Date): string {
   const totalMois =
@@ -124,7 +152,15 @@ export function calculerAge(dateNaissance: Date, maintenant: Date): string {
   if (totalMois < 24) {
     return `${totalMois} mois`;
   }
-  return `${Math.floor(totalMois / 12)} ans`;
+
+  const ans = Math.floor(totalMois / 12);
+  const moisRestants = totalMois % 12;
+
+  if (ans < 6) {
+    return moisRestants > 0 ? `${ans} ans et ${moisRestants} mois` : `${ans} ans`;
+  }
+
+  return `${ans} ans`;
 }
 
 /**

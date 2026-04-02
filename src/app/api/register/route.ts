@@ -11,7 +11,7 @@ export async function POST(request: Request) {
       data: {
         nom: nomStructure,
         type: typeStructure,
-        modules_actifs: modulesActifs ?? ["temperatures", "tracabilite", "nettoyage", "biberonnerie"],
+        modules_actifs: modulesActifs ?? ["temperatures", "tracabilite", "nettoyage", "biberonnerie", "repas", "changes", "siestes", "transmissions", "stocks", "protocoles"],
       },
     });
     await prisma.userStructure.create({

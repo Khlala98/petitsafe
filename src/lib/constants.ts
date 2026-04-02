@@ -7,7 +7,13 @@ export const SEUILS_TEMPERATURE = {
   frigo_warning: 5,
   congel_max: -18,
   congel_warning: -15,
-  plat_min_apres: 63,
+  plat_chaud_min: 63,
+  plat_froid_max: 3,
+  /** Plages de validation — valeurs physiquement plausibles */
+  frigo_plage_min: -10,
+  frigo_plage_max: 15,
+  congel_plage_min: -30,
+  congel_plage_max: 0,
 } as const;
 
 /** Délai max biberon après préparation (minutes) — recommandation ANSES */

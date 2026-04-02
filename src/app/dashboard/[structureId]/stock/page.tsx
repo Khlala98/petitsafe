@@ -68,6 +68,7 @@ export default function StockPage() {
 
   const handleAddStock = async () => {
     if (!sNom) { toast.error("Nom du produit requis."); return; }
+    if (!Number.isInteger(sQte) || sQte < 0 || sQte > 99999) { toast.error("Quantité invalide (entier entre 0 et 99 999)."); return; }
     const result = await creerStock({ structure_id: structureId, categorie: sCat, produit_nom: sNom, quantite: sQte, unite: sUnite, seuil_alerte: sSeuil, maj_par: proNom });
     if (result.success) { toast.success("Produit ajouté !"); setShowStockForm(false); setSNom(""); fetchData(); }
     else toast.error(result.error);
@@ -115,8 +116,14 @@ export default function StockPage() {
                 <datalist id="fournisseurs-list">{fournisseurs.map((f) => <option key={f} value={f} />)}</datalist>
               </div>
               <div className="grid grid-cols-2 gap-3">
-                <input type="text" value={fLot} onChange={(e) => setFLot(e.target.value)} placeholder="Numéro de lot" className={inputClass} />
-                <input type="date" value={fDlc} onChange={(e) => setFDlc(e.target.value)} className={inputClass} />
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Numéro de lot</label>
+                  <input type="text" value={fLot} onChange={(e) => setFLot(e.target.value)} placeholder="Ex: L2026-042" className={inputClass} />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">DLC (Date Limite de Consommation)</label>
+                  <input type="date" value={fDlc} onChange={(e) => setFDlc(e.target.value)} className={inputClass} />
+                </div>
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
@@ -213,7 +220,7 @@ export default function StockPage() {
                 <input type="text" value={sUnite} onChange={(e) => setSUnite(e.target.value)} placeholder="Unité (paquets, litres...)" className={inputClass} />
               </div>
               <div className="grid grid-cols-2 gap-3">
-                <div><label className="text-sm text-gray-600">Quantité</label><input type="number" value={sQte} onChange={(e) => setSQte(Number(e.target.value))} className={inputClass} /></div>
+                <div><label className="text-sm text-gray-600">Quantité</label><input type="number" min={0} max={99999} step={1} value={sQte} onChange={(e) => setSQte(Math.floor(Number(e.target.value)))} className={inputClass} /></div>
                 <div><label className="text-sm text-gray-600">Seuil alerte</label><input type="number" value={sSeuil} onChange={(e) => setSSeuil(Number(e.target.value))} className={inputClass} /></div>
               </div>
               <div className="flex gap-3">

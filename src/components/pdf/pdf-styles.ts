@@ -92,12 +92,29 @@ export const pdfStyles = StyleSheet.create({
     bottom: 20,
     left: 40,
     right: 40,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     fontSize: 7,
     color: "#A0AEC0",
-    textAlign: "center",
     borderTopWidth: 0.5,
     borderTopColor: "#E2E8F0",
     paddingTop: 6,
+  },
+  footerLeft: {
+    fontSize: 7,
+    color: "#A0AEC0",
+  },
+  footerRight: {
+    fontSize: 7,
+    color: "#A0AEC0",
+  },
+  // Cover footer / mention
+  coverMention: {
+    fontSize: 9,
+    color: "#A0AEC0",
+    textAlign: "center",
+    marginTop: 40,
   },
   // Utils
   emptyText: {
