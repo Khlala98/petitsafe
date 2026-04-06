@@ -1,20 +1,20 @@
 "use client";
 
-import { useState, Suspense } from "react";
+export const dynamic = 'force-dynamic';
+
+import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { toast } from "sonner";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 
-function LoginPageContent() {
+export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const redirect = searchParams.get("redirect") || "/dashboard";
   const supabase = createClient();
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -36,6 +36,10 @@ function LoginPageContent() {
       }
       return;
     }
+    const redirect =
+      (typeof window !== "undefined" &&
+        new URLSearchParams(window.location.search).get("redirect")) ||
+      "/dashboard";
     router.push(redirect);
     router.refresh();
   };
@@ -114,17 +118,5 @@ function LoginPageContent() {
         </div>
       </div>
     </div>
-  );
-}
-
-export default function LoginPage() {
-  return (
-    <Suspense fallback={
-      <div className="min-h-screen bg-petitsafe-fond flex items-center justify-center">
-        <Loader2 className="animate-spin text-petitsafe-primary" size={32} />
-      </div>
-    }>
-      <LoginPageContent />
-    </Suspense>
   );
 }

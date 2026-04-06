@@ -10,7 +10,15 @@
       "Bash(npx jest:*)",
       "Bash(find:*)",
       "Bash(grep -E \"\\\\.\\(tsx|ts\\)$\")",
-      "Bash(ls:*)"
+      "Bash(ls:*)",
+      "Bash(curl -sS -o /tmp/login.html -w \"HTTP %{http_code} | redirect: %{redirect_url}\\\\n\" http://localhost:3001/login --max-time 15)",
+      "Read(//tmp/**)",
+      "Bash(curl -sS -o /tmp/home.html -w \"HTTP %{http_code}\\\\n\" http://localhost:3001/ --max-time 15 -L)",
+      "Read(//c/Users/khali/AppData/Local/Temp/claude/C--Users-khali-Documents-petitsafe/bd4fcdd5-60b0-4cd6-b5a9-3a70f943425d/tasks/**)",
+      "Bash(curl -s -o /tmp/login.html -w \"HTTP %{http_code}\\\\n\" http://localhost:3002/login)",
+      "Bash(pkill -f \"next start\")",
+      "Bash(pkill -f \"next dev\")",
+      "Bash(taskkill //F //IM node.exe)"
     ]
   }
 }
