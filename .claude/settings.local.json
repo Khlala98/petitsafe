@@ -18,7 +18,13 @@
       "Bash(curl -s -o /tmp/login.html -w \"HTTP %{http_code}\\\\n\" http://localhost:3002/login)",
       "Bash(pkill -f \"next start\")",
       "Bash(pkill -f \"next dev\")",
-      "Bash(taskkill //F //IM node.exe)"
+      "Bash(taskkill //F //IM node.exe)",
+      "Bash(curl -s -o /tmp/dash.html -w \"HTTP %{http_code}\\\\n\" http://localhost:3020/dashboard)",
+      "Bash(curl -s -o /tmp/dashid.html -w \"HTTP %{http_code}\\\\n\" http://localhost:3020/dashboard/some-id)",
+      "Bash(curl -s -i http://localhost:3030/dashboard)",
+      "Bash(curl -s -X POST 'https://lmclmnomqaxevkjkxpqn.supabase.co/auth/v1/token?grant_type=password' -H 'apikey: sb_publishable_WdhDBg-UHTIOSY9yd6GBgg_osGbd9fZ' -H 'Content-Type: application/json' -d '{\"email\":\"test@example.com\",\"password\":\"wrongpass\"}')",
+      "Bash(curl -sv -X POST \"https://lmclmnomqaxevkjkxpqn.supabase.co/auth/v1/token?grant_type=password\" -H \"apikey: sb_publishable_WdhDBg-UHTIOSY9yd6GBgg_osGbd9fZ\" -H \"Content-Type: application/json\" -d '{\"email\":\"x@x.com\",\"password\":\"x\"}')",
+      "Bash(curl -sv -k \"https://lmclmnomqaxevkjkxpqn.supabase.co/auth/v1/health\" -H \"apikey: sb_publishable_WdhDBg-UHTIOSY9yd6GBgg_osGbd9fZ\")"
     ]
   }
 }
