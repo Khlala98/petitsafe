@@ -115,6 +115,21 @@ enum CategorieStock {
   AUTRE
 }
 
+enum TypeIncident {
+  CHUTE
+  MORSURE
+  GRIFFURE
+  PLEURS_PROLONGES
+  FIEVRE
+  AUTRE
+}
+
+enum GraviteIncident {
+  MINEUR
+  MODERE
+  GRAVE
+}
+
 // ═══ MULTI-TENANT ═══
 
 model Structure {
@@ -147,6 +162,7 @@ model Structure {
   releves_temp     ReleveTemperature[]
   releves_plat     RelevePlat[]
   receptions       ReceptionMarchandise[]
+  incidents        Incident[]
 }
 
 model UserStructure {
@@ -175,6 +191,7 @@ model Enfant {
   actif          Boolean  @default(true)
   date_entree    DateTime?
   regimes        String[] @default([])
+  portail_token  String?  @unique
 
   structure      Structure        @relation(fields: [structure_id], references: [id], onDelete: Cascade)
   allergies      AllergieEnfant[]
@@ -184,6 +201,7 @@ model Enfant {
   changes        Change[]
   siestes        Sieste[]
   transmissions  Transmission[]
+  incidents      Incident[]
 
   @@index([structure_id])
   @@index([structure_id, actif])
@@ -295,6 +313,28 @@ model Sieste {
   heure_fin        DateTime?
   duree_minutes    Int?
   qualite          QualiteSieste?
+  professionnel_id String
+
+  structure        Structure @relation(fields: [structure_id], references: [id], onDelete: Cascade)
+  enfant           Enfant    @relation(fields: [enfant_id], references: [id], onDelete: Cascade)
+
+  @@index([structure_id, date])
+  @@index([enfant_id, date])
+}
+
+// ═══ INCIDENTS ═══
+
+model Incident {
+  id               String          @id @default(uuid())
+  structure_id     String
+  enfant_id        String
+  date             DateTime
+  heure            DateTime
+  type_incident    TypeIncident
+  description      String
+  gravite          GraviteIncident
+  action_prise     String
+  parents_prevenu  Boolean         @default(false)
   professionnel_id String
 
   structure        Structure @relation(fields: [structure_id], references: [id], onDelete: Cascade)

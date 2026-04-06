@@ -2,6 +2,7 @@
 
 import { prisma } from "@/lib/supabase/prisma";
 import { protocoleSchema } from "@/lib/schemas/protocole";
+import { PROTOCOLES_TEMPLATES } from "@/lib/data/protocoles-templates";
 
 export async function getProtocoles(structureId: string) {
   try {
@@ -76,5 +77,37 @@ export async function archiverProtocole(protocoleId: string, structureId: string
     return { success: true as const };
   } catch {
     return { success: false as const, error: "Erreur lors de l'archivage." };
+  }
+}
+
+export async function importerModelesProtocoles(structureId: string) {
+  try {
+    // Fetch existing active protocol titles for this structure
+    const existing = await prisma.protocole.findMany({
+      where: { structure_id: structureId, actif: true },
+      select: { titre: true },
+    });
+    const existingTitres = new Set(existing.map((p) => p.titre));
+
+    // Filter out templates that already exist (by title)
+    const toCreate = PROTOCOLES_TEMPLATES.filter((t) => !existingTitres.has(t.titre));
+
+    if (toCreate.length === 0) {
+      return { success: true as const, created: 0, message: "Tous les modèles existent déjà." };
+    }
+
+    await prisma.protocole.createMany({
+      data: toCreate.map((t) => ({
+        structure_id: structureId,
+        titre: t.titre,
+        categorie: t.categorie,
+        contenu_markdown: t.contenu_markdown,
+        cree_par: "PetitSafe — Modèle",
+      })),
+    });
+
+    return { success: true as const, created: toCreate.length };
+  } catch {
+    return { success: false as const, error: "Erreur lors de l'import des modèles." };
   }
 }

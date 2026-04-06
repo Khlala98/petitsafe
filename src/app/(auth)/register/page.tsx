@@ -126,7 +126,7 @@ export default function RegisterPage() {
         {/* STEP 1 — Infos personnelles */}
         {step === 1 && (
           <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
                 <label htmlFor="prenom" className="block text-sm font-medium text-gray-700 mb-1">Prénom</label>
                 <input id="prenom" type="text" value={prenom} onChange={(e) => setPrenom(e.target.value)} placeholder="Marie"

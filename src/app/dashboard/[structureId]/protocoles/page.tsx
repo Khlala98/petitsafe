@@ -5,10 +5,10 @@ export const dynamic = 'force-dynamic';
 import { useEffect, useState, useCallback } from "react";
 import { useParams } from "next/navigation";
 import { useAuth } from "@/hooks/use-auth";
-import { getProtocoles, creerProtocole, modifierProtocole, archiverProtocole } from "@/app/actions/protocoles";
+import { getProtocoles, creerProtocole, modifierProtocole, archiverProtocole, importerModelesProtocoles } from "@/app/actions/protocoles";
 import { CATEGORIES_PROTOCOLE } from "@/lib/schemas/protocole";
 import { toast } from "sonner";
-import { Loader2, FileText, Plus, Search, Edit, Archive, ArrowLeft, ChevronRight, X } from "lucide-react";
+import { Loader2, FileText, Plus, Search, Edit, Archive, ArrowLeft, ChevronRight, X, Download } from "lucide-react";
 
 interface Protocole {
   id: string; titre: string; categorie: string; contenu_markdown: string; version: number; cree_par: string; date_creation: string;
@@ -43,6 +43,7 @@ export default function ProtocolesPage() {
   const [formCategorie, setFormCategorie] = useState<string>(CATEGORIES_PROTOCOLE[0]);
   const [formContenu, setFormContenu] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [importing, setImporting] = useState(false);
 
   const fetchProtocoles = useCallback(async () => {
     const res = await getProtocoles(structureId);
@@ -93,6 +94,22 @@ export default function ProtocolesPage() {
     const res = await archiverProtocole(id, structureId);
     if (res.success) { toast.success("Protocole archivé"); setSelectedId(null); fetchProtocoles(); }
     else toast.error(res.error);
+  };
+
+  const handleImportModeles = async () => {
+    setImporting(true);
+    const res = await importerModelesProtocoles(structureId);
+    setImporting(false);
+    if (res.success) {
+      if (res.created === 0) {
+        toast.info(res.message ?? "Tous les modèles existent déjà.");
+      } else {
+        toast.success(`${res.created} modèle(s) importé(s) avec succès`);
+        fetchProtocoles();
+      }
+    } else {
+      toast.error(res.error);
+    }
   };
 
   // Filter & search
@@ -203,9 +220,16 @@ export default function ProtocolesPage() {
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-gray-800">Protocoles</h1>
         {isGestionnaire && (
-          <button onClick={openCreate} className="h-10 px-4 rounded-xl bg-petitsafe-primary text-white text-sm font-medium hover:bg-petitsafe-primary/90 flex items-center gap-2">
-            <Plus size={16} /> Nouveau
-          </button>
+          <div className="flex items-center gap-2">
+            <button onClick={handleImportModeles} disabled={importing}
+              className="h-10 px-4 rounded-xl bg-gray-100 text-gray-700 text-sm font-medium hover:bg-gray-200 flex items-center gap-2 disabled:opacity-50">
+              {importing ? <Loader2 size={16} className="animate-spin" /> : <Download size={16} />}
+              Importer les modèles
+            </button>
+            <button onClick={openCreate} className="h-10 px-4 rounded-xl bg-petitsafe-primary text-white text-sm font-medium hover:bg-petitsafe-primary/90 flex items-center gap-2">
+              <Plus size={16} /> Nouveau
+            </button>
+          </div>
         )}
       </div>
 

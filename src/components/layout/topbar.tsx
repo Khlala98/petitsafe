@@ -2,6 +2,7 @@
 
 import { ChevronDown } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
+import { NotificationsBell } from "./notifications-bell";
 
 interface Structure {
   structure_id: string;
@@ -52,6 +53,7 @@ export function Topbar({ structures, activeStructureId, onSwitchStructure, preno
         <span className="text-sm font-medium text-gray-700">{active?.structure.nom ?? "PetitSafe"}</span>
       )}
       <div className="flex items-center gap-2">
+        {activeStructureId && <NotificationsBell structureId={activeStructureId} />}
         <div className="h-8 w-8 rounded-full bg-petitsafe-primary/10 flex items-center justify-center text-sm font-semibold text-petitsafe-primary">
           {prenom.charAt(0).toUpperCase()}
         </div>

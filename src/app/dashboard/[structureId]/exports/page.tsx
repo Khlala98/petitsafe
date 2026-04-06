@@ -151,7 +151,7 @@ export default function ExportsPage() {
             {errors.type_export && <p className="text-sm text-red-500 mt-1">{errors.type_export.message}</p>}
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label htmlFor="periode_debut" className="block text-sm font-medium text-gray-700 mb-1">
                 <Calendar size={14} className="inline mr-1" />

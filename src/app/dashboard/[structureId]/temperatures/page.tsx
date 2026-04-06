@@ -226,7 +226,7 @@ export default function TemperaturesPage() {
                 <option value="">Sélectionnez un équipement...</option>
                 {equipements.map((e) => <option key={e.id} value={e.id}>{e.nom} ({e.type === "REFRIGERATEUR" ? "Frigo" : "Congélateur"})</option>)}
               </select>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Température (°C)</label>
                   <input type="number" step="0.1" value={formTemp} onChange={(e) => setFormTemp(Number(e.target.value))} placeholder="Ex: 3.5" className={inputClass} inputMode="decimal" />
@@ -346,7 +346,7 @@ export default function TemperaturesPage() {
                 <button onClick={() => setPlatType("CHAUD")} className={`flex-1 h-10 rounded-lg text-sm font-medium ${platType === "CHAUD" ? "bg-petitsafe-primary text-white" : "bg-gray-100 text-gray-600"}`}>Plat chaud</button>
                 <button onClick={() => setPlatType("FROID")} className={`flex-1 h-10 rounded-lg text-sm font-medium ${platType === "FROID" ? "bg-petitsafe-primary text-white" : "bg-gray-100 text-gray-600"}`}>Plat froid</button>
               </div>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">T° avant (°C)</label>
                   <input type="number" step="0.1" value={platAvant} onChange={(e) => setPlatAvant(Number(e.target.value))} className={inputClass} inputMode="decimal" />

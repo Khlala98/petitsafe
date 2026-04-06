@@ -121,7 +121,7 @@ export default function VueGroupePage() {
                       <td key={col.key} className="text-center py-3 px-3">
                         <button
                           onClick={() => router.push(`/dashboard/${structureId}/suivi?enfant=${enfant.id}`)}
-                          className={`inline-flex items-center justify-center h-8 min-w-[32px] rounded-lg text-sm font-medium ${count > 0 ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-400"}`}>
+                          className={`inline-flex items-center justify-center min-h-[44px] min-w-[44px] rounded-lg text-sm font-medium ${count > 0 ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-400"}`}>
                           {count > 0 ? (count > 1 ? `✓ ×${count}` : "✓") : "—"}
                         </button>
                       </td>

@@ -1,5 +1,6 @@
 "use server";
 
+import { randomBytes } from "crypto";
 import { prisma } from "@/lib/supabase/prisma";
 import type { ActionResult } from "@/types";
 
@@ -73,7 +74,7 @@ export async function getTimelineEnfant(
     const debut = new Date(date); debut.setHours(0, 0, 0, 0);
     const fin = new Date(date); fin.setHours(23, 59, 59, 999);
 
-    const [biberons, repas, changes, siestes, transmissions] = await Promise.all([
+    const [biberons, repas, changes, siestes, transmissions, incidents] = await Promise.all([
       prisma.biberon.findMany({
         where: { structure_id: structureId, enfant_id: enfantId, date: { gte: debut, lte: fin } },
         orderBy: { heure_preparation: "asc" },
@@ -93,6 +94,10 @@ export async function getTimelineEnfant(
       prisma.transmission.findMany({
         where: { structure_id: structureId, enfant_id: enfantId, date: { gte: debut, lte: fin } },
         orderBy: { date: "asc" },
+      }),
+      prisma.incident.findMany({
+        where: { structure_id: structureId, enfant_id: enfantId, date: { gte: debut, lte: fin } },
+        orderBy: { heure: "asc" },
       }),
     ]);
 
@@ -175,6 +180,24 @@ export async function getTimelineEnfant(
       });
     }
 
+    const INCIDENT_LABELS: Record<string, string> = {
+      CHUTE: "Chute", MORSURE: "Morsure", GRIFFURE: "Griffure",
+      PLEURS_PROLONGES: "Pleurs prolongés", FIEVRE: "Fièvre", AUTRE: "Autre",
+    };
+    const GRAVITE_LABELS: Record<string, string> = { MINEUR: "mineur", MODERE: "modéré", GRAVE: "grave" };
+
+    for (const inc of incidents) {
+      const h = new Date(inc.heure).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" });
+      const type = INCIDENT_LABELS[inc.type_incident] ?? inc.type_incident;
+      const gravite = GRAVITE_LABELS[inc.gravite] ?? inc.gravite;
+      timeline.push({
+        heure: h,
+        icone: "⚠️",
+        type: "incident",
+        description: `${type} (${gravite}) — ${inc.description}${inc.action_prise ? ` | Action : ${inc.action_prise}` : ""}`,
+      });
+    }
+
     // Sort by time descending (most recent first)
     timeline.sort((a, b) => {
       const [ah, am] = a.heure.split(":").map(Number);
@@ -234,6 +257,100 @@ export async function creerSignalementApport(data: {
     return { success: true };
   } catch {
     return { success: false, error: "Erreur lors de l'enregistrement." };
+  }
+}
+
+// ═══ TOKEN-BASED PORTAL (no login required) ═══
+
+export async function genererTokenPortail(
+  enfantId: string, structureId: string
+): Promise<ActionResult<{ token: string }>> {
+  try {
+    const enfant = await prisma.enfant.findFirst({
+      where: { id: enfantId, structure_id: structureId, actif: true },
+      select: { portail_token: true },
+    });
+    if (!enfant) return { success: false, error: "Enfant non trouvé." };
+
+    // Return existing token if already generated
+    if (enfant.portail_token) {
+      return { success: true, data: { token: enfant.portail_token } };
+    }
+
+    const token = randomBytes(32).toString("hex");
+    await prisma.enfant.update({
+      where: { id: enfantId },
+      data: { portail_token: token },
+    });
+
+    return { success: true, data: { token } };
+  } catch {
+    return { success: false, error: "Erreur lors de la génération du lien." };
+  }
+}
+
+export async function regenererTokenPortail(
+  enfantId: string, structureId: string
+): Promise<ActionResult<{ token: string }>> {
+  try {
+    const enfant = await prisma.enfant.findFirst({
+      where: { id: enfantId, structure_id: structureId, actif: true },
+    });
+    if (!enfant) return { success: false, error: "Enfant non trouvé." };
+
+    const token = randomBytes(32).toString("hex");
+    await prisma.enfant.update({
+      where: { id: enfantId },
+      data: { portail_token: token },
+    });
+
+    return { success: true, data: { token } };
+  } catch {
+    return { success: false, error: "Erreur lors de la régénération du lien." };
+  }
+}
+
+export async function getEnfantByToken(
+  token: string
+): Promise<ActionResult<{
+  enfant: EnfantPortail;
+  structureNom: string;
+  structureId: string;
+}>> {
+  try {
+    const enfant = await prisma.enfant.findUnique({
+      where: { portail_token: token },
+      include: {
+        structure: { select: { id: true, nom: true } },
+        allergies: { select: { allergene: true, severite: true } },
+      },
+    });
+
+    if (!enfant || !enfant.actif) {
+      return { success: false, error: "Lien invalide ou expiré." };
+    }
+
+    return {
+      success: true,
+      data: {
+        structureNom: enfant.structure.nom,
+        structureId: enfant.structure.id,
+        enfant: {
+          id: enfant.id,
+          prenom: enfant.prenom,
+          nom: enfant.nom,
+          date_naissance: enfant.date_naissance.toISOString(),
+          photo_url: enfant.photo_url,
+          groupe: enfant.groupe,
+          allergies: enfant.allergies.map((a) => ({
+            allergene: a.allergene,
+            severite: a.severite,
+          })),
+        },
+      },
+    };
+  } catch {
+    return { success: false, error: "Erreur lors du chargement." };
   }
 }
 

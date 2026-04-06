@@ -6,10 +6,11 @@ import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { getEnfant, supprimerEnfant } from "@/app/actions/enfants";
 import { getTransmissionsEnfant } from "@/app/actions/transmissions";
+import { genererTokenPortail, regenererTokenPortail } from "@/app/actions/portail-parents";
 import { calculerAge } from "@/lib/business-logic";
 import { BadgeAllergie } from "@/components/shared/badge-allergie";
 import { BadgeRegime } from "@/components/shared/badge-regime";
-import { Loader2, ArrowLeft, Edit, Trash2, Phone, User, MessageSquare } from "lucide-react";
+import { Loader2, ArrowLeft, Edit, Trash2, Phone, User, MessageSquare, Link2, Copy, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 
 interface Enfant {
@@ -37,6 +38,8 @@ export default function FicheEnfantPage() {
   const [transmissions, setTransmissions] = useState<TransmissionEnfant[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState(0);
+  const [portalUrl, setPortalUrl] = useState<string | null>(null);
+  const [portalLoading, setPortalLoading] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -63,6 +66,42 @@ export default function FicheEnfantPage() {
     const result = await supprimerEnfant(enfantId, structureId);
     if (result.success) { toast.success("Enfant archivé."); router.push(`/dashboard/${structureId}/enfants`); }
     else toast.error(result.error);
+  };
+
+  const handleGenererLien = async () => {
+    setPortalLoading(true);
+    const res = await genererTokenPortail(enfantId, structureId);
+    setPortalLoading(false);
+    if (!res.success) {
+      toast.error(res.error);
+      return;
+    }
+    if (res.data) {
+      const url = `${window.location.origin}/portail/${res.data.token}`;
+      setPortalUrl(url);
+    }
+  };
+
+  const handleRegenererLien = async () => {
+    if (!confirm("Régénérer le lien ? L'ancien lien ne fonctionnera plus.")) return;
+    setPortalLoading(true);
+    const res = await regenererTokenPortail(enfantId, structureId);
+    setPortalLoading(false);
+    if (!res.success) {
+      toast.error(res.error);
+      return;
+    }
+    if (res.data) {
+      const url = `${window.location.origin}/portail/${res.data.token}`;
+      setPortalUrl(url);
+      toast.success("Nouveau lien généré");
+    }
+  };
+
+  const handleCopyLink = () => {
+    if (!portalUrl) return;
+    navigator.clipboard.writeText(portalUrl);
+    toast.success("Lien copié dans le presse-papiers");
   };
 
   if (loading || !enfant) return <div className="flex items-center justify-center py-20"><Loader2 size={32} className="animate-spin text-petitsafe-primary" /></div>;
@@ -106,6 +145,38 @@ export default function FicheEnfantPage() {
       {/* Allergie & régime banners */}
       {enfant.allergies.length > 0 && <BadgeAllergie enfant={enfant} />}
       {enfant.regimes.length > 0 && <BadgeRegime enfant={enfant} />}
+
+      {/* Portail parents */}
+      <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+        <div className="flex items-center gap-2 mb-3">
+          <Link2 size={16} className="text-petitsafe-primary" />
+          <h3 className="text-sm font-semibold text-gray-700">Portail Parents</h3>
+        </div>
+
+        {portalUrl ? (
+          <div className="space-y-3">
+            <div className="flex items-center gap-2">
+              <input value={portalUrl} readOnly className="flex-1 h-10 px-3 rounded-lg border border-gray-200 bg-gray-50 text-xs text-gray-600 truncate" />
+              <button onClick={handleCopyLink} className="h-10 px-3 rounded-lg bg-petitsafe-primary text-white hover:bg-petitsafe-primary/90 flex items-center gap-1.5 shrink-0">
+                <Copy size={14} /> <span className="text-sm">Copier</span>
+              </button>
+            </div>
+            <div className="flex items-center justify-between">
+              <p className="text-xs text-gray-400">Partagez ce lien aux parents pour qu&apos;ils consultent les activités.</p>
+              <button onClick={handleRegenererLien} disabled={portalLoading}
+                className="text-xs text-gray-400 hover:text-red-500 flex items-center gap-1">
+                <RefreshCw size={12} /> Régénérer
+              </button>
+            </div>
+          </div>
+        ) : (
+          <button onClick={handleGenererLien} disabled={portalLoading}
+            className="w-full h-10 rounded-lg bg-petitsafe-primary/10 text-petitsafe-primary text-sm font-medium hover:bg-petitsafe-primary/20 flex items-center justify-center gap-2 disabled:opacity-50">
+            {portalLoading ? <Loader2 size={16} className="animate-spin" /> : <Link2 size={16} />}
+            Générer le lien portail parents
+          </button>
+        )}
+      </div>
 
       {/* Tabs */}
       <div className="flex gap-1 border-b border-gray-200">

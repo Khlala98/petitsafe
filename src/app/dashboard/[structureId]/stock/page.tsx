@@ -115,7 +115,7 @@ export default function StockPage() {
                 <input type="text" value={fFourn} onChange={(e) => setFFourn(e.target.value)} placeholder="Fournisseur" className={inputClass} list="fournisseurs-list" />
                 <datalist id="fournisseurs-list">{fournisseurs.map((f) => <option key={f} value={f} />)}</datalist>
               </div>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Numéro de lot</label>
                   <input type="text" value={fLot} onChange={(e) => setFLot(e.target.value)} placeholder="Ex: L2026-042" className={inputClass} />
@@ -125,7 +125,7 @@ export default function StockPage() {
                   <input type="date" value={fDlc} onChange={(e) => setFDlc(e.target.value)} className={inputClass} />
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="text-sm text-gray-600">T° réception (°C)</label>
                   <input type="number" step="0.1" value={fTemp} onChange={(e) => setFTemp(Number(e.target.value))} className={inputClass} />

@@ -168,7 +168,7 @@ function NouveauBiberonContent() {
               <label className="block text-sm font-medium text-gray-700 mb-1">Numéro de lot *</label>
               <input type="text" value={numeroLot} onChange={(e) => setNumeroLot(e.target.value)} placeholder="Ex: G2024-1150" className={inputClass} />
             </div>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Date de péremption</label>
                 <input type="date" value={datePeremption} onChange={(e) => setDatePeremption(e.target.value)} className={inputClass} />

@@ -23,7 +23,7 @@ export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   const publicRoutes = ["/", "/blog", "/login", "/register", "/forgot-password", "/test"];
-  const isPublicRoute = publicRoutes.includes(pathname) || pathname.startsWith("/blog/") || pathname.startsWith("/api/");
+  const isPublicRoute = publicRoutes.includes(pathname) || pathname.startsWith("/blog/") || pathname.startsWith("/api/") || pathname.startsWith("/portail/");
 
   if (isPublicRoute) return supabaseResponse;
 

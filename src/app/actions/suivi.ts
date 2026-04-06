@@ -138,6 +138,39 @@ export async function enregistrerTransmission(data: {
   }
 }
 
+// ═══ INCIDENTS ═══
+
+export async function enregistrerIncident(data: {
+  structure_id: string; enfant_id: string; type_incident: string;
+  description: string; gravite: string; action_prise: string;
+  parents_prevenu: boolean; heure: string; professionnel_id: string;
+}) {
+  try {
+    const now = new Date();
+    const [h, m] = data.heure.split(":").map(Number);
+    const heureDate = new Date(now);
+    heureDate.setHours(h, m, 0, 0);
+
+    const incident = await prisma.incident.create({
+      data: {
+        structure_id: data.structure_id,
+        enfant_id: data.enfant_id,
+        date: now,
+        heure: heureDate,
+        type_incident: data.type_incident as "CHUTE" | "MORSURE" | "GRIFFURE" | "PLEURS_PROLONGES" | "FIEVRE" | "AUTRE",
+        description: data.description,
+        gravite: data.gravite as "MINEUR" | "MODERE" | "GRAVE",
+        action_prise: data.action_prise,
+        parents_prevenu: data.parents_prevenu,
+        professionnel_id: data.professionnel_id,
+      },
+    });
+    return { success: true as const, data: incident };
+  } catch {
+    return { success: false as const, error: "Erreur lors de l'enregistrement de l'incident." };
+  }
+}
+
 // ═══ HISTORIQUE DU JOUR (timeline par enfant) ═══
 
 export async function getHistoriqueDuJour(structureId: string, enfantId: string) {
@@ -146,17 +179,18 @@ export async function getHistoriqueDuJour(structureId: string, enfantId: string)
     const todayEnd = new Date(); todayEnd.setHours(23, 59, 59, 999);
     const where = { structure_id: structureId, enfant_id: enfantId, date: { gte: todayStart, lte: todayEnd } };
 
-    const [repas, changes, siestes, biberons, transmissions] = await Promise.all([
+    const [repas, changes, siestes, biberons, transmissions, incidents] = await Promise.all([
       prisma.repas.findMany({ where, orderBy: { date: "desc" } }),
       prisma.change.findMany({ where, orderBy: { heure: "desc" } }),
       prisma.sieste.findMany({ where, orderBy: { heure_debut: "desc" } }),
       prisma.biberon.findMany({ where, orderBy: { heure_preparation: "desc" } }),
       prisma.transmission.findMany({ where: { ...where, enfant_id: enfantId }, orderBy: { date: "desc" } }),
+      prisma.incident.findMany({ where, orderBy: { heure: "desc" } }),
     ]);
 
     type TimelineItem = {
       id: string;
-      type: "biberon" | "repas" | "change" | "sieste" | "transmission";
+      type: "biberon" | "repas" | "change" | "sieste" | "transmission" | "incident";
       heure: string;
       details: string;
     };
@@ -194,6 +228,19 @@ export async function getHistoriqueDuJour(structureId: string, enfantId: string)
     transmissions.forEach((t) => {
       const h = new Date(t.date).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" });
       items.push({ id: t.id, type: "transmission", heure: h, details: t.contenu.length > 60 ? t.contenu.slice(0, 60) + "…" : t.contenu });
+    });
+
+    const INCIDENT_LABELS: Record<string, string> = {
+      CHUTE: "Chute", MORSURE: "Morsure", GRIFFURE: "Griffure",
+      PLEURS_PROLONGES: "Pleurs prolongés", FIEVRE: "Fièvre", AUTRE: "Autre",
+    };
+    const GRAVITE_LABELS: Record<string, string> = { MINEUR: "mineur", MODERE: "modéré", GRAVE: "grave" };
+
+    incidents.forEach((inc) => {
+      const h = new Date(inc.heure).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" });
+      const gravite = GRAVITE_LABELS[inc.gravite] ?? inc.gravite;
+      const type = INCIDENT_LABELS[inc.type_incident] ?? inc.type_incident;
+      items.push({ id: inc.id, type: "incident", heure: h, details: `${type} (${gravite}) — ${inc.description.length > 50 ? inc.description.slice(0, 50) + "…" : inc.description}` });
     });
 
     // Sort by time descending (most recent first)

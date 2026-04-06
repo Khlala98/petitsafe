@@ -5,13 +5,13 @@ export const dynamic = 'force-dynamic';
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { getEnfants } from "@/app/actions/enfants";
-import { enregistrerRepas, enregistrerChange, debuterSieste, finirSieste, getSiesteEnCours, enregistrerTransmission, getHistoriqueDuJour } from "@/app/actions/suivi";
+import { enregistrerRepas, enregistrerChange, debuterSieste, finirSieste, getSiesteEnCours, enregistrerTransmission, enregistrerIncident, getHistoriqueDuJour } from "@/app/actions/suivi";
 import { useAuth } from "@/hooks/use-auth";
 import { useModules } from "@/hooks/use-modules";
 import { BadgeAllergie } from "@/components/shared/badge-allergie";
 import { BadgeRegime } from "@/components/shared/badge-regime";
 import { toast } from "sonner";
-import { Loader2, Baby, UtensilsCrossed, Droplets, Moon, MessageSquare, Clock } from "lucide-react";
+import { Loader2, Baby, UtensilsCrossed, Droplets, Moon, MessageSquare, Clock, AlertTriangle } from "lucide-react";
 import Link from "next/link";
 
 interface Enfant {
@@ -20,7 +20,7 @@ interface Enfant {
   regimes: string[];
 }
 
-type ActiveForm = null | "repas" | "change" | "sieste" | "transmission";
+type ActiveForm = null | "repas" | "change" | "sieste" | "transmission" | "incident";
 
 const COULEURS_AVATAR = ["#2E86C1", "#27AE60", "#F4A261", "#E53E3E", "#8E44AD", "#F39C12"];
 
@@ -50,8 +50,16 @@ export default function SuiviPage() {
   const [transType, setTransType] = useState("ENFANT");
   const [transContenu, setTransContenu] = useState("");
 
+  // Incident state
+  const [incType, setIncType] = useState("CHUTE");
+  const [incDescription, setIncDescription] = useState("");
+  const [incGravite, setIncGravite] = useState("MINEUR");
+  const [incAction, setIncAction] = useState("");
+  const [incParents, setIncParents] = useState(false);
+  const [incHeure, setIncHeure] = useState(() => new Date().toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" }));
+
   // Historique timeline
-  type TimelineItem = { id: string; type: "biberon" | "repas" | "change" | "sieste" | "transmission"; heure: string; details: string };
+  type TimelineItem = { id: string; type: "biberon" | "repas" | "change" | "sieste" | "transmission" | "incident"; heure: string; details: string };
   const [historique, setHistorique] = useState<TimelineItem[]>([]);
   const [historiqueVersion, setHistoriqueVersion] = useState(0);
   const refreshHistorique = () => setHistoriqueVersion((v) => v + 1);
@@ -154,6 +162,25 @@ export default function SuiviPage() {
     else toast.error(result.error);
   };
 
+  const handleIncident = async () => {
+    if (!selectedId) return;
+    if (!incDescription.trim()) { toast.error("Décrivez l'incident."); return; }
+    if (!incAction.trim()) { toast.error("Décrivez l'action prise."); return; }
+    const result = await enregistrerIncident({
+      structure_id: structureId, enfant_id: selectedId, type_incident: incType,
+      description: incDescription, gravite: incGravite, action_prise: incAction,
+      parents_prevenu: incParents, heure: incHeure, professionnel_id: proId,
+    });
+    if (result.success) {
+      toast.success("Incident enregistré");
+      setActiveForm(null);
+      setIncType("CHUTE"); setIncDescription(""); setIncGravite("MINEUR");
+      setIncAction(""); setIncParents(false);
+      setIncHeure(new Date().toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" }));
+      refreshHistorique();
+    } else toast.error(result.error);
+  };
+
   if (loading) return <div className="flex items-center justify-center py-20"><Loader2 size={32} className="animate-spin text-petitsafe-primary" /></div>;
 
   const QteButton = ({ value, current, onChange }: { value: string; current: string; onChange: (v: string) => void }) => {
@@ -232,6 +259,10 @@ export default function SuiviPage() {
                 <MessageSquare size={24} /><span className="text-sm">Transmission</span>
               </button>
             )}
+            <button onClick={() => { setActiveForm("incident"); setIncHeure(new Date().toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })); }}
+              className={`h-20 rounded-xl font-semibold flex flex-col items-center justify-center gap-1 ${activeForm === "incident" ? "ring-2 ring-offset-2 ring-[#E74C3C]" : ""}`} style={{ backgroundColor: "#E74C3C", color: "white" }}>
+              <AlertTriangle size={24} /><span className="text-sm">Incident</span>
+            </button>
           </div>
 
           {/* ═══ FORMS ═══ */}
@@ -322,6 +353,83 @@ export default function SuiviPage() {
             </div>
           )}
 
+          {/* INCIDENT */}
+          {activeForm === "incident" && (
+            <div className="bg-white rounded-xl p-6 shadow-sm border-2 border-red-200 space-y-4">
+              <h3 className="font-semibold text-red-700 flex items-center gap-2">
+                <AlertTriangle size={18} /> Signaler un incident — {selected.prenom}
+              </h3>
+
+              {/* Type */}
+              <div>
+                <label className="text-sm font-medium text-gray-600 block mb-1.5">Type d&apos;incident</label>
+                <div className="flex gap-2 flex-wrap">
+                  {[
+                    { v: "CHUTE", l: "Chute" }, { v: "MORSURE", l: "Morsure" }, { v: "GRIFFURE", l: "Griffure" },
+                    { v: "PLEURS_PROLONGES", l: "Pleurs prolongés" }, { v: "FIEVRE", l: "Fièvre" }, { v: "AUTRE", l: "Autre" },
+                  ].map((t) => (
+                    <button key={t.v} onClick={() => setIncType(t.v)}
+                      className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${incType === t.v ? "bg-red-600 text-white" : "bg-red-50 text-red-700 hover:bg-red-100"}`}>
+                      {t.l}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Heure */}
+              <div>
+                <label className="text-sm font-medium text-gray-600 block mb-1.5">Heure de l&apos;incident</label>
+                <input type="time" value={incHeure} onChange={(e) => setIncHeure(e.target.value)}
+                  className="h-10 px-3 rounded-lg border border-gray-300 text-sm focus:border-petitsafe-primary outline-none" />
+              </div>
+
+              {/* Gravité */}
+              <div>
+                <label className="text-sm font-medium text-gray-600 block mb-1.5">Gravité</label>
+                <div className="flex gap-2">
+                  {[
+                    { v: "MINEUR", l: "Mineur", c: "bg-yellow-100 text-yellow-800 border-yellow-300", ac: "bg-yellow-500 text-white" },
+                    { v: "MODERE", l: "Modéré", c: "bg-orange-100 text-orange-800 border-orange-300", ac: "bg-orange-500 text-white" },
+                    { v: "GRAVE", l: "Grave", c: "bg-red-100 text-red-800 border-red-300", ac: "bg-red-600 text-white" },
+                  ].map((g) => (
+                    <button key={g.v} onClick={() => setIncGravite(g.v)}
+                      className={`px-4 py-2 rounded-lg text-sm font-medium border transition-colors ${incGravite === g.v ? g.ac : g.c}`}>
+                      {g.l}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Description */}
+              <div>
+                <label className="text-sm font-medium text-gray-600 block mb-1.5">Description</label>
+                <textarea value={incDescription} onChange={(e) => setIncDescription(e.target.value)}
+                  placeholder="Décrivez ce qui s'est passé..."
+                  className="w-full h-20 px-3 py-2 rounded-lg border border-gray-300 text-sm focus:border-petitsafe-primary outline-none resize-none" />
+              </div>
+
+              {/* Action prise */}
+              <div>
+                <label className="text-sm font-medium text-gray-600 block mb-1.5">Action prise</label>
+                <textarea value={incAction} onChange={(e) => setIncAction(e.target.value)}
+                  placeholder="Soins apportés, appel parents, glaçage..."
+                  className="w-full h-20 px-3 py-2 rounded-lg border border-gray-300 text-sm focus:border-petitsafe-primary outline-none resize-none" />
+              </div>
+
+              {/* Parents prévenus */}
+              <label className="flex items-center gap-3 cursor-pointer">
+                <input type="checkbox" checked={incParents} onChange={(e) => setIncParents(e.target.checked)}
+                  className="h-5 w-5 rounded border-gray-300 text-petitsafe-primary focus:ring-petitsafe-primary" />
+                <span className="text-sm font-medium text-gray-700">Parents prévenus</span>
+              </label>
+
+              <button onClick={handleIncident}
+                className="w-full h-12 rounded-xl bg-red-600 text-white font-medium hover:bg-red-700 flex items-center justify-center gap-2">
+                <AlertTriangle size={18} /> Enregistrer l&apos;incident
+              </button>
+            </div>
+          )}
+
           {/* ═══ HISTORIQUE DU JOUR ═══ */}
           <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
             <div className="flex items-center gap-2 mb-4">
@@ -343,9 +451,10 @@ export default function SuiviPage() {
                       change: { icon: "💧", color: "bg-green-500", bg: "bg-green-50" },
                       sieste: { icon: "😴", color: "bg-purple-500", bg: "bg-purple-50" },
                       transmission: { icon: "📝", color: "bg-gray-400", bg: "bg-gray-50" },
+                      incident: { icon: "⚠️", color: "bg-red-500", bg: "bg-red-50" },
                     };
                     const c = config[item.type];
-                    const labels: Record<string, string> = { biberon: "Biberon", repas: "Repas", change: "Change", sieste: "Sieste", transmission: "Transmission" };
+                    const labels: Record<string, string> = { biberon: "Biberon", repas: "Repas", change: "Change", sieste: "Sieste", transmission: "Transmission", incident: "Incident" };
                     return (
                       <div key={item.id} className="relative flex items-start gap-3">
                         {/* Dot on line */}
