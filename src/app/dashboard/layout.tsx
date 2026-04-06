@@ -23,10 +23,25 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     router.push(`/dashboard/${id}`);
   };
 
-  if (loading || !user || !activeStructureId || !activeStructure) {
+  // Auth en cours de chargement → spinner
+  if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-petitsafe-fond">
         <Loader2 size={32} className="animate-spin text-petitsafe-primary" />
+      </div>
+    );
+  }
+
+  // Pas d'utilisateur → l'effet ci-dessus redirige vers /login, on n'affiche rien
+  if (!user) return null;
+
+  // Utilisateur connecté mais aucune structure (ou activeStructure introuvable) :
+  // on laisse la page enfant s'afficher pour qu'elle puisse rendre son état vide
+  // (« Aucune structure trouvée »), au lieu de bloquer indéfiniment sur un spinner.
+  if (!activeStructureId || !activeStructure) {
+    return (
+      <div className="min-h-screen bg-petitsafe-fond">
+        <main className="px-4 md:px-6 py-4">{children}</main>
       </div>
     );
   }

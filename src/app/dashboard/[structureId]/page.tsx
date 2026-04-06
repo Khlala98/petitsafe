@@ -22,14 +22,26 @@ export default function DashboardPage() {
   const structureId = params.structureId as string;
   const [data, setData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [fetchError, setFetchError] = useState<string | null>(null);
 
   const aujourdhui = new Date();
   const dateStr = aujourdhui.toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
 
   const fetchData = async () => {
-    const res = await getDashboardData(structureId, modulesActifs);
-    if (res.success) setData(res.data);
-    setLoading(false);
+    try {
+      const res = await getDashboardData(structureId, modulesActifs);
+      if (res.success) {
+        setData(res.data);
+        setFetchError(null);
+      } else {
+        setFetchError(res.error || "Erreur de chargement");
+      }
+    } catch (e) {
+      console.error("[DashboardPage] getDashboardData failed:", e);
+      setFetchError(e instanceof Error ? e.message : "Erreur inattendue");
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => { fetchData(); }, [structureId]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -39,10 +51,26 @@ export default function DashboardPage() {
   useRealtimeSubscription("ReceptionMarchandise", isActif("tracabilite") ? structureId : null, { onInsert: () => fetchData() });
   useRealtimeSubscription("ValidationNettoyage", isActif("nettoyage") ? structureId : null, { onInsert: () => fetchData() });
 
-  if (loading || !data) {
+  if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
         <div className="h-8 w-8 animate-spin rounded-full border-4 border-petitsafe-primary border-t-transparent" />
+      </div>
+    );
+  }
+
+  if (fetchError || !data) {
+    return (
+      <div className="flex flex-col items-center justify-center gap-4 py-20 text-center px-4">
+        <AlertTriangle size={32} className="text-red-500" />
+        <p className="text-gray-700 font-medium">Impossible de charger le tableau de bord</p>
+        {fetchError && <p className="text-sm text-gray-500 max-w-md">{fetchError}</p>}
+        <button
+          onClick={() => { setLoading(true); fetchData(); }}
+          className="mt-2 px-4 h-10 rounded-xl bg-petitsafe-primary text-white text-sm font-medium hover:bg-petitsafe-primary/90"
+        >
+          Réessayer
+        </button>
       </div>
     );
   }
