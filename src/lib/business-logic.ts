@@ -140,14 +140,26 @@ export function getAlerteDLC(dlc: Date, maintenant: Date): AlerteDLC {
 
 /**
  * Calcule l'âge lisible d'un enfant.
+ * - < 1 mois → "X jours"
  * - < 2 ans → "X mois"
  * - 2–6 ans → "X ans et Y mois"
  * - > 6 ans → "X ans"
  */
 export function calculerAge(dateNaissance: Date, maintenant: Date): string {
-  const totalMois =
+  if (dateNaissance > maintenant) return "—";
+
+  const msParJour = 1000 * 60 * 60 * 24;
+  const totalJours = Math.floor((maintenant.getTime() - dateNaissance.getTime()) / msParJour);
+
+  if (totalJours < 30) {
+    return totalJours <= 1 ? `${totalJours} jour` : `${totalJours} jours`;
+  }
+
+  let totalMois =
     (maintenant.getFullYear() - dateNaissance.getFullYear()) * 12 +
     (maintenant.getMonth() - dateNaissance.getMonth());
+  // Si le jour du mois courant est avant celui de la naissance, le mois en cours n'est pas révolu
+  if (maintenant.getDate() < dateNaissance.getDate()) totalMois -= 1;
 
   if (totalMois < 24) {
     return `${totalMois} mois`;

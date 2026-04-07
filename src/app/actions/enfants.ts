@@ -90,14 +90,25 @@ export async function modifierEnfant(enfantId: string, structureId: string, data
   }
 }
 
-export async function supprimerEnfant(enfantId: string, structureId: string) {
+export async function archiverEnfant(enfantId: string, structureId: string) {
   try {
     await prisma.enfant.update({
       where: { id: enfantId, structure_id: structureId },
       data: { actif: false },
     });
     return { success: true as const };
-  } catch (error) {
+  } catch {
+    return { success: false as const, error: "Erreur lors de l'archivage." };
+  }
+}
+
+export async function supprimerEnfant(enfantId: string, structureId: string) {
+  try {
+    await prisma.enfant.delete({
+      where: { id: enfantId, structure_id: structureId },
+    });
+    return { success: true as const };
+  } catch {
     return { success: false as const, error: "Erreur lors de la suppression." };
   }
 }

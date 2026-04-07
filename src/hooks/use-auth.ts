@@ -64,7 +64,13 @@ export function useAuth() {
   const activeStructure = structures.find((s) => s.structure_id === activeStructureId);
   const activeRole = activeStructure?.role ?? null;
   const modulesActifs = activeStructure?.structure.modules_actifs ?? [];
-  const prenom = user?.user_metadata?.prenom ?? "Utilisateur";
+  const meta = user?.user_metadata ?? {};
+  const prenom: string =
+    (typeof meta.prenom === "string" && meta.prenom.trim()) ||
+    (typeof meta.full_name === "string" && meta.full_name.trim().split(/\s+/)[0]) ||
+    (typeof meta.name === "string" && meta.name.trim().split(/\s+/)[0]) ||
+    (user?.email ? user.email.split("@")[0] : "") ||
+    "";
 
   return { user, prenom, structures, activeStructureId, activeStructure, activeRole, modulesActifs, switchStructure, loading };
 }

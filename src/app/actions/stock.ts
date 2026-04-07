@@ -54,6 +54,15 @@ export async function marquerProduit(receptionId: string, statut: "UTILISE" | "J
   }
 }
 
+export async function supprimerReception(receptionId: string) {
+  try {
+    await prisma.receptionMarchandise.delete({ where: { id: receptionId } });
+    return { success: true as const };
+  } catch {
+    return { success: false as const, error: "Erreur lors de la suppression." };
+  }
+}
+
 export async function getFournisseurs(structureId: string) {
   try {
     const result = await prisma.receptionMarchandise.findMany({
@@ -122,6 +131,15 @@ export async function ajusterStock(stockId: string, delta: number, par: string) 
     return { success: true as const };
   } catch {
     return { success: false as const, error: "Erreur lors de l'ajustement." };
+  }
+}
+
+export async function supprimerStock(stockId: string) {
+  try {
+    await prisma.stock.delete({ where: { id: stockId } });
+    return { success: true as const };
+  } catch {
+    return { success: false as const, error: "Erreur lors de la suppression." };
   }
 }
 

@@ -85,7 +85,7 @@ export default function DashboardPage() {
   return (
     <div className="max-w-5xl mx-auto space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-gray-800">Bonjour {prenom} 👋</h1>
+        <h1 className="text-2xl font-bold text-gray-800">Bonjour{prenom ? ` ${prenom}` : ""} 👋</h1>
         <p className="text-sm text-gray-500 capitalize mt-1">{dateStr}</p>
       </div>
 
@@ -104,22 +104,28 @@ export default function DashboardPage() {
         </div>
 
         {/* Nettoyage du jour */}
-        {isActif("nettoyage") && data.nettoyage && (
+        {isActif("nettoyage") && (
           <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
             <div className="flex items-center gap-2 mb-3">
               <Sparkles size={20} className="text-rzpanda-secondary" />
               <span className="text-sm font-medium text-gray-600">Nettoyage du jour</span>
             </div>
-            <div className="flex items-center gap-2 mb-2">
-              <PastilleStatut status={data.nettoyage.pct === 100 ? "conforme" : data.nettoyage.pct >= 50 ? "attention" : "alerte"} />
-              <span className="text-sm font-semibold">{data.nettoyage.fait}/{data.nettoyage.total} taches — {data.nettoyage.pct}%</span>
-            </div>
-            <div className="w-full bg-gray-200 rounded-full h-2">
-              <div
-                className={`h-2 rounded-full transition-all ${data.nettoyage.pct === 100 ? "bg-green-500" : data.nettoyage.pct >= 50 ? "bg-orange-400" : "bg-red-500"}`}
-                style={{ width: `${data.nettoyage.pct}%` }}
-              />
-            </div>
+            {data.nettoyage && data.nettoyage.total > 0 ? (
+              <>
+                <div className="flex items-center gap-2 mb-2">
+                  <PastilleStatut status={data.nettoyage.pct > 80 ? "conforme" : data.nettoyage.pct >= 50 ? "attention" : "alerte"} />
+                  <span className="text-sm font-semibold">{data.nettoyage.fait}/{data.nettoyage.total} tâches — {data.nettoyage.pct}%</span>
+                </div>
+                <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div
+                    className={`h-2 rounded-full transition-all ${data.nettoyage.pct > 80 ? "bg-rzpanda-primary" : data.nettoyage.pct >= 50 ? "bg-orange-400" : "bg-red-500"}`}
+                    style={{ width: `${data.nettoyage.pct}%` }}
+                  />
+                </div>
+              </>
+            ) : (
+              <p className="text-sm text-gray-400">Aucune tâche planifiée aujourd&apos;hui.</p>
+            )}
             <Link href={`/dashboard/${structureId}/nettoyage`} className="text-xs text-rzpanda-primary hover:underline block mt-2">
               Voir le plan <ArrowRight size={12} className="inline" />
             </Link>
@@ -139,7 +145,7 @@ export default function DashboardPage() {
               <div className="space-y-1.5">
                 {data.prochainesDlc.map((p) => (
                   <div key={p.id} className="flex items-center gap-2 text-sm">
-                    <span className={`inline-block h-2 w-2 rounded-full shrink-0 ${p.joursRestants <= 0 ? "bg-red-500" : p.joursRestants <= 3 ? "bg-orange-400" : "bg-green-500"}`} />
+                    <span className={`inline-block h-2 w-2 rounded-full shrink-0 ${p.joursRestants <= 0 ? "bg-red-500" : p.joursRestants <= 3 ? "bg-orange-400" : "bg-rzpanda-primary"}`} />
                     <span className="text-gray-700 truncate">{p.nom_produit}</span>
                     <span className={`ml-auto text-xs font-medium shrink-0 ${p.joursRestants <= 0 ? "text-red-600" : p.joursRestants <= 3 ? "text-orange-600" : "text-gray-400"}`}>
                       {p.joursRestants <= 0 ? "Expirée" : `J-${p.joursRestants}`}

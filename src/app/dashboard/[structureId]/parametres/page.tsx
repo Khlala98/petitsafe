@@ -2,13 +2,14 @@
 
 export const dynamic = 'force-dynamic';
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/use-auth";
 import { updateModulesActifs } from "@/app/actions/stock";
+import { getStructureInfo, updateStructureInfo, nettoyerDonneesAberrantes } from "@/app/actions/structure";
 import { MODULES_DISPONIBLES, PRESETS_MODULES, type ModuleId } from "@/lib/constants";
 import { toast } from "sonner";
-import { Shield, Sparkles, Loader2, Check } from "lucide-react";
+import { Shield, Sparkles, Loader2, Check, Trash2 } from "lucide-react";
 
 export default function ParametresPage() {
   const params = useParams();
@@ -18,7 +19,64 @@ export default function ParametresPage() {
   const [modules, setModules] = useState<ModuleId[]>(modulesActifs as ModuleId[]);
   const [saving, setSaving] = useState(false);
 
+  // Infos structure
+  const [infoNom, setInfoNom] = useState("");
+  const [infoAdresse, setInfoAdresse] = useState("");
+  const [infoCp, setInfoCp] = useState("");
+  const [infoVille, setInfoVille] = useState("");
+  const [infoTel, setInfoTel] = useState("");
+  const [infoEmail, setInfoEmail] = useState("");
+  const [infoLoaded, setInfoLoaded] = useState(false);
+  const [infoSaving, setInfoSaving] = useState(false);
+  const [cleaning, setCleaning] = useState(false);
+
   const isGestionnaire = activeRole === "GESTIONNAIRE";
+
+  useEffect(() => {
+    getStructureInfo(structureId).then((res) => {
+      if (res.success && res.data) {
+        setInfoNom(res.data.nom ?? "");
+        setInfoAdresse(res.data.adresse ?? "");
+        setInfoCp(res.data.code_postal ?? "");
+        setInfoVille(res.data.ville ?? "");
+        setInfoTel(res.data.telephone ?? "");
+        setInfoEmail(res.data.email ?? "");
+      }
+      setInfoLoaded(true);
+    });
+  }, [structureId]);
+
+  const handleSaveInfo = async () => {
+    setInfoSaving(true);
+    const result = await updateStructureInfo(structureId, {
+      nom: infoNom,
+      adresse: infoAdresse,
+      code_postal: infoCp,
+      ville: infoVille,
+      telephone: infoTel,
+      email: infoEmail,
+    });
+    setInfoSaving(false);
+    if (result.success) {
+      toast.success("Informations enregistrées ! Rechargement...");
+      setTimeout(() => window.location.reload(), 800);
+    } else {
+      toast.error(result.error);
+    }
+  };
+
+  const handleNettoyer = async () => {
+    if (!confirm("Supprimer définitivement toutes les données aberrantes (températures hors plage, stocks > 10 000, produits au nom invalide) ?")) return;
+    setCleaning(true);
+    const result = await nettoyerDonneesAberrantes(structureId);
+    setCleaning(false);
+    if (result.success && result.data) {
+      const { relevesSupprimes, stocksSupprimes, receptionsSupprimees } = result.data;
+      toast.success(`Nettoyage terminé : ${relevesSupprimes} relevés, ${stocksSupprimes} stocks, ${receptionsSupprimees} réceptions supprimés.`);
+    } else {
+      toast.error(result.success ? "Erreur" : result.error);
+    }
+  };
 
   const toggle = (moduleId: ModuleId) => {
     setModules((prev) =>
@@ -65,6 +123,59 @@ export default function ParametresPage() {
         </div>
       ) : (
         <>
+          {/* Infos structure */}
+          <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 space-y-4">
+            <div>
+              <h2 className="text-lg font-semibold text-gray-800">Informations de la structure</h2>
+              <p className="text-sm text-gray-500 mt-1">Ces informations apparaissent sur les exports PDF et le portail parents.</p>
+            </div>
+            {!infoLoaded ? (
+              <div className="flex justify-center py-6"><Loader2 size={24} className="animate-spin text-rzpanda-primary" /></div>
+            ) : (
+              <>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Nom de la structure *</label>
+                  <input type="text" value={infoNom} onChange={(e) => setInfoNom(e.target.value)} placeholder="Crèche Les Petits Pandas"
+                    className="w-full h-12 px-4 rounded-xl border border-gray-300 focus:border-rzpanda-primary focus:ring-2 focus:ring-rzpanda-primary/20 outline-none text-sm" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Adresse</label>
+                  <input type="text" value={infoAdresse} onChange={(e) => setInfoAdresse(e.target.value)} placeholder="12 rue des Lilas"
+                    className="w-full h-12 px-4 rounded-xl border border-gray-300 focus:border-rzpanda-primary focus:ring-2 focus:ring-rzpanda-primary/20 outline-none text-sm" />
+                </div>
+                <div className="grid grid-cols-3 gap-3">
+                  <div className="col-span-1">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Code postal</label>
+                    <input type="text" value={infoCp} onChange={(e) => setInfoCp(e.target.value)} placeholder="75001"
+                      className="w-full h-12 px-4 rounded-xl border border-gray-300 focus:border-rzpanda-primary focus:ring-2 focus:ring-rzpanda-primary/20 outline-none text-sm" />
+                  </div>
+                  <div className="col-span-2">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Ville</label>
+                    <input type="text" value={infoVille} onChange={(e) => setInfoVille(e.target.value)} placeholder="Paris"
+                      className="w-full h-12 px-4 rounded-xl border border-gray-300 focus:border-rzpanda-primary focus:ring-2 focus:ring-rzpanda-primary/20 outline-none text-sm" />
+                  </div>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Téléphone</label>
+                    <input type="tel" value={infoTel} onChange={(e) => setInfoTel(e.target.value)} placeholder="01 23 45 67 89"
+                      className="w-full h-12 px-4 rounded-xl border border-gray-300 focus:border-rzpanda-primary focus:ring-2 focus:ring-rzpanda-primary/20 outline-none text-sm" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Email de contact</label>
+                    <input type="email" value={infoEmail} onChange={(e) => setInfoEmail(e.target.value)} placeholder="contact@creche.fr"
+                      className="w-full h-12 px-4 rounded-xl border border-gray-300 focus:border-rzpanda-primary focus:ring-2 focus:ring-rzpanda-primary/20 outline-none text-sm" />
+                  </div>
+                </div>
+                <button onClick={handleSaveInfo} disabled={infoSaving}
+                  className="h-11 px-5 rounded-xl bg-rzpanda-primary text-white text-sm font-medium hover:bg-rzpanda-primary/90 disabled:opacity-50 flex items-center gap-2">
+                  {infoSaving && <Loader2 size={16} className="animate-spin" />}
+                  Enregistrer
+                </button>
+              </>
+            )}
+          </div>
+
           <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 space-y-6">
             <div>
               <h2 className="text-lg font-semibold text-gray-800">Modules activés</h2>
@@ -132,6 +243,21 @@ export default function ParametresPage() {
                 Enregistrer les modifications
               </button>
             )}
+          </div>
+
+          {/* Maintenance — données aberrantes */}
+          <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 space-y-3">
+            <div>
+              <h2 className="text-lg font-semibold text-gray-800">Maintenance</h2>
+              <p className="text-sm text-gray-500 mt-1">
+                Supprime en un clic les données de test ou aberrantes : températures hors plage (&lt; -50°C ou &gt; 100°C), stocks &gt; 10 000 unités, produits au nom invalide.
+              </p>
+            </div>
+            <button onClick={handleNettoyer} disabled={cleaning}
+              className="h-11 px-5 rounded-xl border border-red-300 text-red-600 text-sm font-medium hover:bg-red-50 disabled:opacity-50 flex items-center gap-2">
+              {cleaning ? <Loader2 size={16} className="animate-spin" /> : <Trash2 size={16} />}
+              Nettoyer les données aberrantes
+            </button>
           </div>
         </>
       )}

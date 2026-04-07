@@ -7,8 +7,9 @@ import { useParams } from "next/navigation";
 import { getEnfantByToken, getTimelineEnfant } from "@/app/actions/portail-parents";
 import type { TimelineEntry, EnfantPortail } from "@/app/actions/portail-parents";
 import { Loader2, ChevronLeft, ChevronRight, ShieldAlert } from "lucide-react";
+import { calculerAge } from "@/lib/business-logic";
 
-const COULEURS_AVATAR = ["#4ade80", "#22c55e", "#F4A261", "#E53E3E", "#8E44AD", "#F39C12"];
+const COULEURS_AVATAR = ["#66bb6a", "#4caf50", "#F4A261", "#E53E3E", "#8E44AD", "#F39C12"];
 
 const TYPE_COLORS: Record<string, string> = {
   biberon: "bg-pink-100 text-pink-700 border-pink-200",
@@ -22,7 +23,7 @@ const TYPE_COLORS: Record<string, string> = {
 const TYPE_DOT_COLORS: Record<string, string> = {
   biberon: "bg-pink-400",
   repas: "bg-orange-400",
-  change: "bg-green-400",
+  change: "bg-rzpanda-primary",
   sieste: "bg-purple-400",
   transmission: "bg-blue-400",
   incident: "bg-red-500",
@@ -30,14 +31,6 @@ const TYPE_DOT_COLORS: Record<string, string> = {
 
 function formatDateFR(date: Date): string {
   return date.toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
-}
-
-function calculerAge(dateNaissance: Date, now: Date): string {
-  const months = (now.getFullYear() - dateNaissance.getFullYear()) * 12 + (now.getMonth() - dateNaissance.getMonth());
-  if (months < 24) return `${months} mois`;
-  const years = Math.floor(months / 12);
-  const rest = months % 12;
-  return rest > 0 ? `${years} ans et ${rest} mois` : `${years} ans`;
 }
 
 export default function PortailTokenPage() {

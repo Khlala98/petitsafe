@@ -26,6 +26,24 @@ export async function creerEquipement(data: {
   }
 }
 
+export async function supprimerEquipement(equipementId: string) {
+  try {
+    await prisma.equipement.delete({ where: { id: equipementId } });
+    return { success: true as const };
+  } catch {
+    return { success: false as const, error: "Erreur lors de la suppression." };
+  }
+}
+
+export async function supprimerReleve(releveId: string) {
+  try {
+    await prisma.releveTemperature.delete({ where: { id: releveId } });
+    return { success: true as const };
+  } catch {
+    return { success: false as const, error: "Erreur lors de la suppression." };
+  }
+}
+
 export async function getReleves(structureId: string, date: string) {
   try {
     const start = new Date(date); start.setHours(0, 0, 0, 0);

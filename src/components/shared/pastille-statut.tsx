@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils";
 type Statut = "conforme" | "attention" | "alerte";
 
 const COULEURS: Record<Statut, string> = {
-  conforme: "bg-green-500",
+  conforme: "bg-rzpanda-primary",
   attention: "bg-orange-400",
   alerte: "bg-red-500",
 };

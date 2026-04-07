@@ -180,7 +180,7 @@ export default function BiberonneriePage() {
                   )}
                   {isServi && !isNettoye && (
                     <button onClick={() => handleNettoye(bib.id)}
-                      className="flex-1 h-10 rounded-lg bg-green-500 text-white text-sm font-medium hover:bg-green-600">
+                      className="flex-1 h-10 rounded-lg bg-rzpanda-primary text-white text-sm font-medium hover:bg-rzpanda-secondary">
                       Marquer nettoyé
                     </button>
                   )}

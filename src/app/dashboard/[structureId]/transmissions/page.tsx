@@ -104,9 +104,9 @@ export default function TransmissionsPage() {
       <div className="space-y-3">
         {filtered.length === 0 ? (
           <div className="bg-white rounded-xl p-12 shadow-sm border border-gray-100 text-center">
-            <MessageSquare size={40} className="mx-auto text-gray-200 mb-3" />
-            <p className="text-gray-400 text-sm">Aucune transmission aujourd&apos;hui.</p>
-            <p className="text-gray-300 text-xs mt-1">Cliquez sur le bouton + pour en ajouter une.</p>
+            <MessageSquare size={64} className="mx-auto text-gray-200 mb-4" />
+            <p className="text-gray-500 font-medium">Aucune transmission aujourd&apos;hui</p>
+            <p className="text-gray-400 text-sm mt-1">Partagez les moments forts de la journée avec les parents : cliquez sur + pour en ajouter une.</p>
           </div>
         ) : (
           filtered.map((t) => {

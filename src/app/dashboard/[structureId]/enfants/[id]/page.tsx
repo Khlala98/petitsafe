@@ -4,7 +4,7 @@ export const dynamic = 'force-dynamic';
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { getEnfant, supprimerEnfant } from "@/app/actions/enfants";
+import { getEnfant, supprimerEnfant, archiverEnfant } from "@/app/actions/enfants";
 import { getTransmissionsEnfant } from "@/app/actions/transmissions";
 import { genererTokenPortail, regenererTokenPortail } from "@/app/actions/portail-parents";
 import { calculerAge } from "@/lib/business-logic";
@@ -27,7 +27,7 @@ interface TransmissionEnfant {
 
 const TABS = ["Infos générales", "Allergies & Santé", "Contacts urgence", "Transmissions"];
 const SEVERITE_LABELS: Record<string, string> = { LEGERE: "Légère", MODEREE: "Modérée", SEVERE: "Sévère" };
-const COULEURS_AVATAR = ["#4ade80", "#22c55e", "#F4A261", "#E53E3E", "#8E44AD", "#F39C12"];
+const COULEURS_AVATAR = ["#66bb6a", "#4caf50", "#F4A261", "#E53E3E", "#8E44AD", "#F39C12"];
 
 export default function FicheEnfantPage() {
   const params = useParams();
@@ -61,10 +61,19 @@ export default function FicheEnfantPage() {
     fetchData();
   }, [enfantId, structureId]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const handleDelete = async () => {
-    if (!confirm("Êtes-vous sûr de vouloir archiver cet enfant ?")) return;
-    const result = await supprimerEnfant(enfantId, structureId);
+  const handleArchive = async () => {
+    if (!confirm("Archiver cet enfant ? Il n'apparaîtra plus dans la liste mais son historique sera conservé.")) return;
+    const result = await archiverEnfant(enfantId, structureId);
     if (result.success) { toast.success("Enfant archivé."); router.push(`/dashboard/${structureId}/enfants`); }
+    else toast.error(result.error);
+  };
+
+  const handleDelete = async () => {
+    if (!enfant) return;
+    if (!confirm(`Supprimer définitivement ${enfant.prenom} ${enfant.nom} ?`)) return;
+    if (!confirm("Cette action est IRRÉVERSIBLE. Tous les biberons, repas, changes, siestes, transmissions et allergies liés seront également supprimés. Confirmer ?")) return;
+    const result = await supprimerEnfant(enfantId, structureId);
+    if (result.success) { toast.success("Enfant supprimé."); router.push(`/dashboard/${structureId}/enfants`); }
     else toast.error(result.error);
   };
 
@@ -121,8 +130,11 @@ export default function FicheEnfantPage() {
             className="h-9 px-3 rounded-lg border border-gray-300 text-sm text-gray-600 hover:bg-gray-50 flex items-center gap-2">
             <Edit size={14} /> Modifier
           </button>
-          <button onClick={handleDelete} className="h-9 px-3 rounded-lg border border-red-200 text-sm text-red-500 hover:bg-red-50 flex items-center gap-2">
-            <Trash2 size={14} /> Archiver
+          <button onClick={handleArchive} className="h-9 px-3 rounded-lg border border-gray-300 text-sm text-gray-600 hover:bg-gray-50 flex items-center gap-2">
+            <Edit size={14} /> Archiver
+          </button>
+          <button onClick={handleDelete} className="h-9 px-3 rounded-lg border border-red-300 text-sm text-red-600 hover:bg-red-50 flex items-center gap-2">
+            <Trash2 size={14} /> Supprimer
           </button>
         </div>
       </div>

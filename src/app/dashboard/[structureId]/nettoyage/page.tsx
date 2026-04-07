@@ -210,7 +210,7 @@ export default function NettoyagePage() {
             <div className="space-y-1">
               {histData[histSelectedDay].details.map((d, i) => (
                 <div key={i} className="flex items-center gap-2 text-sm">
-                  <CheckCircle2 size={14} className="text-green-500 shrink-0" />
+                  <CheckCircle2 size={14} className="text-rzpanda-primary shrink-0" />
                   <span className="text-gray-600">{d.professionnel_nom}</span>
                   <span className="text-gray-400 font-mono text-xs">{d.heure}</span>
                 </div>
@@ -313,7 +313,7 @@ export default function NettoyagePage() {
           <span className="text-sm font-bold text-gray-600">{globalFait}/{globalTotal} — {globalPct}%</span>
         </div>
         <div className="h-2.5 bg-gray-100 rounded-full overflow-hidden">
-          <div className={`h-full rounded-full transition-all duration-500 ${globalPct === 100 ? "bg-green-500" : globalPct >= 50 ? "bg-orange-400" : "bg-red-500"}`} style={{ width: `${globalPct}%` }} />
+          <div className={`h-full rounded-full transition-all duration-500 ${globalPct === 100 ? "bg-rzpanda-primary" : globalPct >= 50 ? "bg-orange-400" : "bg-red-500"}`} style={{ width: `${globalPct}%` }} />
         </div>
       </div>
 
@@ -356,7 +356,7 @@ export default function NettoyagePage() {
                   return (
                     <div key={tache.id} className={`flex items-center gap-3 p-4 ${isValidated ? "bg-green-50/50" : ""}`}>
                       <button onClick={() => !isValidated && handleValider(tache.id)} disabled={isValidated}
-                        className={`shrink-0 h-7 w-7 rounded-lg border-2 flex items-center justify-center transition-colors ${isValidated ? "bg-green-500 border-green-500 text-white" : "border-gray-300 hover:border-rzpanda-primary hover:bg-rzpanda-primary/5"}`}
+                        className={`shrink-0 h-7 w-7 rounded-lg border-2 flex items-center justify-center transition-colors ${isValidated ? "bg-rzpanda-primary border-rzpanda-primary text-white" : "border-gray-300 hover:border-rzpanda-primary hover:bg-rzpanda-primary/5"}`}
                         aria-label={isValidated ? `${tache.nom} — validée` : `Valider ${tache.nom}`}>
                         {isValidated && <CheckCircle2 size={16} />}
                       </button>
@@ -373,7 +373,7 @@ export default function NettoyagePage() {
                       {isValidated && validation && (
                         <div className="shrink-0 text-right">
                           <p className="text-xs text-green-600 font-medium">{validation.professionnel_nom}</p>
-                          <p className="text-xs text-green-500 flex items-center gap-1 justify-end">
+                          <p className="text-xs text-rzpanda-primary flex items-center gap-1 justify-end">
                             <Clock size={10} />
                             {new Date(validation.heure).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}
                           </p>

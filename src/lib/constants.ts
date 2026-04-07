@@ -30,8 +30,8 @@ export const DLC_ALERTE_JOURS = 2;
 
 /** Couleurs de la palette RZPan'Da */
 export const COULEURS = {
-  primaire: "#4ade80",
-  secondaire: "#22c55e",
+  primaire: "#66bb6a",
+  secondaire: "#4caf50",
   accent: "#F4A261",
   danger: "#E53E3E",
   warning: "#F39C12",

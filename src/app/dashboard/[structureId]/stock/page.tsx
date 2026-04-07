@@ -4,13 +4,13 @@ export const dynamic = 'force-dynamic';
 
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
-import { getReceptions, creerReception, marquerProduit, getFournisseurs, getStocks, creerStock, ajusterStock } from "@/app/actions/stock";
+import { getReceptions, creerReception, marquerProduit, getFournisseurs, getStocks, creerStock, ajusterStock, supprimerStock, supprimerReception } from "@/app/actions/stock";
 import { getAlerteDLC } from "@/lib/business-logic";
 import { SEUILS_TEMPERATURE } from "@/lib/constants";
 import { PastilleStatut } from "@/components/shared/pastille-statut";
 import { useAuth } from "@/hooks/use-auth";
 import { toast } from "sonner";
-import { Loader2, Plus, AlertTriangle, Minus } from "lucide-react";
+import { Loader2, Plus, AlertTriangle, Minus, Trash2, Package } from "lucide-react";
 
 interface Reception { id: string; nom_produit: string; fournisseur: string; numero_lot: string; dlc: string; temperature_reception?: number | null; conforme: boolean; statut: string; motif_non_conformite?: string | null }
 interface Stock { id: string; categorie: string; produit_nom: string; quantite: number; unite: string; seuil_alerte: number }
@@ -77,6 +77,20 @@ export default function StockPage() {
   const handleAjuster = async (stockId: string, delta: number) => {
     const result = await ajusterStock(stockId, delta, proNom);
     if (result.success) fetchData();
+    else toast.error(result.error);
+  };
+
+  const handleSupprimerStock = async (stockId: string) => {
+    if (!confirm("Supprimer ce produit ?")) return;
+    const result = await supprimerStock(stockId);
+    if (result.success) { toast.success("Produit supprimé."); fetchData(); }
+    else toast.error(result.error);
+  };
+
+  const handleSupprimerReception = async (receptionId: string) => {
+    if (!confirm("Supprimer cette réception ?")) return;
+    const result = await supprimerReception(receptionId);
+    if (result.success) { toast.success("Réception supprimée."); fetchData(); }
     else toast.error(result.error);
   };
 
@@ -166,6 +180,7 @@ export default function StockPage() {
                   <span className={`text-xs px-2 py-0.5 rounded-full ${r.statut === "EN_STOCK" ? "bg-blue-100 text-blue-700" : r.statut === "UTILISE" ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}`}>
                     {r.statut === "EN_STOCK" ? "En stock" : r.statut === "UTILISE" ? "Utilisé" : "Jeté"}
                   </span>
+                  <button onClick={() => handleSupprimerReception(r.id)} className="h-9 w-9 rounded-lg border border-red-200 text-red-600 flex items-center justify-center hover:bg-red-50" aria-label="Supprimer la réception"><Trash2 size={14} /></button>
                 </div>
               ))}
             </div>
@@ -177,7 +192,11 @@ export default function StockPage() {
       {tab === "alimentaire" && (
         <div className="space-y-3">
           {enStock.length === 0 ? (
-            <div className="text-center py-10 bg-white rounded-xl shadow-sm border border-gray-100"><p className="text-gray-400">Aucun produit en stock</p></div>
+            <div className="text-center py-10 bg-white rounded-xl shadow-sm border border-gray-100">
+              <Package size={36} className="text-gray-300 mx-auto mb-3" />
+              <p className="text-gray-500 font-medium">Aucun produit en stock</p>
+              <p className="text-gray-400 text-sm mt-1">Les produits apparaissent ici après une réception.</p>
+            </div>
           ) : (
             enStock.sort((a, b) => new Date(a.dlc).getTime() - new Date(b.dlc).getTime()).map((r) => {
               const alerte = getAlerteDLC(new Date(r.dlc), now);
@@ -194,7 +213,7 @@ export default function StockPage() {
                     {badgeText && <span className={`text-xs font-semibold px-2 py-1 rounded-full ${badgeClass}`}>{badgeText}</span>}
                   </div>
                   <div className="flex gap-2 mt-3">
-                    <button onClick={() => handleMarquer(r.id, "UTILISE")} className="h-9 px-3 rounded-lg bg-green-500 text-white text-xs font-medium">Marqué utilisé</button>
+                    <button onClick={() => handleMarquer(r.id, "UTILISE")} className="h-9 px-3 rounded-lg bg-rzpanda-primary text-white text-xs font-medium">Marqué utilisé</button>
                     <button onClick={() => handleMarquer(r.id, "JETE")} className="h-9 px-3 rounded-lg bg-red-500 text-white text-xs font-medium">Marqué jeté</button>
                   </div>
                 </div>
@@ -253,6 +272,7 @@ export default function StockPage() {
                             <button onClick={() => handleAjuster(s.id, -1)} className="h-10 w-10 rounded-lg border border-gray-300 flex items-center justify-center hover:bg-gray-50" aria-label="Retirer 1"><Minus size={16} /></button>
                             <span className="w-10 text-center font-mono font-bold">{s.quantite}</span>
                             <button onClick={() => handleAjuster(s.id, 1)} className="h-10 w-10 rounded-lg border border-gray-300 flex items-center justify-center hover:bg-gray-50" aria-label="Ajouter 1"><Plus size={16} /></button>
+                            <button onClick={() => handleSupprimerStock(s.id)} className="h-10 w-10 ml-1 rounded-lg border border-red-200 text-red-600 flex items-center justify-center hover:bg-red-50" aria-label="Supprimer le produit"><Trash2 size={16} /></button>
                           </div>
                         </div>
                       );

@@ -18,7 +18,16 @@ export const contactSchema = z.object({
 export const enfantSchema = z.object({
   prenom: z.string().min(1, "Prénom requis"),
   nom: z.string().min(1, "Nom requis"),
-  date_naissance: z.string().min(1, "Date de naissance requise"),
+  date_naissance: z
+    .string()
+    .min(1, "Date de naissance requise")
+    .refine((v) => {
+      const d = new Date(v);
+      if (isNaN(d.getTime())) return false;
+      const now = new Date();
+      const minDate = new Date(now.getFullYear() - 7, now.getMonth(), now.getDate());
+      return d <= now && d >= minDate;
+    }, "Date de naissance invalide (l'enfant doit avoir moins de 7 ans et être déjà né)"),
   sexe: z.enum(["FILLE", "GARCON"]).optional().nullable(),
   groupe: z.string().optional().nullable(),
   photo_url: z.string().optional().nullable(),

@@ -84,7 +84,7 @@ export const pdfStyles = StyleSheet.create({
   },
   cellOk: {
     fontSize: 8,
-    color: "#22c55e",
+    color: "#4caf50",
   },
   // Footer
   footer: {

@@ -4,14 +4,14 @@ export const dynamic = 'force-dynamic';
 
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
-import { getEquipements, creerEquipement, getReleves, creerReleve, getRelevesPlat, creerRelevePlat, getRelevesHistorique } from "@/app/actions/temperatures";
+import { getEquipements, creerEquipement, supprimerEquipement, supprimerReleve, getReleves, creerReleve, getRelevesPlat, creerRelevePlat, getRelevesHistorique } from "@/app/actions/temperatures";
 import { getConformiteTemperature, getConformitePlat, validerPlageTemperature } from "@/lib/business-logic";
 import { SEUILS_TEMPERATURE } from "@/lib/constants";
 import { PastilleStatut } from "@/components/shared/pastille-statut";
 import { useAuth } from "@/hooks/use-auth";
 import { useRealtimeSubscription } from "@/hooks/use-realtime-subscription";
 import { toast } from "sonner";
-import { Loader2, Plus, ChevronLeft, ChevronRight, AlertTriangle, Thermometer } from "lucide-react";
+import { Loader2, Plus, ChevronLeft, ChevronRight, AlertTriangle, Thermometer, Trash2 } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceArea } from "recharts";
 
 interface Equipement { id: string; nom: string; type: "REFRIGERATEUR" | "CONGELATEUR"; temperature_max: number }
@@ -148,6 +148,20 @@ export default function TemperaturesPage() {
     else toast.error(result.error);
   };
 
+  const handleSupprimerEquip = async (eqId: string, nom: string) => {
+    if (!confirm(`Supprimer l'équipement "${nom}" ? Tous ses relevés seront également supprimés.`)) return;
+    const result = await supprimerEquipement(eqId);
+    if (result.success) { toast.success("Équipement supprimé."); fetchData(); }
+    else toast.error(result.error);
+  };
+
+  const handleSupprimerReleve = async (releveId: string) => {
+    if (!confirm("Supprimer ce relevé ?")) return;
+    const result = await supprimerReleve(releveId);
+    if (result.success) { toast.success("Relevé supprimé."); fetchData(); }
+    else toast.error(result.error);
+  };
+
   const changeDate = (delta: number) => {
     const d = new Date(date); d.setDate(d.getDate() + delta);
     setDate(d.toISOString().split("T")[0]);
@@ -194,7 +208,10 @@ export default function TemperaturesPage() {
                   <div key={eq.id} className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
                     <div className="flex items-center justify-between mb-2">
                       <p className="font-semibold text-gray-800">{eq.nom}</p>
-                      <span className="text-xs text-gray-400">{eq.type === "REFRIGERATEUR" ? "Frigo" : "Congélateur"}</span>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs text-gray-400">{eq.type === "REFRIGERATEUR" ? "Frigo" : "Congélateur"}</span>
+                        <button onClick={() => handleSupprimerEquip(eq.id, eq.nom)} className="h-7 w-7 rounded-lg text-red-500 hover:bg-red-50 flex items-center justify-center" aria-label="Supprimer l'équipement"><Trash2 size={14} /></button>
+                      </div>
                     </div>
                     {dernierReleve ? (
                       <div className="flex items-center gap-2">
@@ -305,9 +322,9 @@ export default function TemperaturesPage() {
                   <YAxis tick={{ fontSize: 12 }} domain={["auto", "auto"]} />
                   <Tooltip />
                   {graphEquip?.type === "REFRIGERATEUR" && (
-                    <ReferenceArea y1={SEUILS_TEMPERATURE.frigo_min} y2={SEUILS_TEMPERATURE.frigo_max} fill="#22c55e" fillOpacity={0.1} />
+                    <ReferenceArea y1={SEUILS_TEMPERATURE.frigo_min} y2={SEUILS_TEMPERATURE.frigo_max} fill="#4caf50" fillOpacity={0.1} />
                   )}
-                  <Line type="monotone" dataKey="temperature" stroke="#4ade80" strokeWidth={2} dot={{ r: 4 }} />
+                  <Line type="monotone" dataKey="temperature" stroke="#66bb6a" strokeWidth={2} dot={{ r: 4 }} />
                 </LineChart>
               </ResponsiveContainer>
             </div>
@@ -323,8 +340,9 @@ export default function TemperaturesPage() {
                     <PastilleStatut status={r.conforme ? "conforme" : "alerte"} />
                     <span className="font-mono font-bold">{r.temperature}°C</span>
                     <span className="text-sm text-gray-600">{r.equipement.nom}</span>
-                    <span className="text-xs text-gray-400 ml-auto">{new Date(r.heure).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}</span>
                     {r.action_corrective && <span className="text-xs text-red-500">⚠️ {r.action_corrective}</span>}
+                    <span className="text-xs text-gray-400 ml-auto">{new Date(r.heure).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}</span>
+                    <button onClick={() => handleSupprimerReleve(r.id)} className="h-7 w-7 rounded-lg text-red-500 hover:bg-red-100 flex items-center justify-center" aria-label="Supprimer le relevé"><Trash2 size={14} /></button>
                   </div>
                 ))}
               </div>

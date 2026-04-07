@@ -188,7 +188,7 @@ export function ImportCSVModal({ structureId, onClose, onImported }: ImportCSVMo
                         <td className="py-2 px-2">
                           {!row.valid && <span className="text-xs text-red-500">{row.error}</span>}
                           {row.valid && row.warning && <span className="text-xs text-orange-500">{row.warning}</span>}
-                          {row.valid && !row.warning && <Check size={14} className="text-green-500" />}
+                          {row.valid && !row.warning && <Check size={14} className="text-rzpanda-primary" />}
                         </td>
                         <td className="py-2 px-2">
                           <button onClick={() => removeRow(i)} className="text-gray-400 hover:text-red-500" aria-label="Supprimer"><X size={14} /></button>

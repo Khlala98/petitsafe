@@ -22,7 +22,7 @@ interface Enfant {
 
 type ActiveForm = null | "repas" | "change" | "sieste" | "transmission" | "incident";
 
-const COULEURS_AVATAR = ["#4ade80", "#22c55e", "#F4A261", "#E53E3E", "#8E44AD", "#F39C12"];
+const COULEURS_AVATAR = ["#66bb6a", "#4caf50", "#F4A261", "#E53E3E", "#8E44AD", "#F39C12"];
 
 export default function SuiviPage() {
   const params = useParams();
@@ -448,7 +448,7 @@ export default function SuiviPage() {
                     const config: Record<string, { icon: string; color: string; bg: string }> = {
                       biberon: { icon: "🍼", color: "bg-blue-500", bg: "bg-blue-50" },
                       repas: { icon: "🍽️", color: "bg-orange-500", bg: "bg-orange-50" },
-                      change: { icon: "💧", color: "bg-green-500", bg: "bg-green-50" },
+                      change: { icon: "💧", color: "bg-rzpanda-primary", bg: "bg-green-50" },
                       sieste: { icon: "😴", color: "bg-purple-500", bg: "bg-purple-50" },
                       transmission: { icon: "📝", color: "bg-gray-400", bg: "bg-gray-50" },
                       incident: { icon: "⚠️", color: "bg-red-500", bg: "bg-red-50" },
