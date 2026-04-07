@@ -3,6 +3,7 @@
 export const dynamic = 'force-dynamic';
 
 import { useState } from "react";
+import Image from "next/image";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -111,8 +112,9 @@ export default function RegisterPage() {
   return (
     <div className="min-h-screen bg-rzpanda-fond flex items-center justify-center px-4 py-8">
       <div className="w-full max-w-md space-y-6">
-        <div className="text-center">
-          <h1 className="text-3xl font-bold text-rzpanda-primary">{"RZPan'Da"}</h1>
+        <div className="text-center flex flex-col items-center">
+          <Image src="/rzpanda-icon.svg" alt="RZPan'Da" width={64} height={64} priority unoptimized />
+          <h1 className="mt-3 text-3xl font-bold text-rzpanda-primary">{"RZPan'Da"}</h1>
           <p className="mt-2 text-sm text-gray-500">Créer votre compte — Étape {step}/3</p>
         </div>
 

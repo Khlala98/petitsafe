@@ -1,5 +1,6 @@
 import { Document, Page, Text, View } from "@react-pdf/renderer";
 import { pdfStyles as s } from "./pdf-styles";
+import { PandaIcon } from "./panda-icon";
 import { TYPES_STRUCTURE } from "@/lib/constants";
 import type { ExportDDPPData } from "@/app/actions/exports";
 
@@ -13,7 +14,10 @@ function formatHeure(iso: string) {
 function Footer() {
   return (
     <View style={s.footer} fixed>
-      <Text style={s.footerLeft}>{"RZPan'Da — Gestion HACCP"}</Text>
+      <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
+        <PandaIcon size={14} />
+        <Text style={s.footerLeft}>{"RZPan'Da — Gestion HACCP"}</Text>
+      </View>
       <Text style={s.footerRight} render={({ pageNumber, totalPages }) => `Page ${pageNumber}/${totalPages}`} />
     </View>
   );
@@ -26,6 +30,7 @@ export function PdfDDPP({ data }: { data: ExportDDPPData }) {
     <Document>
       {/* Page de garde */}
       <Page size="A4" style={s.coverPage}>
+        <PandaIcon size={90} />
         <Text style={s.coverTitle}>{"RZPan'Da"}</Text>
         <Text style={s.coverSubtitle}>Rapport DDPP — Contrôle sanitaire</Text>
         <Text style={{ ...s.coverInfo, fontSize: 16, fontFamily: "Helvetica-Bold", color: "#1A202C", marginBottom: 10 }}>{data.structure.nom}</Text>

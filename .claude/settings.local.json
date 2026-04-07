@@ -30,7 +30,12 @@
       "Bash(perl -i -pe 's/#2E86C1/#4ade80/g; s/#27AE60/#22c55e/g' 'src/app/dashboard/[structureId]/enfants/page.tsx' 'src/app/dashboard/[structureId]/suivi/page.tsx' 'src/app/dashboard/[structureId]/enfants/[id]/page.tsx' 'src/app/dashboard/[structureId]/suivi/groupe/page.tsx' 'src/app/dashboard/[structureId]/temperatures/page.tsx')",
       "Bash(git add:*)",
       "Bash(git commit -m ':*)",
-      "Bash(git push:*)"
+      "Bash(git push:*)",
+      "Bash(cat:*)",
+      "Bash(curl -sI http://localhost:3000/rzpanda-icon.svg)",
+      "Bash(curl -s http://localhost:3000/rzpanda-icon.svg)",
+      "Bash(curl -s http://localhost:3000/login)",
+      "Bash(npx kill-port:*)"
     ]
   }
 }

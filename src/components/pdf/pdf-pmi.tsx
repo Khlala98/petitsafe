@@ -1,5 +1,6 @@
 import { Document, Page, Text, View } from "@react-pdf/renderer";
 import { pdfStyles as s } from "./pdf-styles";
+import { PandaIcon } from "./panda-icon";
 import { TYPES_STRUCTURE } from "@/lib/constants";
 import type { ExportPMIData } from "@/app/actions/exports";
 
@@ -29,6 +30,7 @@ export function PdfPMI({ data }: { data: ExportPMIData }) {
     <Document>
       {/* Page de garde */}
       <Page size="A4" style={s.coverPage}>
+        <PandaIcon size={90} />
         <Text style={s.coverTitle}>{"RZPan'Da"}</Text>
         <Text style={s.coverSubtitle}>Rapport PMI — Petite enfance</Text>
         <Text style={s.coverInfo}>{data.structure.nom}</Text>
