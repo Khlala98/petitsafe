@@ -71,8 +71,8 @@ export default function ParametresPage() {
     const result = await nettoyerDonneesAberrantes(structureId);
     setCleaning(false);
     if (result.success && result.data) {
-      const { relevesSupprimes, stocksSupprimes, receptionsSupprimees } = result.data;
-      toast.success(`Nettoyage terminé : ${relevesSupprimes} relevés, ${stocksSupprimes} stocks, ${receptionsSupprimees} réceptions supprimés.`);
+      const { relevesSupprimes, equipementsSupprimes, stocksSupprimes, receptionsSupprimees } = result.data;
+      toast.success(`Nettoyage terminé : ${relevesSupprimes} relevés, ${equipementsSupprimes} équipements, ${stocksSupprimes} stocks, ${receptionsSupprimees} réceptions supprimés.`);
     } else {
       toast.error(result.success ? "Erreur" : result.error);
     }

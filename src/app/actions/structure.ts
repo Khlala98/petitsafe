@@ -61,46 +61,87 @@ export async function updateStructureInfo(
 }
 
 /**
+ * Détecte un nom "gibberish" (saisies de test type "dzadaz", "fdzed", "EZVEZ").
+ * Heuristiques cumulatives :
+ *  - longueur < 3
+ *  - aucune voyelle
+ *  - "z" adjacent à une autre consonne (sauf h) — quasi inexistant en français/anglais
+ *    courant, mais typique du clavier-rage ("dz", "zv", "zd", "zf"...)
+ *    Exclut volontairement "zz" (pizza), "zy" (crazy), "zh" (Zhang).
+ */
+function isGibberishNom(input: string): boolean {
+  const nom = input.trim();
+  if (nom.length < 3) return true;
+  // Si contient autre chose que des lettres/espaces/accents/tirets/apostrophes, on laisse
+  if (!/^[a-zA-ZÀ-ÿ\s'\-]+$/.test(nom)) return false;
+  if (!/[aeiouyàâäéèêëîïôöùûüAEIOUYÀÂÄÉÈÊËÎÏÔÖÙÛÜ]/.test(nom)) return true;
+  // z accolé à une consonne (hors h, y, z)
+  if (/z[bcdfgjklmnpqrstvwx]|[bcdfgjklmnpqrstvwx]z/i.test(nom)) return true;
+  return false;
+}
+
+/**
  * Supprime les données aberrantes d'une structure :
- * - Relevés de température hors plage physiquement plausible (< -50 ou > 100)
- * - Stocks avec quantité absurde (> 10 000)
- * - Réceptions avec nom de produit visiblement invalide (< 3 caractères ou que des consonnes)
+ * - Relevés de température hors plage plausible (< -50 ou > 100)
+ * - Équipements de température avec nom gibberish (cascade : supprime aussi leurs relevés)
+ * - Stocks avec quantité absurde (> 10 000) ou nom gibberish
+ * - Réceptions avec nom de produit invalide (< 3 caractères ou gibberish)
  */
 export async function nettoyerDonneesAberrantes(structureId: string) {
   try {
-    const releves = await prisma.releveTemperature.deleteMany({
+    // 1. Relevés de température hors plage physique
+    const relevesHorsPlage = await prisma.releveTemperature.deleteMany({
       where: {
         structure_id: structureId,
         OR: [{ temperature: { gt: 100 } }, { temperature: { lt: -50 } }],
       },
     });
 
-    const stocks = await prisma.stock.deleteMany({
+    // 2. Équipements avec nom gibberish (cascade supprime leurs relevés)
+    const equipements = await prisma.equipement.findMany({
+      where: { structure_id: structureId },
+      select: { id: true, nom: true },
+    });
+    const equipementsAberrantsIds = equipements
+      .filter((e) => isGibberishNom(e.nom))
+      .map((e) => e.id);
+    const equipDeleted = equipementsAberrantsIds.length
+      ? await prisma.equipement.deleteMany({ where: { id: { in: equipementsAberrantsIds } } })
+      : { count: 0 };
+
+    // 3. Stocks : quantité absurde OU nom gibberish
+    const stocksHorsQuantite = await prisma.stock.deleteMany({
       where: { structure_id: structureId, quantite: { gt: 10000 } },
     });
+    const stocksRestants = await prisma.stock.findMany({
+      where: { structure_id: structureId },
+      select: { id: true, produit_nom: true },
+    });
+    const stocksAberrantsIds = stocksRestants
+      .filter((s) => isGibberishNom(s.produit_nom))
+      .map((s) => s.id);
+    const stocksGibberishDeleted = stocksAberrantsIds.length
+      ? await prisma.stock.deleteMany({ where: { id: { in: stocksAberrantsIds } } })
+      : { count: 0 };
 
+    // 4. Réceptions avec nom de produit gibberish
     const receptions = await prisma.receptionMarchandise.findMany({
       where: { structure_id: structureId },
-      select: { id: true, nom_produit: true, fournisseur: true },
+      select: { id: true, nom_produit: true },
     });
-    const aberrantesIds = receptions
-      .filter((r) => {
-        const nom = r.nom_produit.trim();
-        if (nom.length < 3) return true;
-        // Pas de voyelle = probablement du gibberish (dzadaz, EZVEZ, etc. ont des voyelles, on doit être plus large)
-        const isGibberish = /^[a-zA-Z]{3,}$/.test(nom) && !/[aeiouyAEIOUY].*[aeiouyAEIOUY]/.test(nom);
-        return isGibberish;
-      })
+    const receptionsAberrantesIds = receptions
+      .filter((r) => isGibberishNom(r.nom_produit))
       .map((r) => r.id);
-    const recDeleted = aberrantesIds.length
-      ? await prisma.receptionMarchandise.deleteMany({ where: { id: { in: aberrantesIds } } })
+    const recDeleted = receptionsAberrantesIds.length
+      ? await prisma.receptionMarchandise.deleteMany({ where: { id: { in: receptionsAberrantesIds } } })
       : { count: 0 };
 
     return {
       success: true as const,
       data: {
-        relevesSupprimes: releves.count,
-        stocksSupprimes: stocks.count,
+        relevesSupprimes: relevesHorsPlage.count,
+        equipementsSupprimes: equipDeleted.count,
+        stocksSupprimes: stocksHorsQuantite.count + stocksGibberishDeleted.count,
         receptionsSupprimees: recDeleted.count,
       },
     };
