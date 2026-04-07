@@ -4,6 +4,7 @@ export const dynamic = 'force-dynamic';
 
 import { useState } from "react";
 import { PandaIcon } from "@/components/shared/panda-icon";
+import { LogoText } from "@/components/shared/logo-text";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -50,7 +51,7 @@ export default function LoginPage() {
       <div className="w-full max-w-sm space-y-8">
         <div className="text-center flex flex-col items-center">
           <PandaIcon size={64} />
-          <h1 className="mt-3 text-3xl font-bold text-rzpanda-primary">{"RZPan'Da"}</h1>
+          <h1 className="mt-3 text-3xl font-bold"><LogoText /></h1>
           <p className="mt-2 text-sm text-gray-500">
             Conformité HACCP &amp; Traçabilité pour la Petite Enfance
           </p>

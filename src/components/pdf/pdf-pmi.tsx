@@ -31,7 +31,12 @@ export function PdfPMI({ data }: { data: ExportPMIData }) {
       {/* Page de garde */}
       <Page size="A4" style={s.coverPage}>
         <PandaIcon size={90} />
-        <Text style={s.coverTitle}>{"RZPan'Da"}</Text>
+        <Text style={s.coverTitle}>
+          <Text style={{ color: "#66bb6a" }}>RZ</Text>
+          <Text style={{ color: "#1a202c" }}>Pan</Text>
+          <Text style={{ color: "#66bb6a" }}>&apos;</Text>
+          <Text style={{ color: "#1a202c" }}>Da</Text>
+        </Text>
         <Text style={s.coverSubtitle}>Rapport PMI — Petite enfance</Text>
         <Text style={s.coverInfo}>{data.structure.nom}</Text>
         <Text style={s.coverInfo}>{typeLabel}</Text>

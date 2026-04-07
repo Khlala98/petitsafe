@@ -31,7 +31,12 @@ export function PdfDDPP({ data }: { data: ExportDDPPData }) {
       {/* Page de garde */}
       <Page size="A4" style={s.coverPage}>
         <PandaIcon size={90} />
-        <Text style={s.coverTitle}>{"RZPan'Da"}</Text>
+        <Text style={s.coverTitle}>
+          <Text style={{ color: "#66bb6a" }}>RZ</Text>
+          <Text style={{ color: "#1a202c" }}>Pan</Text>
+          <Text style={{ color: "#66bb6a" }}>&apos;</Text>
+          <Text style={{ color: "#1a202c" }}>Da</Text>
+        </Text>
         <Text style={s.coverSubtitle}>Rapport DDPP — Contrôle sanitaire</Text>
         <Text style={{ ...s.coverInfo, fontSize: 16, fontFamily: "Helvetica-Bold", color: "#1A202C", marginBottom: 10 }}>{data.structure.nom}</Text>
         <Text style={s.coverInfo}>{typeLabel}</Text>

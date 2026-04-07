@@ -3,6 +3,7 @@
 export const dynamic = 'force-dynamic';
 
 import { useState } from "react";
+import { LogoText } from "@/components/shared/logo-text";
 import { createClient } from "@/lib/supabase/client";
 import Link from "next/link";
 import { toast } from "sonner";
@@ -30,7 +31,7 @@ export default function ForgotPasswordPage() {
     <div className="min-h-screen bg-rzpanda-fond flex items-center justify-center px-4">
       <div className="w-full max-w-sm space-y-8">
         <div className="text-center">
-          <h1 className="text-3xl font-bold text-rzpanda-primary">{"RZPan'Da"}</h1>
+          <h1 className="text-3xl font-bold"><LogoText /></h1>
           <p className="mt-2 text-sm text-gray-500">Réinitialiser votre mot de passe</p>
         </div>
         {sent ? (

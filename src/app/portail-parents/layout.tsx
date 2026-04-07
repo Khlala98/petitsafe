@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { Loader2, LogOut } from "lucide-react";
 import type { User } from "@supabase/supabase-js";
+import { LogoText } from "@/components/shared/logo-text";
 
 export default function PortailParentsLayout({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
@@ -44,7 +45,7 @@ export default function PortailParentsLayout({ children }: { children: React.Rea
     <div className="min-h-screen bg-rzpanda-fond">
       <header className="bg-white border-b border-gray-100 sticky top-0 z-20">
         <div className="max-w-2xl mx-auto px-4 h-14 flex items-center justify-between">
-          <span className="text-lg font-bold text-rzpanda-primary">{"RZPan'Da"}</span>
+          <LogoText className="text-lg font-bold" />
           <div className="flex items-center gap-3">
             <span className="text-sm text-gray-500">{user?.user_metadata?.prenom ?? "Parent"}</span>
             <button
