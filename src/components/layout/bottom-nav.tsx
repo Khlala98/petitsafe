@@ -79,14 +79,14 @@ export function BottomNav({ structureId, modulesActifs }: BottomNavProps) {
             const isActive = item.href === "" ? (pathname === basePath || pathname === basePath + "/") : pathname.startsWith(fullHref);
             return (
               <Link key={item.href} href={fullHref}
-                className={cn("flex flex-col items-center justify-center gap-0.5 min-w-[64px] py-1", isActive ? "text-petitsafe-primary" : "text-gray-400")}>
+                className={cn("flex flex-col items-center justify-center gap-0.5 min-w-[64px] py-1", isActive ? "text-rzpanda-primary" : "text-gray-400")}>
                 <item.icon size={22} />
                 <span className="text-[10px] font-medium">{item.label}</span>
               </Link>
             );
           })}
           <button onClick={() => setShowMore(true)}
-            className={cn("flex flex-col items-center justify-center gap-0.5 min-w-[64px] py-1", showMore ? "text-petitsafe-primary" : "text-gray-400")} aria-label="Plus d'options">
+            className={cn("flex flex-col items-center justify-center gap-0.5 min-w-[64px] py-1", showMore ? "text-rzpanda-primary" : "text-gray-400")} aria-label="Plus d'options">
             <Menu size={22} /><span className="text-[10px] font-medium">Plus</span>
           </button>
         </div>

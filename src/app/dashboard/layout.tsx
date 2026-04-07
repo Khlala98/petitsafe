@@ -26,8 +26,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   // Auth en cours de chargement → spinner
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-petitsafe-fond">
-        <Loader2 size={32} className="animate-spin text-petitsafe-primary" />
+      <div className="min-h-screen flex items-center justify-center bg-rzpanda-fond">
+        <Loader2 size={32} className="animate-spin text-rzpanda-primary" />
       </div>
     );
   }
@@ -40,14 +40,14 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   // (« Aucune structure trouvée »), au lieu de bloquer indéfiniment sur un spinner.
   if (!activeStructureId || !activeStructure) {
     return (
-      <div className="min-h-screen bg-petitsafe-fond">
+      <div className="min-h-screen bg-rzpanda-fond">
         <main className="px-4 md:px-6 py-4">{children}</main>
       </div>
     );
   }
 
   return (
-    <div className="flex h-screen bg-petitsafe-fond overflow-hidden">
+    <div className="flex h-screen bg-rzpanda-fond overflow-hidden">
       <Sidebar structureId={activeStructureId} structureNom={activeStructure.structure.nom} prenom={prenom} modulesActifs={modulesActifs} />
       <div className="flex flex-col flex-1 min-w-0">
         <Topbar structures={structures} activeStructureId={activeStructureId} onSwitchStructure={handleSwitchStructure} prenom={prenom} />

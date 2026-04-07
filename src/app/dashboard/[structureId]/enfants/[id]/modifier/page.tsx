@@ -42,7 +42,7 @@ export default function ModifierEnfantPage() {
     fetch();
   }, [enfantId, structureId]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  if (loading || !enfant) return <div className="flex items-center justify-center py-20"><Loader2 size={32} className="animate-spin text-petitsafe-primary" /></div>;
+  if (loading || !enfant) return <div className="flex items-center justify-center py-20"><Loader2 size={32} className="animate-spin text-rzpanda-primary" /></div>;
 
   return <EnfantForm mode="edit" initial={enfant} />;
 }

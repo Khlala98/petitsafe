@@ -9,7 +9,7 @@ test.describe("Authentification", () => {
     await expect(page).toHaveURL(/connexion/);
 
     // Remplir le formulaire de connexion
-    await page.getByLabel(/email/i).fill("marie@petitsafe-demo.fr");
+    await page.getByLabel(/email/i).fill("marie@rzpanda-demo.fr");
     await page.getByLabel(/mot de passe/i).fill("password123");
     await page.getByRole("button", { name: /connexion|se connecter/i }).click();
 

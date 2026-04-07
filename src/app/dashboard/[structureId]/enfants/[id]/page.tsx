@@ -27,7 +27,7 @@ interface TransmissionEnfant {
 
 const TABS = ["Infos générales", "Allergies & Santé", "Contacts urgence", "Transmissions"];
 const SEVERITE_LABELS: Record<string, string> = { LEGERE: "Légère", MODEREE: "Modérée", SEVERE: "Sévère" };
-const COULEURS_AVATAR = ["#2E86C1", "#27AE60", "#F4A261", "#E53E3E", "#8E44AD", "#F39C12"];
+const COULEURS_AVATAR = ["#4ade80", "#22c55e", "#F4A261", "#E53E3E", "#8E44AD", "#F39C12"];
 
 export default function FicheEnfantPage() {
   const params = useParams();
@@ -104,7 +104,7 @@ export default function FicheEnfantPage() {
     toast.success("Lien copié dans le presse-papiers");
   };
 
-  if (loading || !enfant) return <div className="flex items-center justify-center py-20"><Loader2 size={32} className="animate-spin text-petitsafe-primary" /></div>;
+  if (loading || !enfant) return <div className="flex items-center justify-center py-20"><Loader2 size={32} className="animate-spin text-rzpanda-primary" /></div>;
 
   const age = calculerAge(new Date(enfant.date_naissance), new Date());
   const couleur = COULEURS_AVATAR[enfant.prenom.charCodeAt(0) % COULEURS_AVATAR.length];
@@ -113,7 +113,7 @@ export default function FicheEnfantPage() {
     <div className="max-w-3xl mx-auto space-y-6">
       {/* Back + actions */}
       <div className="flex items-center justify-between">
-        <button onClick={() => router.push(`/dashboard/${structureId}/enfants`)} className="flex items-center gap-2 text-sm text-gray-500 hover:text-petitsafe-primary">
+        <button onClick={() => router.push(`/dashboard/${structureId}/enfants`)} className="flex items-center gap-2 text-sm text-gray-500 hover:text-rzpanda-primary">
           <ArrowLeft size={16} /> Retour
         </button>
         <div className="flex gap-2">
@@ -149,7 +149,7 @@ export default function FicheEnfantPage() {
       {/* Portail parents */}
       <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
         <div className="flex items-center gap-2 mb-3">
-          <Link2 size={16} className="text-petitsafe-primary" />
+          <Link2 size={16} className="text-rzpanda-primary" />
           <h3 className="text-sm font-semibold text-gray-700">Portail Parents</h3>
         </div>
 
@@ -157,7 +157,7 @@ export default function FicheEnfantPage() {
           <div className="space-y-3">
             <div className="flex items-center gap-2">
               <input value={portalUrl} readOnly className="flex-1 h-10 px-3 rounded-lg border border-gray-200 bg-gray-50 text-xs text-gray-600 truncate" />
-              <button onClick={handleCopyLink} className="h-10 px-3 rounded-lg bg-petitsafe-primary text-white hover:bg-petitsafe-primary/90 flex items-center gap-1.5 shrink-0">
+              <button onClick={handleCopyLink} className="h-10 px-3 rounded-lg bg-rzpanda-primary text-white hover:bg-rzpanda-primary/90 flex items-center gap-1.5 shrink-0">
                 <Copy size={14} /> <span className="text-sm">Copier</span>
               </button>
             </div>
@@ -171,7 +171,7 @@ export default function FicheEnfantPage() {
           </div>
         ) : (
           <button onClick={handleGenererLien} disabled={portalLoading}
-            className="w-full h-10 rounded-lg bg-petitsafe-primary/10 text-petitsafe-primary text-sm font-medium hover:bg-petitsafe-primary/20 flex items-center justify-center gap-2 disabled:opacity-50">
+            className="w-full h-10 rounded-lg bg-rzpanda-primary/10 text-rzpanda-primary text-sm font-medium hover:bg-rzpanda-primary/20 flex items-center justify-center gap-2 disabled:opacity-50">
             {portalLoading ? <Loader2 size={16} className="animate-spin" /> : <Link2 size={16} />}
             Générer le lien portail parents
           </button>
@@ -182,7 +182,7 @@ export default function FicheEnfantPage() {
       <div className="flex gap-1 border-b border-gray-200">
         {TABS.map((tab, i) => (
           <button key={tab} onClick={() => setActiveTab(i)}
-            className={`px-4 py-2.5 text-sm font-medium border-b-2 transition-colors ${activeTab === i ? "border-petitsafe-primary text-petitsafe-primary" : "border-transparent text-gray-500 hover:text-gray-700"}`}>
+            className={`px-4 py-2.5 text-sm font-medium border-b-2 transition-colors ${activeTab === i ? "border-rzpanda-primary text-rzpanda-primary" : "border-transparent text-gray-500 hover:text-gray-700"}`}>
             {tab}
           </button>
         ))}
@@ -220,7 +220,7 @@ export default function FicheEnfantPage() {
                       </span>
                     </div>
                     {a.protocole && <p className="text-sm text-red-700 mt-2">{a.protocole}</p>}
-                    {a.document_pai && <a href={a.document_pai} target="_blank" rel="noreferrer" className="text-sm text-petitsafe-primary hover:underline mt-1 block">Voir le PAI</a>}
+                    {a.document_pai && <a href={a.document_pai} target="_blank" rel="noreferrer" className="text-sm text-rzpanda-primary hover:underline mt-1 block">Voir le PAI</a>}
                   </div>
                 ))
               )}
@@ -249,8 +249,8 @@ export default function FicheEnfantPage() {
             ) : (
               enfant.contacts.sort((a, b) => a.ordre_priorite - b.ordre_priorite).map((c) => (
                 <div key={c.id} className="flex items-center gap-4 p-3 rounded-lg bg-gray-50">
-                  <div className="h-10 w-10 rounded-full bg-petitsafe-primary/10 flex items-center justify-center shrink-0">
-                    <User size={18} className="text-petitsafe-primary" />
+                  <div className="h-10 w-10 rounded-full bg-rzpanda-primary/10 flex items-center justify-center shrink-0">
+                    <User size={18} className="text-rzpanda-primary" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="font-medium text-gray-800">{c.nom} <span className="text-sm text-gray-400">({c.lien})</span></p>

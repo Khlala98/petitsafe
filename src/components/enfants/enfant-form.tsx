@@ -83,11 +83,11 @@ export function EnfantForm({ mode, initial }: EnfantFormProps) {
     }
   };
 
-  const inputClass = "w-full h-12 px-4 rounded-xl border border-gray-300 focus:border-petitsafe-primary focus:ring-2 focus:ring-petitsafe-primary/20 outline-none text-sm";
+  const inputClass = "w-full h-12 px-4 rounded-xl border border-gray-300 focus:border-rzpanda-primary focus:ring-2 focus:ring-rzpanda-primary/20 outline-none text-sm";
 
   return (
     <div className="max-w-2xl mx-auto space-y-6">
-      <button onClick={() => router.back()} className="flex items-center gap-2 text-sm text-gray-500 hover:text-petitsafe-primary">
+      <button onClick={() => router.back()} className="flex items-center gap-2 text-sm text-gray-500 hover:text-rzpanda-primary">
         <ArrowLeft size={16} /> Retour
       </button>
 
@@ -133,7 +133,7 @@ export function EnfantForm({ mode, initial }: EnfantFormProps) {
       <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 space-y-4">
         <div className="flex items-center justify-between">
           <h2 className="font-semibold text-gray-700">Allergies</h2>
-          <button onClick={addAllergie} className="text-sm text-petitsafe-primary hover:underline flex items-center gap-1"><Plus size={14} /> Ajouter</button>
+          <button onClick={addAllergie} className="text-sm text-rzpanda-primary hover:underline flex items-center gap-1"><Plus size={14} /> Ajouter</button>
         </div>
         {allergies.length === 0 && <p className="text-sm text-gray-400">Aucune allergie.</p>}
         {allergies.map((a, i) => (
@@ -191,7 +191,7 @@ export function EnfantForm({ mode, initial }: EnfantFormProps) {
       <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 space-y-4">
         <div className="flex items-center justify-between">
           <h2 className="font-semibold text-gray-700">Contacts d&apos;urgence</h2>
-          <button onClick={addContact} className="text-sm text-petitsafe-primary hover:underline flex items-center gap-1"><Plus size={14} /> Ajouter</button>
+          <button onClick={addContact} className="text-sm text-rzpanda-primary hover:underline flex items-center gap-1"><Plus size={14} /> Ajouter</button>
         </div>
         {contacts.length === 0 && <p className="text-sm text-gray-400">Aucun contact.</p>}
         {contacts.map((c, i) => (
@@ -203,7 +203,7 @@ export function EnfantForm({ mode, initial }: EnfantFormProps) {
             </div>
             <div className="flex items-center justify-between">
               <label className="flex items-center gap-2 text-sm text-gray-600">
-                <input type="checkbox" checked={c.est_autorise_recuperer} onChange={(e) => updateContact(i, "est_autorise_recuperer", e.target.checked)} className="h-4 w-4 rounded border-gray-300 text-petitsafe-primary" />
+                <input type="checkbox" checked={c.est_autorise_recuperer} onChange={(e) => updateContact(i, "est_autorise_recuperer", e.target.checked)} className="h-4 w-4 rounded border-gray-300 text-rzpanda-primary" />
                 Autorisé à récupérer l&apos;enfant
               </label>
               <button onClick={() => removeContact(i)} className="text-red-400 hover:text-red-600 text-sm flex items-center gap-1"><Trash2 size={14} /> Supprimer</button>
@@ -214,7 +214,7 @@ export function EnfantForm({ mode, initial }: EnfantFormProps) {
 
       {/* Submit */}
       <button onClick={handleSubmit} disabled={loading}
-        className="w-full h-12 rounded-xl bg-petitsafe-primary text-white font-medium hover:bg-petitsafe-primary/90 disabled:opacity-50 flex items-center justify-center gap-2">
+        className="w-full h-12 rounded-xl bg-rzpanda-primary text-white font-medium hover:bg-rzpanda-primary/90 disabled:opacity-50 flex items-center justify-center gap-2">
         {loading && <Loader2 size={20} className="animate-spin" />}
         {mode === "create" ? "Ajouter l'enfant" : "Enregistrer les modifications"}
       </button>

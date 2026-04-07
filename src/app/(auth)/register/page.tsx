@@ -109,17 +109,17 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen bg-petitsafe-fond flex items-center justify-center px-4 py-8">
+    <div className="min-h-screen bg-rzpanda-fond flex items-center justify-center px-4 py-8">
       <div className="w-full max-w-md space-y-6">
         <div className="text-center">
-          <h1 className="text-3xl font-bold text-petitsafe-primary">PetitSafe</h1>
+          <h1 className="text-3xl font-bold text-rzpanda-primary">{"RZPan'Da"}</h1>
           <p className="mt-2 text-sm text-gray-500">Créer votre compte — Étape {step}/3</p>
         </div>
 
         {/* Progress bar */}
         <div className="flex gap-2">
           {[1, 2, 3].map((s) => (
-            <div key={s} className={`h-1.5 flex-1 rounded-full ${s <= step ? "bg-petitsafe-primary" : "bg-gray-200"}`} />
+            <div key={s} className={`h-1.5 flex-1 rounded-full ${s <= step ? "bg-rzpanda-primary" : "bg-gray-200"}`} />
           ))}
         </div>
 
@@ -130,31 +130,31 @@ export default function RegisterPage() {
               <div>
                 <label htmlFor="prenom" className="block text-sm font-medium text-gray-700 mb-1">Prénom</label>
                 <input id="prenom" type="text" value={prenom} onChange={(e) => setPrenom(e.target.value)} placeholder="Marie"
-                  className="w-full h-12 px-4 rounded-xl border border-gray-300 focus:border-petitsafe-primary focus:ring-2 focus:ring-petitsafe-primary/20 outline-none" />
+                  className="w-full h-12 px-4 rounded-xl border border-gray-300 focus:border-rzpanda-primary focus:ring-2 focus:ring-rzpanda-primary/20 outline-none" />
               </div>
               <div>
                 <label htmlFor="nom" className="block text-sm font-medium text-gray-700 mb-1">Nom</label>
                 <input id="nom" type="text" value={nom} onChange={(e) => setNom(e.target.value)} placeholder="Dupont"
-                  className="w-full h-12 px-4 rounded-xl border border-gray-300 focus:border-petitsafe-primary focus:ring-2 focus:ring-petitsafe-primary/20 outline-none" />
+                  className="w-full h-12 px-4 rounded-xl border border-gray-300 focus:border-rzpanda-primary focus:ring-2 focus:ring-rzpanda-primary/20 outline-none" />
               </div>
             </div>
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">Email</label>
               <input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="votre@email.com"
-                className="w-full h-12 px-4 rounded-xl border border-gray-300 focus:border-petitsafe-primary focus:ring-2 focus:ring-petitsafe-primary/20 outline-none" autoComplete="email" />
+                className="w-full h-12 px-4 rounded-xl border border-gray-300 focus:border-rzpanda-primary focus:ring-2 focus:ring-rzpanda-primary/20 outline-none" autoComplete="email" />
             </div>
             <div>
               <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">Mot de passe</label>
               <div className="relative">
                 <input id="password" type={showPassword ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)} placeholder="6 caractères minimum"
-                  className="w-full h-12 px-4 pr-12 rounded-xl border border-gray-300 focus:border-petitsafe-primary focus:ring-2 focus:ring-petitsafe-primary/20 outline-none" autoComplete="new-password" />
+                  className="w-full h-12 px-4 pr-12 rounded-xl border border-gray-300 focus:border-rzpanda-primary focus:ring-2 focus:ring-rzpanda-primary/20 outline-none" autoComplete="new-password" />
                 <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400" aria-label={showPassword ? "Masquer" : "Afficher"}>
                   {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                 </button>
               </div>
             </div>
             <button onClick={() => validateStep1() && setStep(2)}
-              className="w-full h-12 rounded-xl bg-petitsafe-primary text-white font-medium hover:bg-petitsafe-primary/90 flex items-center justify-center gap-2">
+              className="w-full h-12 rounded-xl bg-rzpanda-primary text-white font-medium hover:bg-rzpanda-primary/90 flex items-center justify-center gap-2">
               Suivant <ChevronRight size={18} />
             </button>
           </div>
@@ -166,7 +166,7 @@ export default function RegisterPage() {
             <div>
               <label htmlFor="type" className="block text-sm font-medium text-gray-700 mb-1">Type de structure</label>
               <select id="type" value={typeStructure} onChange={(e) => setTypeStructure(e.target.value)}
-                className="w-full h-12 px-4 rounded-xl border border-gray-300 focus:border-petitsafe-primary focus:ring-2 focus:ring-petitsafe-primary/20 outline-none bg-white">
+                className="w-full h-12 px-4 rounded-xl border border-gray-300 focus:border-rzpanda-primary focus:ring-2 focus:ring-rzpanda-primary/20 outline-none bg-white">
                 <option value="">Sélectionnez...</option>
                 {Object.entries(TYPES_STRUCTURE).map(([key, label]) => (
                   <option key={key} value={key}>{label}</option>
@@ -176,14 +176,14 @@ export default function RegisterPage() {
             <div>
               <label htmlFor="nomStructure" className="block text-sm font-medium text-gray-700 mb-1">Nom de la structure</label>
               <input id="nomStructure" type="text" value={nomStructure} onChange={(e) => setNomStructure(e.target.value)} placeholder="Les Petits Explorateurs"
-                className="w-full h-12 px-4 rounded-xl border border-gray-300 focus:border-petitsafe-primary focus:ring-2 focus:ring-petitsafe-primary/20 outline-none" />
+                className="w-full h-12 px-4 rounded-xl border border-gray-300 focus:border-rzpanda-primary focus:ring-2 focus:ring-rzpanda-primary/20 outline-none" />
             </div>
             <div className="flex gap-3">
               <button onClick={() => setStep(1)} className="h-12 px-6 rounded-xl border border-gray-300 text-gray-600 font-medium hover:bg-gray-50 flex items-center gap-2">
                 <ChevronLeft size={18} /> Retour
               </button>
               <button onClick={() => validateStep2() && setStep(3)}
-                className="flex-1 h-12 rounded-xl bg-petitsafe-primary text-white font-medium hover:bg-petitsafe-primary/90 flex items-center justify-center gap-2">
+                className="flex-1 h-12 rounded-xl bg-rzpanda-primary text-white font-medium hover:bg-rzpanda-primary/90 flex items-center justify-center gap-2">
                 Suivant <ChevronRight size={18} />
               </button>
             </div>
@@ -193,37 +193,37 @@ export default function RegisterPage() {
         {/* STEP 3 — Modules */}
         {step === 3 && (
           <div className="space-y-4">
-            <p className="text-sm text-gray-600 text-center">Que souhaitez-vous gérer avec PetitSafe ?</p>
+            <p className="text-sm text-gray-600 text-center">Que souhaitez-vous gérer avec {"RZPan'Da"} ?</p>
 
             {/* Preset cards */}
             <div className="grid gap-3">
               <button onClick={() => selectPreset([...PRESETS_MODULES.haccp_essentiel])}
-                className={`p-4 rounded-xl border-2 text-left transition-colors ${isPresetSelected(PRESETS_MODULES.haccp_essentiel) ? "border-petitsafe-primary bg-petitsafe-primary/5" : "border-gray-200 hover:border-gray-300"}`}>
+                className={`p-4 rounded-xl border-2 text-left transition-colors ${isPresetSelected(PRESETS_MODULES.haccp_essentiel) ? "border-rzpanda-primary bg-rzpanda-primary/5" : "border-gray-200 hover:border-gray-300"}`}>
                 <div className="flex items-start gap-3">
-                  <Shield size={24} className="text-petitsafe-primary shrink-0 mt-0.5" />
+                  <Shield size={24} className="text-rzpanda-primary shrink-0 mt-0.5" />
                   <div>
                     <p className="font-semibold text-gray-800">HACCP &amp; Traçabilité</p>
                     <p className="text-sm text-gray-500 mt-1">Conformité réglementaire, températures, nettoyage, biberonnerie</p>
                   </div>
-                  {isPresetSelected(PRESETS_MODULES.haccp_essentiel) && <Check size={20} className="text-petitsafe-primary shrink-0" />}
+                  {isPresetSelected(PRESETS_MODULES.haccp_essentiel) && <Check size={20} className="text-rzpanda-primary shrink-0" />}
                 </div>
               </button>
 
               <button onClick={() => selectPreset([...PRESETS_MODULES.complet])}
-                className={`p-4 rounded-xl border-2 text-left transition-colors ${isPresetSelected(PRESETS_MODULES.complet) ? "border-petitsafe-primary bg-petitsafe-primary/5" : "border-gray-200 hover:border-gray-300"}`}>
+                className={`p-4 rounded-xl border-2 text-left transition-colors ${isPresetSelected(PRESETS_MODULES.complet) ? "border-rzpanda-primary bg-rzpanda-primary/5" : "border-gray-200 hover:border-gray-300"}`}>
                 <div className="flex items-start gap-3">
-                  <Sparkles size={24} className="text-petitsafe-accent shrink-0 mt-0.5" />
+                  <Sparkles size={24} className="text-rzpanda-accent shrink-0 mt-0.5" />
                   <div>
                     <p className="font-semibold text-gray-800">Solution complète</p>
                     <p className="text-sm text-gray-500 mt-1">HACCP + suivi enfants + gestion quotidienne</p>
                   </div>
-                  {isPresetSelected(PRESETS_MODULES.complet) && <Check size={20} className="text-petitsafe-primary shrink-0" />}
+                  {isPresetSelected(PRESETS_MODULES.complet) && <Check size={20} className="text-rzpanda-primary shrink-0" />}
                 </div>
               </button>
             </div>
 
             {/* Custom modules toggle */}
-            <button onClick={() => setShowCustomModules(!showCustomModules)} className="text-sm text-petitsafe-primary hover:underline mx-auto block">
+            <button onClick={() => setShowCustomModules(!showCustomModules)} className="text-sm text-rzpanda-primary hover:underline mx-auto block">
               Personnaliser les modules →
             </button>
 
@@ -239,7 +239,7 @@ export default function RegisterPage() {
                         <label key={id} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white cursor-pointer">
                           <input type="checkbox" checked={modulesActifs.includes(id as ModuleId)}
                             onChange={() => toggleModule(id as ModuleId)}
-                            className="h-4 w-4 rounded border-gray-300 text-petitsafe-primary focus:ring-petitsafe-primary" />
+                            className="h-4 w-4 rounded border-gray-300 text-rzpanda-primary focus:ring-rzpanda-primary" />
                           <span className="text-sm text-gray-700">{mod.label}</span>
                           <span className="text-xs text-gray-400 ml-auto">{mod.description}</span>
                         </label>
@@ -257,7 +257,7 @@ export default function RegisterPage() {
                 <ChevronLeft size={18} /> Retour
               </button>
               <button onClick={handleRegister} disabled={loading}
-                className="flex-1 h-12 rounded-xl bg-petitsafe-primary text-white font-medium hover:bg-petitsafe-primary/90 disabled:opacity-50 flex items-center justify-center gap-2">
+                className="flex-1 h-12 rounded-xl bg-rzpanda-primary text-white font-medium hover:bg-rzpanda-primary/90 disabled:opacity-50 flex items-center justify-center gap-2">
                 {loading && <Loader2 size={20} className="animate-spin" />}
                 Créer mon compte
               </button>
@@ -267,7 +267,7 @@ export default function RegisterPage() {
 
         <p className="text-center text-sm text-gray-500">
           Déjà un compte ?{" "}
-          <Link href="/login" className="text-petitsafe-primary hover:underline font-medium">Se connecter</Link>
+          <Link href="/login" className="text-rzpanda-primary hover:underline font-medium">Se connecter</Link>
         </p>
       </div>
     </div>

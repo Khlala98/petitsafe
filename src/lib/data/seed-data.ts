@@ -1,4 +1,4 @@
-// PetitSafe — Données de seed réalistes pour les démos
+// RZPan'Da — Données de seed réalistes pour les démos
 // Importé par prisma/seed.ts — toutes les données structurées ici
 
 import type { StructureType, Severite, TypeEquipement, TypeRepas, Quantite, TypeChange, QualiteSieste, Frequence, CategorieStock, TypeTransmission, StatutProduit, Sexe } from "@prisma/client";
@@ -462,7 +462,7 @@ export function getRelevesTemperatureS2(frigoId: string, structureId: string, pr
 export const ZONES_NETTOYAGE_S2 = [
   {
     zone: "Cuisine",
-    couleur_code: "#2E86C1",
+    couleur_code: "#4ade80",
     taches: [
       { nom: "Plan de travail", frequence: "QUOTIDIEN" as Frequence, methode: "Nettoyage après chaque utilisation", produit: "Vinaigre blanc" },
       { nom: "Réfrigérateur", frequence: "QUOTIDIEN" as Frequence, methode: "Nettoyage quotidien", produit: "Vinaigre blanc" },

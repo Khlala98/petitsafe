@@ -42,7 +42,7 @@ export function Topbar({ structures, activeStructureId, onSwitchStructure, preno
             <div className="absolute top-full left-0 mt-1 bg-white rounded-xl shadow-lg border border-gray-200 py-1 min-w-[200px] z-50">
               {structures.map((s) => (
                 <button key={s.structure_id} onClick={() => { onSwitchStructure(s.structure_id); setOpen(false); }}
-                  className={`w-full text-left px-4 py-2.5 text-sm hover:bg-gray-50 ${s.structure_id === activeStructureId ? "text-petitsafe-primary font-medium" : "text-gray-600"}`}>
+                  className={`w-full text-left px-4 py-2.5 text-sm hover:bg-gray-50 ${s.structure_id === activeStructureId ? "text-rzpanda-primary font-medium" : "text-gray-600"}`}>
                   {s.structure.nom}
                 </button>
               ))}
@@ -50,11 +50,11 @@ export function Topbar({ structures, activeStructureId, onSwitchStructure, preno
           )}
         </div>
       ) : (
-        <span className="text-sm font-medium text-gray-700">{active?.structure.nom ?? "PetitSafe"}</span>
+        <span className="text-sm font-medium text-gray-700">{active?.structure.nom ?? "RZPan'Da"}</span>
       )}
       <div className="flex items-center gap-2">
         {activeStructureId && <NotificationsBell structureId={activeStructureId} />}
-        <div className="h-8 w-8 rounded-full bg-petitsafe-primary/10 flex items-center justify-center text-sm font-semibold text-petitsafe-primary">
+        <div className="h-8 w-8 rounded-full bg-rzpanda-primary/10 flex items-center justify-center text-sm font-semibold text-rzpanda-primary">
           {prenom.charAt(0).toUpperCase()}
         </div>
         <span className="text-sm text-gray-600 hidden sm:block">{prenom}</span>

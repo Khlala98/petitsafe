@@ -4,28 +4,31 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: {
-    default: "PetitSafe — Gestion HACCP & Traçabilité Petite Enfance",
-    template: "%s | PetitSafe",
+    default: "RZPan'Da — Gestion HACCP & Traçabilité Petite Enfance",
+    template: "%s | RZPan'Da",
   },
   description:
-    "PetitSafe : le SaaS de gestion HACCP, PMS et traçabilité alimentaire pour les crèches, micro-crèches, MAM et assistantes maternelles en France.",
+    "RZPan'Da : le SaaS de gestion HACCP, PMS et traçabilité alimentaire pour les crèches, micro-crèches, MAM et assistantes maternelles en France.",
   metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"),
   openGraph: {
-    title: "PetitSafe — Gestion HACCP & Traçabilité Petite Enfance",
+    title: "RZPan'Da — Gestion HACCP & Traçabilité Petite Enfance",
     description:
       "Conformité HACCP, traçabilité alimentaire, biberonnerie ANSES, suivi enfants — tout en un.",
-    siteName: "PetitSafe",
+    siteName: "RZPan'Da",
     type: "website",
     locale: "fr_FR",
   },
   twitter: {
     card: "summary_large_image",
-    title: "PetitSafe",
+    title: "RZPan'Da",
     description: "Le SaaS HACCP pour la petite enfance.",
   },
   robots: {
     index: true,
     follow: true,
+  },
+  icons: {
+    icon: "/rzpanda-logo.svg",
   },
 };
 
@@ -36,7 +39,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="fr" suppressHydrationWarning>
-      <body className="min-h-screen bg-petitsafe-fond antialiased">
+      <body className="min-h-screen bg-rzpanda-fond antialiased">
         {children}
         <Toaster
           position="top-right"

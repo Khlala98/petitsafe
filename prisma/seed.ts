@@ -1,4 +1,4 @@
-// PetitSafe — Seed script Phase 7
+// RZPan'Da — Seed script Phase 7
 // Injecte des données réalistes pour les démos
 
 import { PrismaClient } from "@prisma/client";
@@ -38,7 +38,7 @@ const PRO_ID_1 = "00000000-0000-0000-0000-000000000001";
 const PRO_ID_2 = "00000000-0000-0000-0000-000000000002";
 
 async function main() {
-  console.log("🌱 Seed PetitSafe — Phase 7 : données réalistes");
+  console.log("🌱 Seed RZPan'Da — Phase 7 : données réalistes");
 
   // Clean existing data
   console.log("🗑️  Nettoyage des données existantes...");
@@ -387,7 +387,7 @@ async function main() {
 
   const TACHES_DEFAUT = [
     {
-      zone: "Cuisine", couleur_code: "#2E86C1",
+      zone: "Cuisine", couleur_code: "#4ade80",
       taches: [
         { nom: "Plan de travail", frequence: "BIQUOTIDIEN" as const, methode: "Nettoyage après chaque utilisation + soir", produit: "Vinaigre blanc + détergent le soir" },
         { nom: "Évier", frequence: "QUOTIDIEN" as const, methode: "Nettoyage complet", produit: "Vinaigre blanc" },
@@ -569,7 +569,7 @@ async function main() {
 
   const zonesS2 = [
     {
-      zone: "Cuisine", couleur_code: "#2E86C1",
+      zone: "Cuisine", couleur_code: "#4ade80",
       taches: [
         { nom: "Plan de travail", frequence: "QUOTIDIEN" as const, methode: "Nettoyage après chaque utilisation", produit: "Vinaigre blanc" },
         { nom: "Réfrigérateur", frequence: "QUOTIDIEN" as const, methode: "Nettoyage quotidien", produit: "Vinaigre blanc" },

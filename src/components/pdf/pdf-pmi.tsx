@@ -10,7 +10,7 @@ function formatDate(iso: string) {
 function Footer({ date }: { date: string }) {
   return (
     <Text style={s.footer} fixed>
-      Généré par PetitSafe — {formatDate(date)} — Document à valeur probante
+      {"Généré par RZPan'Da — "}{formatDate(date)}{" — Document à valeur probante"}
     </Text>
   );
 }
@@ -29,7 +29,7 @@ export function PdfPMI({ data }: { data: ExportPMIData }) {
     <Document>
       {/* Page de garde */}
       <Page size="A4" style={s.coverPage}>
-        <Text style={s.coverTitle}>PetitSafe</Text>
+        <Text style={s.coverTitle}>{"RZPan'Da"}</Text>
         <Text style={s.coverSubtitle}>Rapport PMI — Petite enfance</Text>
         <Text style={s.coverInfo}>{data.structure.nom}</Text>
         <Text style={s.coverInfo}>{typeLabel}</Text>

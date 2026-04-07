@@ -10,9 +10,9 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        petitsafe: {
-          primary: "#2E86C1",
-          secondary: "#27AE60",
+        rzpanda: {
+          primary: "#4ade80",
+          secondary: "#22c55e",
           accent: "#F4A261",
           danger: "#E53E3E",
           warning: "#F39C12",

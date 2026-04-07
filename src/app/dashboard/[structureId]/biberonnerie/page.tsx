@@ -77,7 +77,7 @@ export default function BiberonneriePage() {
     else toast.error(result.error);
   };
 
-  if (loading) return <div className="flex items-center justify-center py-20"><Loader2 size={32} className="animate-spin text-petitsafe-primary" /></div>;
+  if (loading) return <div className="flex items-center justify-center py-20"><Loader2 size={32} className="animate-spin text-rzpanda-primary" /></div>;
 
   const now = new Date();
 
@@ -86,7 +86,7 @@ export default function BiberonneriePage() {
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-gray-800">Biberonnerie</h1>
         <Link href={`/dashboard/${structureId}/biberonnerie/nouveau`}
-          className="h-10 px-4 rounded-xl bg-petitsafe-primary text-white text-sm font-medium hover:bg-petitsafe-primary/90 flex items-center gap-2">
+          className="h-10 px-4 rounded-xl bg-rzpanda-primary text-white text-sm font-medium hover:bg-rzpanda-primary/90 flex items-center gap-2">
           <Plus size={16} /> Nouveau biberon
         </Link>
       </div>
@@ -199,7 +199,7 @@ export default function BiberonneriePage() {
             <div className="flex flex-wrap gap-2">
               {QUANTITES_BIBERON_ML.map((q) => (
                 <button key={q} onClick={() => setQuantiteBue(q)}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium ${quantiteBue === q ? "bg-petitsafe-primary text-white" : "bg-gray-100 text-gray-600"}`}>
+                  className={`px-4 py-2 rounded-lg text-sm font-medium ${quantiteBue === q ? "bg-rzpanda-primary text-white" : "bg-gray-100 text-gray-600"}`}>
                   {q}ml
                 </button>
               ))}
@@ -208,7 +208,7 @@ export default function BiberonneriePage() {
               placeholder="Autre quantité" className="w-full h-10 px-3 rounded-lg border border-gray-300 text-sm" />
             <div className="flex gap-3">
               <button onClick={() => setShowServiModal(null)} className="flex-1 h-10 rounded-lg border border-gray-300 text-sm text-gray-600">Annuler</button>
-              <button onClick={() => handleServi(showServiModal)} className="flex-1 h-10 rounded-lg bg-petitsafe-primary text-white text-sm font-medium">Confirmer</button>
+              <button onClick={() => handleServi(showServiModal)} className="flex-1 h-10 rounded-lg bg-rzpanda-primary text-white text-sm font-medium">Confirmer</button>
             </div>
           </div>
         </div>

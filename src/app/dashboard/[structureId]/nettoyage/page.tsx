@@ -158,7 +158,7 @@ export default function NettoyagePage() {
     else toast.error(res.error);
   };
 
-  if (loading) return <div className="flex items-center justify-center py-20"><Loader2 size={32} className="animate-spin text-petitsafe-primary" /></div>;
+  if (loading) return <div className="flex items-center justify-center py-20"><Loader2 size={32} className="animate-spin text-rzpanda-primary" /></div>;
 
   // ═══ HISTORIQUE VIEW ═══
   const renderHistorique = () => {
@@ -195,7 +195,7 @@ export default function NettoyagePage() {
 
             return (
               <button key={day} onClick={() => setHistSelectedDay(histSelectedDay === dateStr ? null : dateStr)}
-                className={`p-2 rounded-lg text-sm font-medium transition-colors ${color} ${histSelectedDay === dateStr ? "ring-2 ring-petitsafe-primary" : ""}`}
+                className={`p-2 rounded-lg text-sm font-medium transition-colors ${color} ${histSelectedDay === dateStr ? "ring-2 ring-rzpanda-primary" : ""}`}
                 aria-label={`${day} ${monthNames[histMois]} ${histAnnee}`}>
                 {day}
               </button>
@@ -230,7 +230,7 @@ export default function NettoyagePage() {
         <h3 className="font-semibold text-gray-800 mb-3">Ajouter une zone</h3>
         <div className="flex gap-2">
           <input value={newZoneName} onChange={(e) => setNewZoneName(e.target.value)} placeholder="Nom de la zone" className="flex-1 h-12 px-3 rounded-xl border border-gray-300 text-sm" aria-label="Nom de la zone" />
-          <button onClick={handleAddZone} className="h-12 px-4 rounded-xl bg-petitsafe-primary text-white text-sm font-medium hover:bg-petitsafe-primary/90" aria-label="Ajouter la zone">
+          <button onClick={handleAddZone} className="h-12 px-4 rounded-xl bg-rzpanda-primary text-white text-sm font-medium hover:bg-rzpanda-primary/90" aria-label="Ajouter la zone">
             <Plus size={18} />
           </button>
         </div>
@@ -250,7 +250,7 @@ export default function NettoyagePage() {
           </select>
           <input value={newTacheMethode} onChange={(e) => setNewTacheMethode(e.target.value)} placeholder="Méthode" className="h-12 px-3 rounded-xl border border-gray-300 text-sm" aria-label="Méthode" />
           <input value={newTacheProduit} onChange={(e) => setNewTacheProduit(e.target.value)} placeholder="Produit (optionnel)" className="h-12 px-3 rounded-xl border border-gray-300 text-sm" aria-label="Produit" />
-          <button onClick={handleAddTache} className="h-12 px-4 rounded-xl bg-petitsafe-primary text-white text-sm font-medium hover:bg-petitsafe-primary/90">Ajouter</button>
+          <button onClick={handleAddTache} className="h-12 px-4 rounded-xl bg-rzpanda-primary text-white text-sm font-medium hover:bg-rzpanda-primary/90">Ajouter</button>
         </div>
       </div>
 
@@ -291,12 +291,12 @@ export default function NettoyagePage() {
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-gray-800">Plan de nettoyage</h1>
         <div className="flex gap-1 bg-gray-100 rounded-xl p-1">
-          <button onClick={() => setView("jour")} className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${view === "jour" ? "bg-white shadow-sm text-petitsafe-primary" : "text-gray-500"}`}>Aujourd&apos;hui</button>
-          <button onClick={() => setView("historique")} className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${view === "historique" ? "bg-white shadow-sm text-petitsafe-primary" : "text-gray-500"}`}>
+          <button onClick={() => setView("jour")} className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${view === "jour" ? "bg-white shadow-sm text-rzpanda-primary" : "text-gray-500"}`}>Aujourd&apos;hui</button>
+          <button onClick={() => setView("historique")} className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${view === "historique" ? "bg-white shadow-sm text-rzpanda-primary" : "text-gray-500"}`}>
             <Calendar size={14} className="inline mr-1" />Historique
           </button>
           {isGestionnaire && (
-            <button onClick={() => setView("admin")} className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${view === "admin" ? "bg-white shadow-sm text-petitsafe-primary" : "text-gray-500"}`}>
+            <button onClick={() => setView("admin")} className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${view === "admin" ? "bg-white shadow-sm text-rzpanda-primary" : "text-gray-500"}`}>
               <Settings2 size={14} className="inline mr-1" />Gérer
             </button>
           )}
@@ -329,7 +329,7 @@ export default function NettoyagePage() {
               const status = progress.pct === 100 ? "conforme" : progress.pct >= 50 ? "attention" : "alerte";
               return (
                 <button key={zone.id} onClick={() => setActiveZone(i)}
-                  className={`shrink-0 px-4 py-2.5 rounded-xl text-sm font-medium transition-colors border ${activeZone === i ? "bg-petitsafe-primary/10 border-petitsafe-primary/30 text-petitsafe-primary" : "bg-white border-gray-200 text-gray-600 hover:bg-gray-50"}`}>
+                  className={`shrink-0 px-4 py-2.5 rounded-xl text-sm font-medium transition-colors border ${activeZone === i ? "bg-rzpanda-primary/10 border-rzpanda-primary/30 text-rzpanda-primary" : "bg-white border-gray-200 text-gray-600 hover:bg-gray-50"}`}>
                   <div className="flex items-center gap-2">
                     {zone.couleur_code && <span className="inline-block h-2.5 w-2.5 rounded-full" style={{ backgroundColor: zone.couleur_code }} aria-hidden="true" />}
                     <span>{zone.nom}</span>
@@ -356,7 +356,7 @@ export default function NettoyagePage() {
                   return (
                     <div key={tache.id} className={`flex items-center gap-3 p-4 ${isValidated ? "bg-green-50/50" : ""}`}>
                       <button onClick={() => !isValidated && handleValider(tache.id)} disabled={isValidated}
-                        className={`shrink-0 h-7 w-7 rounded-lg border-2 flex items-center justify-center transition-colors ${isValidated ? "bg-green-500 border-green-500 text-white" : "border-gray-300 hover:border-petitsafe-primary hover:bg-petitsafe-primary/5"}`}
+                        className={`shrink-0 h-7 w-7 rounded-lg border-2 flex items-center justify-center transition-colors ${isValidated ? "bg-green-500 border-green-500 text-white" : "border-gray-300 hover:border-rzpanda-primary hover:bg-rzpanda-primary/5"}`}
                         aria-label={isValidated ? `${tache.nom} — validée` : `Valider ${tache.nom}`}>
                         {isValidated && <CheckCircle2 size={16} />}
                       </button>
@@ -366,7 +366,7 @@ export default function NettoyagePage() {
                           <span className="text-xs text-gray-400">{FREQ_LABELS[tache.frequence]}</span>
                           <span className="text-xs text-gray-300">·</span>
                           <span className="text-xs text-gray-500">{tache.methode}</span>
-                          {tache.produit && <><span className="text-xs text-gray-300">·</span><span className="text-xs text-petitsafe-primary">{tache.produit}</span></>}
+                          {tache.produit && <><span className="text-xs text-gray-300">·</span><span className="text-xs text-rzpanda-primary">{tache.produit}</span></>}
                         </div>
                         {tache.notes && <p className="text-xs text-orange-600 mt-0.5">{tache.notes}</p>}
                       </div>

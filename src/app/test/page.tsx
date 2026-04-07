@@ -21,8 +21,8 @@ const enfantSansAllergie = {
 export default function TestPage() {
   return (
     <div className="max-w-2xl mx-auto p-8 space-y-8">
-      <h1 className="text-3xl font-bold text-petitsafe-primary">
-        PetitSafe — Test Composants Phase 0
+      <h1 className="text-3xl font-bold text-rzpanda-primary">
+        {"RZPan'Da — Test Composants Phase 0"}
       </h1>
 
       {/* PastilleStatut */}

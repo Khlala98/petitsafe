@@ -23,13 +23,13 @@ const TAILLES = {
 
 const VARIANTES = {
   primary:
-    "bg-petitsafe-primary text-white hover:bg-petitsafe-primary/90 active:bg-petitsafe-primary/80",
+    "bg-rzpanda-primary text-white hover:bg-rzpanda-primary/90 active:bg-rzpanda-primary/80",
   secondary:
-    "bg-petitsafe-secondary text-white hover:bg-petitsafe-secondary/90 active:bg-petitsafe-secondary/80",
+    "bg-rzpanda-secondary text-white hover:bg-rzpanda-secondary/90 active:bg-rzpanda-secondary/80",
   danger:
-    "bg-petitsafe-danger text-white hover:bg-petitsafe-danger/90 active:bg-petitsafe-danger/80",
+    "bg-rzpanda-danger text-white hover:bg-rzpanda-danger/90 active:bg-rzpanda-danger/80",
   ghost:
-    "bg-transparent text-petitsafe-texte hover:bg-gray-100 active:bg-gray-200",
+    "bg-transparent text-rzpanda-texte hover:bg-gray-100 active:bg-gray-200",
 } as const;
 
 /**
@@ -56,7 +56,7 @@ export function BoutonAction({
       className={cn(
         "inline-flex items-center justify-center rounded-xl font-medium",
         "transition-colors duration-150",
-        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-petitsafe-primary focus-visible:ring-offset-2",
+        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rzpanda-primary focus-visible:ring-offset-2",
         "disabled:opacity-50 disabled:cursor-not-allowed",
         "min-h-[48px]", // accessibilité tactile
         TAILLES[size],

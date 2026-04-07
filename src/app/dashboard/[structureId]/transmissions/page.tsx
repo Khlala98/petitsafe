@@ -82,7 +82,7 @@ export default function TransmissionsPage() {
 
   const filtered = filter ? transmissions.filter((t) => t.type_transm === filter) : transmissions;
 
-  if (loading) return <div className="flex items-center justify-center py-20"><Loader2 size={32} className="animate-spin text-petitsafe-primary" /></div>;
+  if (loading) return <div className="flex items-center justify-center py-20"><Loader2 size={32} className="animate-spin text-rzpanda-primary" /></div>;
 
   return (
     <div className="max-w-3xl mx-auto space-y-4">
@@ -94,9 +94,9 @@ export default function TransmissionsPage() {
       {/* Filters */}
       <div className="flex gap-2 items-center">
         <Filter size={16} className="text-gray-400" />
-        <button onClick={() => setFilter(null)} className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${filter === null ? "bg-petitsafe-primary text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"}`}>Tous</button>
+        <button onClick={() => setFilter(null)} className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${filter === null ? "bg-rzpanda-primary text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"}`}>Tous</button>
         {Object.entries(TYPE_LABELS).map(([key, val]) => (
-          <button key={key} onClick={() => setFilter(filter === key ? null : key)} className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${filter === key ? "bg-petitsafe-primary text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"}`}>{val.label}</button>
+          <button key={key} onClick={() => setFilter(filter === key ? null : key)} className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${filter === key ? "bg-rzpanda-primary text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"}`}>{val.label}</button>
         ))}
       </div>
 
@@ -127,7 +127,7 @@ export default function TransmissionsPage() {
                       <span className={`text-xs px-2 py-0.5 rounded-full ${typeInfo.color}`}>{typeInfo.label}</span>
                     </div>
                     {t.enfant && (
-                      <p className="text-xs text-petitsafe-primary font-medium mb-1">
+                      <p className="text-xs text-rzpanda-primary font-medium mb-1">
                         <Baby size={12} className="inline mr-1" />
                         {t.enfant.prenom} {t.enfant.nom}
                       </p>
@@ -157,7 +157,7 @@ export default function TransmissionsPage() {
                   const Icon = val.icon;
                   return (
                     <button key={key} onClick={() => setFormType(key)}
-                      className={`flex-1 flex items-center justify-center gap-2 h-12 rounded-xl text-sm font-medium border transition-colors ${formType === key ? "border-petitsafe-primary bg-petitsafe-primary/10 text-petitsafe-primary" : "border-gray-200 text-gray-500 hover:bg-gray-50"}`}>
+                      className={`flex-1 flex items-center justify-center gap-2 h-12 rounded-xl text-sm font-medium border transition-colors ${formType === key ? "border-rzpanda-primary bg-rzpanda-primary/10 text-rzpanda-primary" : "border-gray-200 text-gray-500 hover:bg-gray-50"}`}>
                       <Icon size={16} />
                       {val.label}
                     </button>
@@ -175,10 +175,10 @@ export default function TransmissionsPage() {
 
               {/* Content */}
               <textarea value={formContenu} onChange={(e) => setFormContenu(e.target.value)} placeholder="Écrire la transmission..." rows={3}
-                className="w-full px-3 py-2.5 rounded-xl border border-gray-300 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-petitsafe-primary/30 focus:border-petitsafe-primary" aria-label="Contenu de la transmission" />
+                className="w-full px-3 py-2.5 rounded-xl border border-gray-300 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-rzpanda-primary/30 focus:border-rzpanda-primary" aria-label="Contenu de la transmission" />
 
               <button onClick={handleSubmit} disabled={submitting || !formContenu.trim()}
-                className="w-full h-12 rounded-xl bg-petitsafe-primary text-white text-sm font-medium hover:bg-petitsafe-primary/90 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2">
+                className="w-full h-12 rounded-xl bg-rzpanda-primary text-white text-sm font-medium hover:bg-rzpanda-primary/90 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2">
                 {submitting ? <Loader2 size={18} className="animate-spin" /> : <Send size={18} />}
                 Envoyer
               </button>
@@ -189,7 +189,7 @@ export default function TransmissionsPage() {
 
       {/* Floating action button */}
       <button onClick={() => setShowForm(true)}
-        className="fixed bottom-24 md:bottom-8 right-6 h-14 w-14 rounded-full bg-petitsafe-primary text-white shadow-lg hover:bg-petitsafe-primary/90 flex items-center justify-center z-40 transition-transform hover:scale-105"
+        className="fixed bottom-24 md:bottom-8 right-6 h-14 w-14 rounded-full bg-rzpanda-primary text-white shadow-lg hover:bg-rzpanda-primary/90 flex items-center justify-center z-40 transition-transform hover:scale-105"
         aria-label="Nouvelle transmission">
         <Plus size={24} />
       </button>

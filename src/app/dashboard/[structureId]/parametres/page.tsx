@@ -74,26 +74,26 @@ export default function ParametresPage() {
             {/* Presets */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <button onClick={() => selectPreset(PRESETS_MODULES.haccp_essentiel)}
-                className={`p-4 rounded-xl border-2 text-left transition-colors ${isPresetSelected(PRESETS_MODULES.haccp_essentiel) ? "border-petitsafe-primary bg-petitsafe-primary/5" : "border-gray-200 hover:border-gray-300"}`}>
+                className={`p-4 rounded-xl border-2 text-left transition-colors ${isPresetSelected(PRESETS_MODULES.haccp_essentiel) ? "border-rzpanda-primary bg-rzpanda-primary/5" : "border-gray-200 hover:border-gray-300"}`}>
                 <div className="flex items-center gap-3">
-                  <Shield size={20} className="text-petitsafe-primary shrink-0" />
+                  <Shield size={20} className="text-rzpanda-primary shrink-0" />
                   <div className="flex-1">
                     <p className="font-semibold text-gray-800">HACCP Essentiel</p>
                     <p className="text-xs text-gray-500">Températures, traçabilité, nettoyage, biberonnerie</p>
                   </div>
-                  {isPresetSelected(PRESETS_MODULES.haccp_essentiel) && <Check size={18} className="text-petitsafe-primary" />}
+                  {isPresetSelected(PRESETS_MODULES.haccp_essentiel) && <Check size={18} className="text-rzpanda-primary" />}
                 </div>
               </button>
 
               <button onClick={() => selectPreset(PRESETS_MODULES.complet)}
-                className={`p-4 rounded-xl border-2 text-left transition-colors ${isPresetSelected(PRESETS_MODULES.complet) ? "border-petitsafe-primary bg-petitsafe-primary/5" : "border-gray-200 hover:border-gray-300"}`}>
+                className={`p-4 rounded-xl border-2 text-left transition-colors ${isPresetSelected(PRESETS_MODULES.complet) ? "border-rzpanda-primary bg-rzpanda-primary/5" : "border-gray-200 hover:border-gray-300"}`}>
                 <div className="flex items-center gap-3">
-                  <Sparkles size={20} className="text-petitsafe-accent shrink-0" />
+                  <Sparkles size={20} className="text-rzpanda-accent shrink-0" />
                   <div className="flex-1">
                     <p className="font-semibold text-gray-800">Solution complète</p>
                     <p className="text-xs text-gray-500">Tous les modules activés</p>
                   </div>
-                  {isPresetSelected(PRESETS_MODULES.complet) && <Check size={18} className="text-petitsafe-primary" />}
+                  {isPresetSelected(PRESETS_MODULES.complet) && <Check size={18} className="text-rzpanda-primary" />}
                 </div>
               </button>
             </div>
@@ -113,7 +113,7 @@ export default function ParametresPage() {
                           <p className="text-xs text-gray-500">{mod.description}</p>
                         </div>
                         <button onClick={() => toggle(id)} role="switch" aria-checked={modules.includes(id)}
-                          className={`relative h-6 w-11 rounded-full transition-colors ${modules.includes(id) ? "bg-petitsafe-primary" : "bg-gray-300"}`}>
+                          className={`relative h-6 w-11 rounded-full transition-colors ${modules.includes(id) ? "bg-rzpanda-primary" : "bg-gray-300"}`}>
                           <span className={`absolute top-0.5 left-0.5 h-5 w-5 rounded-full bg-white transition-transform ${modules.includes(id) ? "translate-x-5" : ""}`} />
                         </button>
                       </div>
@@ -127,7 +127,7 @@ export default function ParametresPage() {
 
             {hasChanged && (
               <button onClick={handleSave} disabled={saving}
-                className="w-full h-12 rounded-xl bg-petitsafe-primary text-white font-medium hover:bg-petitsafe-primary/90 disabled:opacity-50 flex items-center justify-center gap-2">
+                className="w-full h-12 rounded-xl bg-rzpanda-primary text-white font-medium hover:bg-rzpanda-primary/90 disabled:opacity-50 flex items-center justify-center gap-2">
                 {saving && <Loader2 size={20} className="animate-spin" />}
                 Enregistrer les modifications
               </button>

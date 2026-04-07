@@ -1,4 +1,4 @@
-// PetitSafe — Schéma Prisma complet
+// RZPan'Da — Schéma Prisma complet
 // Source unique de vérité pour tous les modèles de données
 
 generator client {

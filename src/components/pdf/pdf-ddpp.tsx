@@ -13,7 +13,7 @@ function formatHeure(iso: string) {
 function Footer() {
   return (
     <View style={s.footer} fixed>
-      <Text style={s.footerLeft}>PetitSafe — Gestion HACCP</Text>
+      <Text style={s.footerLeft}>{"RZPan'Da — Gestion HACCP"}</Text>
       <Text style={s.footerRight} render={({ pageNumber, totalPages }) => `Page ${pageNumber}/${totalPages}`} />
     </View>
   );
@@ -26,7 +26,7 @@ export function PdfDDPP({ data }: { data: ExportDDPPData }) {
     <Document>
       {/* Page de garde */}
       <Page size="A4" style={s.coverPage}>
-        <Text style={s.coverTitle}>PetitSafe</Text>
+        <Text style={s.coverTitle}>{"RZPan'Da"}</Text>
         <Text style={s.coverSubtitle}>Rapport DDPP — Contrôle sanitaire</Text>
         <Text style={{ ...s.coverInfo, fontSize: 16, fontFamily: "Helvetica-Bold", color: "#1A202C", marginBottom: 10 }}>{data.structure.nom}</Text>
         <Text style={s.coverInfo}>{typeLabel}</Text>
@@ -36,7 +36,7 @@ export function PdfDDPP({ data }: { data: ExportDDPPData }) {
           Période : {formatDate(data.periode.debut)} — {formatDate(data.periode.fin)}
         </Text>
         <Text style={s.coverInfo}>Date de génération : {formatDate(data.dateGeneration)}</Text>
-        <Text style={s.coverMention}>Rapport généré automatiquement par PetitSafe — www.petitsafe.fr</Text>
+        <Text style={s.coverMention}>{"Rapport généré automatiquement par RZPan'Da — www.rzpanda.fr"}</Text>
         <Footer />
       </Page>
 

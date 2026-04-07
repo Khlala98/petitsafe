@@ -86,9 +86,9 @@ export default function StockPage() {
     else toast.error(result.error);
   };
 
-  if (loading) return <div className="flex items-center justify-center py-20"><Loader2 size={32} className="animate-spin text-petitsafe-primary" /></div>;
+  if (loading) return <div className="flex items-center justify-center py-20"><Loader2 size={32} className="animate-spin text-rzpanda-primary" /></div>;
 
-  const inputClass = "w-full h-12 px-4 rounded-xl border border-gray-300 focus:border-petitsafe-primary focus:ring-2 focus:ring-petitsafe-primary/20 outline-none text-sm";
+  const inputClass = "w-full h-12 px-4 rounded-xl border border-gray-300 focus:border-rzpanda-primary focus:ring-2 focus:ring-rzpanda-primary/20 outline-none text-sm";
   const now = new Date();
   const enStock = receptions.filter((r) => r.statut === "EN_STOCK");
 
@@ -98,14 +98,14 @@ export default function StockPage() {
 
       <div className="flex gap-1 border-b border-gray-200">
         {[{ k: "receptions", l: "Réceptions" }, { k: "alimentaire", l: "Stock alimentaire" }, { k: "consommables", l: "Consommables" }].map((t) => (
-          <button key={t.k} onClick={() => setTab(t.k as typeof tab)} className={`px-4 py-2.5 text-sm font-medium border-b-2 ${tab === t.k ? "border-petitsafe-primary text-petitsafe-primary" : "border-transparent text-gray-500"}`}>{t.l}</button>
+          <button key={t.k} onClick={() => setTab(t.k as typeof tab)} className={`px-4 py-2.5 text-sm font-medium border-b-2 ${tab === t.k ? "border-rzpanda-primary text-rzpanda-primary" : "border-transparent text-gray-500"}`}>{t.l}</button>
         ))}
       </div>
 
       {/* ═══ RÉCEPTIONS ═══ */}
       {tab === "receptions" && (
         <div className="space-y-4">
-          <button onClick={() => setShowForm(true)} className="h-10 px-4 rounded-xl bg-petitsafe-primary text-white text-sm font-medium flex items-center gap-2"><Plus size={16} /> Nouvelle réception</button>
+          <button onClick={() => setShowForm(true)} className="h-10 px-4 rounded-xl bg-rzpanda-primary text-white text-sm font-medium flex items-center gap-2"><Plus size={16} /> Nouvelle réception</button>
 
           {showForm && (
             <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 space-y-4">
@@ -147,7 +147,7 @@ export default function StockPage() {
               )}
               <div className="flex gap-3">
                 <button onClick={() => setShowForm(false)} className="h-10 px-4 rounded-xl border border-gray-300 text-sm text-gray-600">Annuler</button>
-                <button onClick={handleReception} className="h-10 px-6 rounded-xl bg-petitsafe-primary text-white text-sm font-medium">Enregistrer</button>
+                <button onClick={handleReception} className="h-10 px-6 rounded-xl bg-rzpanda-primary text-white text-sm font-medium">Enregistrer</button>
               </div>
             </div>
           )}
@@ -207,7 +207,7 @@ export default function StockPage() {
       {/* ═══ CONSOMMABLES ═══ */}
       {tab === "consommables" && (
         <div className="space-y-4">
-          <button onClick={() => setShowStockForm(true)} className="h-10 px-4 rounded-xl bg-petitsafe-primary text-white text-sm font-medium flex items-center gap-2"><Plus size={16} /> Ajouter un produit</button>
+          <button onClick={() => setShowStockForm(true)} className="h-10 px-4 rounded-xl bg-rzpanda-primary text-white text-sm font-medium flex items-center gap-2"><Plus size={16} /> Ajouter un produit</button>
 
           {showStockForm && (
             <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 space-y-4">
@@ -225,7 +225,7 @@ export default function StockPage() {
               </div>
               <div className="flex gap-3">
                 <button onClick={() => setShowStockForm(false)} className="h-10 px-4 rounded-xl border border-gray-300 text-sm text-gray-600">Annuler</button>
-                <button onClick={handleAddStock} className="h-10 px-6 rounded-xl bg-petitsafe-primary text-white text-sm font-medium">Ajouter</button>
+                <button onClick={handleAddStock} className="h-10 px-6 rounded-xl bg-rzpanda-primary text-white text-sm font-medium">Ajouter</button>
               </div>
             </div>
           )}

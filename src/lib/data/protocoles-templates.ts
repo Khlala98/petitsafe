@@ -58,7 +58,7 @@ export const PROTOCOLES_TEMPLATES: ProtocoleTemplate[] = [
 2. **Administrer le traitement prescrit** selon les instructions du PAI (ex. : Ventoline, Anapen, antihistaminique)
 3. **Prévenir les parents** immédiatement
 4. **Rester auprès de l'enfant** et surveiller son état en attendant les secours
-5. **Consigner l'incident** dans le registre de sécurité et dans PetitSafe`,
+5. **Consigner l'incident** dans le registre de sécurité et dans RZPan'Da`,
   },
   {
     titre: "Nettoyage et désinfection cuisine",
@@ -105,7 +105,7 @@ export const PROTOCOLES_TEMPLATES: ProtocoleTemplate[] = [
 
 5. **Ranger immédiatement au froid** dans les 15 minutes suivant la réception
 6. Appliquer la règle **FIFO** (Premier Entré, Premier Sorti)
-7. **Enregistrer dans PetitSafe** : fournisseur, produit, DLC, lot, température
+7. **Enregistrer dans RZPan'Da** : fournisseur, produit, DLC, lot, température
 
 ## En cas de non-conformité
 
@@ -143,6 +143,6 @@ export const PROTOCOLES_TEMPLATES: ProtocoleTemplate[] = [
 
 ## Traçabilité
 
-- Consigner dans PetitSafe : heure, température, actions entreprises, personnes prévenues`,
+- Consigner dans RZPan'Da : heure, température, actions entreprises, personnes prévenues`,
   },
 ];

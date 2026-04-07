@@ -153,9 +153,9 @@ export default function TemperaturesPage() {
     setDate(d.toISOString().split("T")[0]);
   };
 
-  if (loading) return <div className="flex items-center justify-center py-20"><Loader2 size={32} className="animate-spin text-petitsafe-primary" /></div>;
+  if (loading) return <div className="flex items-center justify-center py-20"><Loader2 size={32} className="animate-spin text-rzpanda-primary" /></div>;
 
-  const inputClass = "w-full h-12 px-4 rounded-xl border border-gray-300 focus:border-petitsafe-primary focus:ring-2 focus:ring-petitsafe-primary/20 outline-none text-sm";
+  const inputClass = "w-full h-12 px-4 rounded-xl border border-gray-300 focus:border-rzpanda-primary focus:ring-2 focus:ring-rzpanda-primary/20 outline-none text-sm";
   const graphEquip = equipements.find((e) => e.id === graphEquipId);
 
   return (
@@ -164,8 +164,8 @@ export default function TemperaturesPage() {
 
       {/* Tabs */}
       <div className="flex gap-1 border-b border-gray-200">
-        <button onClick={() => setTab("enceintes")} className={`px-4 py-2.5 text-sm font-medium border-b-2 ${tab === "enceintes" ? "border-petitsafe-primary text-petitsafe-primary" : "border-transparent text-gray-500"}`}>Enceintes froides</button>
-        <button onClick={() => setTab("plats")} className={`px-4 py-2.5 text-sm font-medium border-b-2 ${tab === "plats" ? "border-petitsafe-primary text-petitsafe-primary" : "border-transparent text-gray-500"}`}>Plats témoins</button>
+        <button onClick={() => setTab("enceintes")} className={`px-4 py-2.5 text-sm font-medium border-b-2 ${tab === "enceintes" ? "border-rzpanda-primary text-rzpanda-primary" : "border-transparent text-gray-500"}`}>Enceintes froides</button>
+        <button onClick={() => setTab("plats")} className={`px-4 py-2.5 text-sm font-medium border-b-2 ${tab === "plats" ? "border-rzpanda-primary text-rzpanda-primary" : "border-transparent text-gray-500"}`}>Plats témoins</button>
       </div>
 
       {/* Date nav */}
@@ -183,7 +183,7 @@ export default function TemperaturesPage() {
             <div className="text-center py-10 bg-white rounded-xl shadow-sm border border-gray-100">
               <Thermometer size={32} className="text-gray-300 mx-auto mb-3" />
               <p className="text-gray-400 mb-2">Aucun équipement configuré</p>
-              <button onClick={() => setShowAddEquip(true)} className="text-sm text-petitsafe-primary hover:underline">+ Ajouter un frigo ou congélateur</button>
+              <button onClick={() => setShowAddEquip(true)} className="text-sm text-rzpanda-primary hover:underline">+ Ajouter un frigo ou congélateur</button>
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -205,7 +205,7 @@ export default function TemperaturesPage() {
                     ) : (
                       <p className="text-sm text-gray-400">Aucun relevé aujourd&apos;hui</p>
                     )}
-                    <button onClick={() => loadGraph(eq.id)} className="text-xs text-petitsafe-primary hover:underline mt-2 block">Voir l&apos;historique</button>
+                    <button onClick={() => loadGraph(eq.id)} className="text-xs text-rzpanda-primary hover:underline mt-2 block">Voir l&apos;historique</button>
                   </div>
                 );
               })}
@@ -214,7 +214,7 @@ export default function TemperaturesPage() {
 
           {/* Actions */}
           <div className="flex gap-2">
-            <button onClick={() => setShowForm(true)} className="h-10 px-4 rounded-xl bg-petitsafe-primary text-white text-sm font-medium flex items-center gap-2"><Plus size={16} /> Nouveau relevé</button>
+            <button onClick={() => setShowForm(true)} className="h-10 px-4 rounded-xl bg-rzpanda-primary text-white text-sm font-medium flex items-center gap-2"><Plus size={16} /> Nouveau relevé</button>
             <button onClick={() => setShowAddEquip(true)} className="h-10 px-4 rounded-xl border border-gray-300 text-sm text-gray-600 flex items-center gap-2"><Plus size={16} /> Ajouter un équipement</button>
           </div>
 
@@ -241,7 +241,7 @@ export default function TemperaturesPage() {
                   <p className="text-sm text-red-600 font-medium">{formPlageWarning}</p>
                   <label className="flex items-center gap-2 text-sm text-gray-700">
                     <input type="checkbox" checked={formPlageConfirmed} onChange={(e) => setFormPlageConfirmed(e.target.checked)}
-                      className="rounded border-gray-300 text-petitsafe-primary focus:ring-petitsafe-primary" />
+                      className="rounded border-gray-300 text-rzpanda-primary focus:ring-rzpanda-primary" />
                     Cette valeur semble anormale. Je confirme qu&apos;elle est correcte.
                   </label>
                 </div>
@@ -270,7 +270,7 @@ export default function TemperaturesPage() {
               )}
               <div className="flex gap-3">
                 <button onClick={() => setShowForm(false)} className="h-10 px-4 rounded-xl border border-gray-300 text-sm text-gray-600">Annuler</button>
-                <button onClick={handleSubmitReleve} className="h-10 px-6 rounded-xl bg-petitsafe-primary text-white text-sm font-medium">Enregistrer</button>
+                <button onClick={handleSubmitReleve} className="h-10 px-6 rounded-xl bg-rzpanda-primary text-white text-sm font-medium">Enregistrer</button>
               </div>
             </div>
           )}
@@ -281,12 +281,12 @@ export default function TemperaturesPage() {
               <h3 className="font-semibold text-gray-700">Ajouter un équipement</h3>
               <input type="text" value={newEquipNom} onChange={(e) => setNewEquipNom(e.target.value)} placeholder="Ex: Frigo cuisine" className={inputClass} />
               <div className="flex gap-2">
-                <button onClick={() => setNewEquipType("REFRIGERATEUR")} className={`flex-1 h-10 rounded-lg text-sm font-medium ${newEquipType === "REFRIGERATEUR" ? "bg-petitsafe-primary text-white" : "bg-gray-100 text-gray-600"}`}>Réfrigérateur</button>
-                <button onClick={() => setNewEquipType("CONGELATEUR")} className={`flex-1 h-10 rounded-lg text-sm font-medium ${newEquipType === "CONGELATEUR" ? "bg-petitsafe-primary text-white" : "bg-gray-100 text-gray-600"}`}>Congélateur</button>
+                <button onClick={() => setNewEquipType("REFRIGERATEUR")} className={`flex-1 h-10 rounded-lg text-sm font-medium ${newEquipType === "REFRIGERATEUR" ? "bg-rzpanda-primary text-white" : "bg-gray-100 text-gray-600"}`}>Réfrigérateur</button>
+                <button onClick={() => setNewEquipType("CONGELATEUR")} className={`flex-1 h-10 rounded-lg text-sm font-medium ${newEquipType === "CONGELATEUR" ? "bg-rzpanda-primary text-white" : "bg-gray-100 text-gray-600"}`}>Congélateur</button>
               </div>
               <div className="flex gap-3">
                 <button onClick={() => setShowAddEquip(false)} className="h-10 px-4 rounded-xl border border-gray-300 text-sm text-gray-600">Annuler</button>
-                <button onClick={handleAddEquip} className="h-10 px-6 rounded-xl bg-petitsafe-primary text-white text-sm font-medium">Ajouter</button>
+                <button onClick={handleAddEquip} className="h-10 px-6 rounded-xl bg-rzpanda-primary text-white text-sm font-medium">Ajouter</button>
               </div>
             </div>
           )}
@@ -305,9 +305,9 @@ export default function TemperaturesPage() {
                   <YAxis tick={{ fontSize: 12 }} domain={["auto", "auto"]} />
                   <Tooltip />
                   {graphEquip?.type === "REFRIGERATEUR" && (
-                    <ReferenceArea y1={SEUILS_TEMPERATURE.frigo_min} y2={SEUILS_TEMPERATURE.frigo_max} fill="#27AE60" fillOpacity={0.1} />
+                    <ReferenceArea y1={SEUILS_TEMPERATURE.frigo_min} y2={SEUILS_TEMPERATURE.frigo_max} fill="#22c55e" fillOpacity={0.1} />
                   )}
-                  <Line type="monotone" dataKey="temperature" stroke="#2E86C1" strokeWidth={2} dot={{ r: 4 }} />
+                  <Line type="monotone" dataKey="temperature" stroke="#4ade80" strokeWidth={2} dot={{ r: 4 }} />
                 </LineChart>
               </ResponsiveContainer>
             </div>
@@ -336,15 +336,15 @@ export default function TemperaturesPage() {
       {/* ═══ PLATS TÉMOINS ═══ */}
       {tab === "plats" && (
         <div className="space-y-4">
-          <button onClick={() => setShowFormPlat(true)} className="h-10 px-4 rounded-xl bg-petitsafe-primary text-white text-sm font-medium flex items-center gap-2"><Plus size={16} /> Nouveau relevé plat</button>
+          <button onClick={() => setShowFormPlat(true)} className="h-10 px-4 rounded-xl bg-rzpanda-primary text-white text-sm font-medium flex items-center gap-2"><Plus size={16} /> Nouveau relevé plat</button>
 
           {showFormPlat && (
             <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 space-y-4">
               <h3 className="font-semibold text-gray-700">Relevé plat témoin</h3>
               <input type="text" value={platNom} onChange={(e) => setPlatNom(e.target.value)} placeholder="Nom du plat" className={inputClass} />
               <div className="flex gap-2">
-                <button onClick={() => setPlatType("CHAUD")} className={`flex-1 h-10 rounded-lg text-sm font-medium ${platType === "CHAUD" ? "bg-petitsafe-primary text-white" : "bg-gray-100 text-gray-600"}`}>Plat chaud</button>
-                <button onClick={() => setPlatType("FROID")} className={`flex-1 h-10 rounded-lg text-sm font-medium ${platType === "FROID" ? "bg-petitsafe-primary text-white" : "bg-gray-100 text-gray-600"}`}>Plat froid</button>
+                <button onClick={() => setPlatType("CHAUD")} className={`flex-1 h-10 rounded-lg text-sm font-medium ${platType === "CHAUD" ? "bg-rzpanda-primary text-white" : "bg-gray-100 text-gray-600"}`}>Plat chaud</button>
+                <button onClick={() => setPlatType("FROID")} className={`flex-1 h-10 rounded-lg text-sm font-medium ${platType === "FROID" ? "bg-rzpanda-primary text-white" : "bg-gray-100 text-gray-600"}`}>Plat froid</button>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
@@ -368,7 +368,7 @@ export default function TemperaturesPage() {
               )}
               <div className="flex gap-3">
                 <button onClick={() => setShowFormPlat(false)} className="h-10 px-4 rounded-xl border border-gray-300 text-sm text-gray-600">Annuler</button>
-                <button onClick={handleSubmitPlat} className="h-10 px-6 rounded-xl bg-petitsafe-primary text-white text-sm font-medium">Enregistrer</button>
+                <button onClick={handleSubmitPlat} className="h-10 px-6 rounded-xl bg-rzpanda-primary text-white text-sm font-medium">Enregistrer</button>
               </div>
             </div>
           )}

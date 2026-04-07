@@ -20,7 +20,7 @@ interface Enfant {
 
 type Counts = Record<string, { biberons: number; repas: number; changes: number; siestes: number; transmissions: number }>;
 
-const COULEURS_AVATAR = ["#2E86C1", "#27AE60", "#F4A261", "#E53E3E", "#8E44AD", "#F39C12"];
+const COULEURS_AVATAR = ["#4ade80", "#22c55e", "#F4A261", "#E53E3E", "#8E44AD", "#F39C12"];
 
 export default function VueGroupePage() {
   const params = useParams();
@@ -64,13 +64,13 @@ export default function VueGroupePage() {
   if (isActif("siestes")) columns.push({ key: "siestes", icon: Moon, label: "😴" });
   if (isActif("transmissions")) columns.push({ key: "transmissions", icon: MessageSquare, label: "📝" });
 
-  if (loading) return <div className="flex items-center justify-center py-20"><Loader2 size={32} className="animate-spin text-petitsafe-primary" /></div>;
+  if (loading) return <div className="flex items-center justify-center py-20"><Loader2 size={32} className="animate-spin text-rzpanda-primary" /></div>;
 
   return (
     <div className="max-w-5xl mx-auto space-y-6">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <Link href={`/dashboard/${structureId}/suivi`} className="text-gray-400 hover:text-petitsafe-primary">
+          <Link href={`/dashboard/${structureId}/suivi`} className="text-gray-400 hover:text-rzpanda-primary">
             <ArrowLeft size={20} />
           </Link>
           <h1 className="text-2xl font-bold text-gray-800">Vue groupe</h1>
@@ -82,7 +82,7 @@ export default function VueGroupePage() {
       <div className="flex gap-1.5">
         {["Tous", ...GROUPES_ENFANTS].map((g) => (
           <button key={g} onClick={() => setGroupeFiltre(g)}
-            className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${groupeFiltre === g ? "bg-petitsafe-primary text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"}`}>
+            className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${groupeFiltre === g ? "bg-rzpanda-primary text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"}`}>
             {g}
           </button>
         ))}

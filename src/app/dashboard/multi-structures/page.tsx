@@ -46,7 +46,7 @@ export default function MultiStructuresPage() {
   if (loading) {
     return (
       <div className="flex justify-center py-16">
-        <Loader2 size={32} className="animate-spin text-petitsafe-primary" />
+        <Loader2 size={32} className="animate-spin text-rzpanda-primary" />
       </div>
     );
   }
@@ -65,7 +65,7 @@ export default function MultiStructuresPage() {
     <div className="max-w-4xl mx-auto space-y-6">
       <div>
         <h1 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
-          <Building2 size={24} className="text-petitsafe-primary" />
+          <Building2 size={24} className="text-rzpanda-primary" />
           Vue multi-structures
         </h1>
         <p className="text-sm text-gray-500 mt-1">{structures.length} structures gérées</p>
@@ -85,7 +85,7 @@ export default function MultiStructuresPage() {
                   <h3 className="font-semibold text-gray-800">{s.nom}</h3>
                   <p className="text-xs text-gray-400">{TYPES_STRUCTURE[s.type as keyof typeof TYPES_STRUCTURE] ?? s.type}</p>
                 </div>
-                <ArrowRight size={18} className="text-gray-300 group-hover:text-petitsafe-primary transition-colors mt-1" />
+                <ArrowRight size={18} className="text-gray-300 group-hover:text-rzpanda-primary transition-colors mt-1" />
               </div>
 
               <div className="grid grid-cols-2 gap-3 mt-4">

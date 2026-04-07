@@ -22,7 +22,7 @@ interface Enfant {
 
 type ActiveForm = null | "repas" | "change" | "sieste" | "transmission" | "incident";
 
-const COULEURS_AVATAR = ["#2E86C1", "#27AE60", "#F4A261", "#E53E3E", "#8E44AD", "#F39C12"];
+const COULEURS_AVATAR = ["#4ade80", "#22c55e", "#F4A261", "#E53E3E", "#8E44AD", "#F39C12"];
 
 export default function SuiviPage() {
   const params = useParams();
@@ -181,13 +181,13 @@ export default function SuiviPage() {
     } else toast.error(result.error);
   };
 
-  if (loading) return <div className="flex items-center justify-center py-20"><Loader2 size={32} className="animate-spin text-petitsafe-primary" /></div>;
+  if (loading) return <div className="flex items-center justify-center py-20"><Loader2 size={32} className="animate-spin text-rzpanda-primary" /></div>;
 
   const QteButton = ({ value, current, onChange }: { value: string; current: string; onChange: (v: string) => void }) => {
     const labels: Record<string, string> = { TOUT: "✅ Tout", BIEN: "👍 Bien", PEU: "😐 Peu", RIEN: "❌ Rien" };
     return (
       <button onClick={() => onChange(value)}
-        className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${current === value ? "bg-petitsafe-primary text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"}`}>
+        className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${current === value ? "bg-rzpanda-primary text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"}`}>
         {labels[value]}
       </button>
     );
@@ -197,7 +197,7 @@ export default function SuiviPage() {
     <div className="max-w-3xl mx-auto space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-gray-800">Suivi du jour</h1>
-        <Link href={`/dashboard/${structureId}/suivi/groupe`} className="text-sm text-petitsafe-primary hover:underline">
+        <Link href={`/dashboard/${structureId}/suivi/groupe`} className="text-sm text-rzpanda-primary hover:underline">
           Vue groupe →
         </Link>
       </div>
@@ -208,7 +208,7 @@ export default function SuiviPage() {
           const couleur = COULEURS_AVATAR[e.prenom.charCodeAt(0) % COULEURS_AVATAR.length];
           return (
             <button key={e.id} onClick={() => { setSelectedId(e.id); setActiveForm(null); }}
-              className={`flex items-center gap-2 px-4 py-2.5 rounded-xl shrink-0 transition-colors ${selectedId === e.id ? "bg-petitsafe-primary text-white" : "bg-white border border-gray-200 text-gray-700 hover:bg-gray-50"}`}>
+              className={`flex items-center gap-2 px-4 py-2.5 rounded-xl shrink-0 transition-colors ${selectedId === e.id ? "bg-rzpanda-primary text-white" : "bg-white border border-gray-200 text-gray-700 hover:bg-gray-50"}`}>
               <div className="h-8 w-8 rounded-full flex items-center justify-center text-white text-sm font-bold shrink-0" style={{ backgroundColor: selectedId === e.id ? "rgba(255,255,255,0.3)" : couleur }}>
                 {e.prenom.charAt(0)}
               </div>
@@ -296,7 +296,7 @@ export default function SuiviPage() {
                   const labels: Record<string, string> = { PETIT_DEJ: "Petit-déj", DEJEUNER: "Déjeuner", GOUTER: "Goûter", DINER: "Dîner" };
                   return (
                     <button key={t} onClick={() => setTypeRepas(t)}
-                      className={`px-4 py-2 rounded-lg text-sm font-medium ${typeRepas === t ? "bg-petitsafe-primary text-white" : "bg-gray-100 text-gray-600"}`}>
+                      className={`px-4 py-2 rounded-lg text-sm font-medium ${typeRepas === t ? "bg-rzpanda-primary text-white" : "bg-gray-100 text-gray-600"}`}>
                       {labels[t]}
                     </button>
                   );
@@ -311,7 +311,7 @@ export default function SuiviPage() {
                   <div key={comp} className="space-y-2">
                     <label className="text-sm font-medium text-gray-600">{comp}</label>
                     <input type="text" value={val} onChange={(e) => setVal(e.target.value)} placeholder={`Nom du ${comp.toLowerCase()}`}
-                      className="w-full h-10 px-3 rounded-lg border border-gray-300 text-sm focus:border-petitsafe-primary outline-none" />
+                      className="w-full h-10 px-3 rounded-lg border border-gray-300 text-sm focus:border-rzpanda-primary outline-none" />
                     <div className="flex gap-2">
                       {["TOUT", "BIEN", "PEU", "RIEN"].map((q) => <QteButton key={q} value={q} current={qte} onChange={setQte} />)}
                     </div>
@@ -319,8 +319,8 @@ export default function SuiviPage() {
                 );
               })}
               <input type="text" value={observations} onChange={(e) => setObservations(e.target.value)} placeholder="Observations (optionnel)"
-                className="w-full h-10 px-3 rounded-lg border border-gray-300 text-sm focus:border-petitsafe-primary outline-none" />
-              <button onClick={handleRepas} className="w-full h-12 rounded-xl bg-petitsafe-primary text-white font-medium">Enregistrer le repas</button>
+                className="w-full h-10 px-3 rounded-lg border border-gray-300 text-sm focus:border-rzpanda-primary outline-none" />
+              <button onClick={handleRepas} className="w-full h-12 rounded-xl bg-rzpanda-primary text-white font-medium">Enregistrer le repas</button>
             </div>
           )}
 
@@ -342,14 +342,14 @@ export default function SuiviPage() {
               <div className="flex gap-2">
                 {[{ v: "ENFANT", l: "Par enfant" }, { v: "GENERAL", l: "Général" }, { v: "EQUIPE", l: "Équipe" }].map((t) => (
                   <button key={t.v} onClick={() => setTransType(t.v)}
-                    className={`px-4 py-2 rounded-lg text-sm font-medium ${transType === t.v ? "bg-petitsafe-primary text-white" : "bg-gray-100 text-gray-600"}`}>
+                    className={`px-4 py-2 rounded-lg text-sm font-medium ${transType === t.v ? "bg-rzpanda-primary text-white" : "bg-gray-100 text-gray-600"}`}>
                     {t.l}
                   </button>
                 ))}
               </div>
               <textarea value={transContenu} onChange={(e) => setTransContenu(e.target.value)} placeholder="Votre message..."
-                className="w-full h-24 px-3 py-2 rounded-lg border border-gray-300 text-sm focus:border-petitsafe-primary outline-none resize-none" />
-              <button onClick={handleTransmission} className="w-full h-12 rounded-xl bg-petitsafe-primary text-white font-medium">Enregistrer</button>
+                className="w-full h-24 px-3 py-2 rounded-lg border border-gray-300 text-sm focus:border-rzpanda-primary outline-none resize-none" />
+              <button onClick={handleTransmission} className="w-full h-12 rounded-xl bg-rzpanda-primary text-white font-medium">Enregistrer</button>
             </div>
           )}
 
@@ -380,7 +380,7 @@ export default function SuiviPage() {
               <div>
                 <label className="text-sm font-medium text-gray-600 block mb-1.5">Heure de l&apos;incident</label>
                 <input type="time" value={incHeure} onChange={(e) => setIncHeure(e.target.value)}
-                  className="h-10 px-3 rounded-lg border border-gray-300 text-sm focus:border-petitsafe-primary outline-none" />
+                  className="h-10 px-3 rounded-lg border border-gray-300 text-sm focus:border-rzpanda-primary outline-none" />
               </div>
 
               {/* Gravité */}
@@ -405,7 +405,7 @@ export default function SuiviPage() {
                 <label className="text-sm font-medium text-gray-600 block mb-1.5">Description</label>
                 <textarea value={incDescription} onChange={(e) => setIncDescription(e.target.value)}
                   placeholder="Décrivez ce qui s'est passé..."
-                  className="w-full h-20 px-3 py-2 rounded-lg border border-gray-300 text-sm focus:border-petitsafe-primary outline-none resize-none" />
+                  className="w-full h-20 px-3 py-2 rounded-lg border border-gray-300 text-sm focus:border-rzpanda-primary outline-none resize-none" />
               </div>
 
               {/* Action prise */}
@@ -413,13 +413,13 @@ export default function SuiviPage() {
                 <label className="text-sm font-medium text-gray-600 block mb-1.5">Action prise</label>
                 <textarea value={incAction} onChange={(e) => setIncAction(e.target.value)}
                   placeholder="Soins apportés, appel parents, glaçage..."
-                  className="w-full h-20 px-3 py-2 rounded-lg border border-gray-300 text-sm focus:border-petitsafe-primary outline-none resize-none" />
+                  className="w-full h-20 px-3 py-2 rounded-lg border border-gray-300 text-sm focus:border-rzpanda-primary outline-none resize-none" />
               </div>
 
               {/* Parents prévenus */}
               <label className="flex items-center gap-3 cursor-pointer">
                 <input type="checkbox" checked={incParents} onChange={(e) => setIncParents(e.target.checked)}
-                  className="h-5 w-5 rounded border-gray-300 text-petitsafe-primary focus:ring-petitsafe-primary" />
+                  className="h-5 w-5 rounded border-gray-300 text-rzpanda-primary focus:ring-rzpanda-primary" />
                 <span className="text-sm font-medium text-gray-700">Parents prévenus</span>
               </label>
 

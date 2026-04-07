@@ -54,7 +54,7 @@ export default function DashboardPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-petitsafe-primary border-t-transparent" />
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-rzpanda-primary border-t-transparent" />
       </div>
     );
   }
@@ -67,7 +67,7 @@ export default function DashboardPage() {
         {fetchError && <p className="text-sm text-gray-500 max-w-md">{fetchError}</p>}
         <button
           onClick={() => { setLoading(true); fetchData(); }}
-          className="mt-2 px-4 h-10 rounded-xl bg-petitsafe-primary text-white text-sm font-medium hover:bg-petitsafe-primary/90"
+          className="mt-2 px-4 h-10 rounded-xl bg-rzpanda-primary text-white text-sm font-medium hover:bg-rzpanda-primary/90"
         >
           Réessayer
         </button>
@@ -94,11 +94,11 @@ export default function DashboardPage() {
         {/* Enfants présents */}
         <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
           <div className="flex items-center gap-2 mb-3">
-            <Users size={20} className="text-petitsafe-primary" />
+            <Users size={20} className="text-rzpanda-primary" />
             <span className="text-sm font-medium text-gray-600">Enfants inscrits</span>
           </div>
           <span className="text-2xl font-bold text-gray-800">{data.enfantsCount}</span>
-          <Link href={`/dashboard/${structureId}/enfants`} className="text-xs text-petitsafe-primary hover:underline block mt-2">
+          <Link href={`/dashboard/${structureId}/enfants`} className="text-xs text-rzpanda-primary hover:underline block mt-2">
             Voir la liste <ArrowRight size={12} className="inline" />
           </Link>
         </div>
@@ -107,7 +107,7 @@ export default function DashboardPage() {
         {isActif("nettoyage") && data.nettoyage && (
           <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
             <div className="flex items-center gap-2 mb-3">
-              <Sparkles size={20} className="text-petitsafe-secondary" />
+              <Sparkles size={20} className="text-rzpanda-secondary" />
               <span className="text-sm font-medium text-gray-600">Nettoyage du jour</span>
             </div>
             <div className="flex items-center gap-2 mb-2">
@@ -120,7 +120,7 @@ export default function DashboardPage() {
                 style={{ width: `${data.nettoyage.pct}%` }}
               />
             </div>
-            <Link href={`/dashboard/${structureId}/nettoyage`} className="text-xs text-petitsafe-primary hover:underline block mt-2">
+            <Link href={`/dashboard/${structureId}/nettoyage`} className="text-xs text-rzpanda-primary hover:underline block mt-2">
               Voir le plan <ArrowRight size={12} className="inline" />
             </Link>
           </div>
@@ -130,7 +130,7 @@ export default function DashboardPage() {
         {(isActif("tracabilite") || isActif("stocks")) && (
           <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
             <div className="flex items-center gap-2 mb-3">
-              <Package size={20} className="text-petitsafe-accent" />
+              <Package size={20} className="text-rzpanda-accent" />
               <span className="text-sm font-medium text-gray-600">Prochaines DLC</span>
             </div>
             {data.prochainesDlc.length === 0 ? (
@@ -148,7 +148,7 @@ export default function DashboardPage() {
                 ))}
               </div>
             )}
-            <Link href={`/dashboard/${structureId}/stock`} className="text-xs text-petitsafe-primary hover:underline block mt-2">
+            <Link href={`/dashboard/${structureId}/stock`} className="text-xs text-rzpanda-primary hover:underline block mt-2">
               Voir le stock <ArrowRight size={12} className="inline" />
             </Link>
           </div>
@@ -168,7 +168,7 @@ export default function DashboardPage() {
                 {" "}({Math.round((Date.now() - new Date(data.biberonsEnAttente.plusAncienPrep).getTime()) / 60000)} min)
               </p>
             )}
-            <Link href={`/dashboard/${structureId}/biberonnerie`} className="text-xs text-petitsafe-primary hover:underline block mt-2">
+            <Link href={`/dashboard/${structureId}/biberonnerie`} className="text-xs text-rzpanda-primary hover:underline block mt-2">
               Voir les biberons <ArrowRight size={12} className="inline" />
             </Link>
           </div>
@@ -178,7 +178,7 @@ export default function DashboardPage() {
         {isActif("temperatures") && (
           <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
             <div className="flex items-center gap-2 mb-3">
-              <Thermometer size={20} className="text-petitsafe-primary" />
+              <Thermometer size={20} className="text-rzpanda-primary" />
               <span className="text-sm font-medium text-gray-600">Températures du jour</span>
             </div>
             <span className="text-sm font-semibold text-gray-800">{data.temperatures.relevesAujourdhui} relevé{data.temperatures.relevesAujourdhui > 1 ? "s" : ""}</span>
@@ -192,7 +192,7 @@ export default function DashboardPage() {
                 </span>
               </div>
             )}
-            <Link href={`/dashboard/${structureId}/temperatures`} className="text-xs text-petitsafe-primary hover:underline block mt-2">
+            <Link href={`/dashboard/${structureId}/temperatures`} className="text-xs text-rzpanda-primary hover:underline block mt-2">
               Voir les relevés <ArrowRight size={12} className="inline" />
             </Link>
           </div>

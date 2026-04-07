@@ -25,7 +25,7 @@ interface Enfant {
   regimes: string[];
 }
 
-const COULEURS_AVATAR = ["#2E86C1", "#27AE60", "#F4A261", "#E53E3E", "#8E44AD", "#F39C12"];
+const COULEURS_AVATAR = ["#4ade80", "#22c55e", "#F4A261", "#E53E3E", "#8E44AD", "#F39C12"];
 
 export default function EnfantsPage() {
   const params = useParams();
@@ -53,7 +53,7 @@ export default function EnfantsPage() {
     .filter((e) => e.prenom.toLowerCase().includes(search.toLowerCase()) || e.nom.toLowerCase().includes(search.toLowerCase()));
 
   if (loading) {
-    return <div className="flex items-center justify-center py-20"><Loader2 size={32} className="animate-spin text-petitsafe-primary" /></div>;
+    return <div className="flex items-center justify-center py-20"><Loader2 size={32} className="animate-spin text-rzpanda-primary" /></div>;
   }
 
   return (
@@ -75,12 +75,12 @@ export default function EnfantsPage() {
         <div className="relative flex-1">
           <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
           <input type="text" placeholder="Rechercher un enfant..." value={search} onChange={(e) => setSearch(e.target.value)}
-            className="w-full h-10 pl-10 pr-4 rounded-xl border border-gray-300 focus:border-petitsafe-primary focus:ring-2 focus:ring-petitsafe-primary/20 outline-none text-sm" />
+            className="w-full h-10 pl-10 pr-4 rounded-xl border border-gray-300 focus:border-rzpanda-primary focus:ring-2 focus:ring-rzpanda-primary/20 outline-none text-sm" />
         </div>
         <div className="flex gap-1.5">
           {["Tous", ...GROUPES_ENFANTS].map((g) => (
             <button key={g} onClick={() => setGroupeFiltre(g)}
-              className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${groupeFiltre === g ? "bg-petitsafe-primary text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"}`}>
+              className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${groupeFiltre === g ? "bg-rzpanda-primary text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"}`}>
               {g}
             </button>
           ))}

@@ -96,7 +96,7 @@ export default function ExportsPage() {
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `petitsafe-${data.type_export.toLowerCase()}-${data.periode_debut}-${data.periode_fin}.pdf`;
+      a.download = `rzpanda-${data.type_export.toLowerCase()}-${data.periode_debut}-${data.periode_fin}.pdf`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
@@ -126,7 +126,7 @@ export default function ExportsPage() {
   return (
     <div className="max-w-3xl mx-auto space-y-6">
       <h1 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
-        <FileDown size={24} className="text-petitsafe-primary" />
+        <FileDown size={24} className="text-rzpanda-primary" />
         Exports PDF
       </h1>
 
@@ -142,7 +142,7 @@ export default function ExportsPage() {
             <select
               id="type_export"
               {...register("type_export")}
-              className="w-full h-12 rounded-xl border border-gray-200 px-4 text-sm focus:outline-none focus:ring-2 focus:ring-petitsafe-primary/30 focus:border-petitsafe-primary"
+              className="w-full h-12 rounded-xl border border-gray-200 px-4 text-sm focus:outline-none focus:ring-2 focus:ring-rzpanda-primary/30 focus:border-rzpanda-primary"
             >
               <option value="DDPP">DDPP — Contrôle sanitaire (HACCP)</option>
               <option value="PMI">PMI — Petite enfance (suivi enfants)</option>
@@ -161,7 +161,7 @@ export default function ExportsPage() {
                 id="periode_debut"
                 type="date"
                 {...register("periode_debut")}
-                className="w-full h-12 rounded-xl border border-gray-200 px-4 text-sm focus:outline-none focus:ring-2 focus:ring-petitsafe-primary/30 focus:border-petitsafe-primary"
+                className="w-full h-12 rounded-xl border border-gray-200 px-4 text-sm focus:outline-none focus:ring-2 focus:ring-rzpanda-primary/30 focus:border-rzpanda-primary"
               />
               {errors.periode_debut && <p className="text-sm text-red-500 mt-1">{errors.periode_debut.message}</p>}
             </div>
@@ -174,7 +174,7 @@ export default function ExportsPage() {
                 id="periode_fin"
                 type="date"
                 {...register("periode_fin")}
-                className="w-full h-12 rounded-xl border border-gray-200 px-4 text-sm focus:outline-none focus:ring-2 focus:ring-petitsafe-primary/30 focus:border-petitsafe-primary"
+                className="w-full h-12 rounded-xl border border-gray-200 px-4 text-sm focus:outline-none focus:ring-2 focus:ring-rzpanda-primary/30 focus:border-rzpanda-primary"
               />
               {errors.periode_fin && <p className="text-sm text-red-500 mt-1">{errors.periode_fin.message}</p>}
             </div>
@@ -183,7 +183,7 @@ export default function ExportsPage() {
           <button
             type="submit"
             disabled={generating}
-            className="w-full h-12 rounded-xl bg-petitsafe-primary text-white font-medium hover:bg-petitsafe-primary/90 disabled:opacity-50 flex items-center justify-center gap-2"
+            className="w-full h-12 rounded-xl bg-rzpanda-primary text-white font-medium hover:bg-rzpanda-primary/90 disabled:opacity-50 flex items-center justify-center gap-2"
           >
             {generating ? (
               <>
@@ -219,7 +219,7 @@ export default function ExportsPage() {
               <div key={exp.id} className="flex items-center justify-between p-3 rounded-lg bg-gray-50">
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
-                    <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-petitsafe-primary/10 text-petitsafe-primary">
+                    <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-rzpanda-primary/10 text-rzpanda-primary">
                       {exp.type_export}
                     </span>
                     <span className="text-sm font-medium text-gray-700">

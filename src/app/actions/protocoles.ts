@@ -102,7 +102,7 @@ export async function importerModelesProtocoles(structureId: string) {
         titre: t.titre,
         categorie: t.categorie,
         contenu_markdown: t.contenu_markdown,
-        cree_par: "PetitSafe — Modèle",
+        cree_par: "RZPan'Da — Modèle",
       })),
     });
 

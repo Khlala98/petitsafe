@@ -6,7 +6,7 @@ test.describe("Portail parents", () => {
   test("connexion parent → timeline enfant visible", async ({ page }) => {
     // Connexion avec un compte parent (seed data)
     await page.goto("/connexion");
-    await page.getByLabel(/email/i).fill("parent@petitsafe-demo.fr");
+    await page.getByLabel(/email/i).fill("parent@rzpanda-demo.fr");
     await page.getByLabel(/mot de passe/i).fill("password123");
     await page.getByRole("button", { name: /connexion|se connecter/i }).click();
 
@@ -21,7 +21,7 @@ test.describe("Portail parents", () => {
   test("parent ne peut pas accéder aux données d'autres enfants", async ({ page }) => {
     // Connexion parent
     await page.goto("/connexion");
-    await page.getByLabel(/email/i).fill("parent@petitsafe-demo.fr");
+    await page.getByLabel(/email/i).fill("parent@rzpanda-demo.fr");
     await page.getByLabel(/mot de passe/i).fill("password123");
     await page.getByRole("button", { name: /connexion|se connecter/i }).click();
     await page.waitForURL(/portail|parent|dashboard/, { timeout: 10000 });
@@ -41,7 +41,7 @@ test.describe("Portail parents", () => {
   test("parent n'a pas accès aux modules d'administration", async ({ page }) => {
     // Connexion parent
     await page.goto("/connexion");
-    await page.getByLabel(/email/i).fill("parent@petitsafe-demo.fr");
+    await page.getByLabel(/email/i).fill("parent@rzpanda-demo.fr");
     await page.getByLabel(/mot de passe/i).fill("password123");
     await page.getByRole("button", { name: /connexion|se connecter/i }).click();
     await page.waitForURL(/portail|parent|dashboard/, { timeout: 10000 });

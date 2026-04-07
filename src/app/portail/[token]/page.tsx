@@ -8,7 +8,7 @@ import { getEnfantByToken, getTimelineEnfant } from "@/app/actions/portail-paren
 import type { TimelineEntry, EnfantPortail } from "@/app/actions/portail-parents";
 import { Loader2, ChevronLeft, ChevronRight, ShieldAlert } from "lucide-react";
 
-const COULEURS_AVATAR = ["#2E86C1", "#27AE60", "#F4A261", "#E53E3E", "#8E44AD", "#F39C12"];
+const COULEURS_AVATAR = ["#4ade80", "#22c55e", "#F4A261", "#E53E3E", "#8E44AD", "#F39C12"];
 
 const TYPE_COLORS: Record<string, string> = {
   biberon: "bg-pink-100 text-pink-700 border-pink-200",
@@ -97,7 +97,7 @@ export default function PortailTokenPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
-        <Loader2 size={32} className="animate-spin text-petitsafe-primary" />
+        <Loader2 size={32} className="animate-spin text-rzpanda-primary" />
       </div>
     );
   }
@@ -161,7 +161,7 @@ export default function PortailTokenPage() {
         </button>
         <div className="text-center">
           <p className="text-sm font-medium text-gray-800 capitalize">{formatDateFR(new Date(date + "T12:00:00"))}</p>
-          {isToday && <p className="text-xs text-petitsafe-primary font-medium">Aujourd&apos;hui</p>}
+          {isToday && <p className="text-xs text-rzpanda-primary font-medium">Aujourd&apos;hui</p>}
         </div>
         <button onClick={() => goDay(1)} disabled={isToday || isFuture}
           className="p-2 rounded-lg hover:bg-gray-100 text-gray-500 disabled:opacity-30 disabled:cursor-not-allowed" aria-label="Jour suivant">
@@ -172,7 +172,7 @@ export default function PortailTokenPage() {
       {/* Timeline */}
       {loadingTimeline ? (
         <div className="flex justify-center py-10">
-          <Loader2 size={24} className="animate-spin text-petitsafe-primary" />
+          <Loader2 size={24} className="animate-spin text-rzpanda-primary" />
         </div>
       ) : timeline.length === 0 ? (
         <div className="bg-white rounded-xl p-10 shadow-sm border border-gray-100 text-center">
@@ -213,7 +213,7 @@ export default function PortailTokenPage() {
 
       {/* Footer */}
       <p className="text-center text-xs text-gray-300 pb-4">
-        Données fournies par {structureNom} via PetitSafe
+        Données fournies par {structureNom} via {"RZPan'Da"}
       </p>
     </div>
   );

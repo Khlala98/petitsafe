@@ -96,13 +96,13 @@ function NouveauBiberonContent() {
     }
   };
 
-  if (loading) return <div className="flex items-center justify-center py-20"><Loader2 size={32} className="animate-spin text-petitsafe-primary" /></div>;
+  if (loading) return <div className="flex items-center justify-center py-20"><Loader2 size={32} className="animate-spin text-rzpanda-primary" /></div>;
 
-  const inputClass = "w-full h-12 px-4 rounded-xl border border-gray-300 focus:border-petitsafe-primary focus:ring-2 focus:ring-petitsafe-primary/20 outline-none text-sm";
+  const inputClass = "w-full h-12 px-4 rounded-xl border border-gray-300 focus:border-rzpanda-primary focus:ring-2 focus:ring-rzpanda-primary/20 outline-none text-sm";
 
   return (
     <div className="max-w-2xl mx-auto space-y-6">
-      <button onClick={() => router.back()} className="flex items-center gap-2 text-sm text-gray-500 hover:text-petitsafe-primary">
+      <button onClick={() => router.back()} className="flex items-center gap-2 text-sm text-gray-500 hover:text-rzpanda-primary">
         <ArrowLeft size={16} /> Retour
       </button>
 
@@ -136,7 +136,7 @@ function NouveauBiberonContent() {
                     disabled={incompatible}
                     className={`h-12 rounded-xl text-sm font-medium transition-colors ${
                       incompatible ? "bg-red-50 text-red-300 cursor-not-allowed border-2 border-red-200" :
-                      typeLait === t ? "bg-petitsafe-primary text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                      typeLait === t ? "bg-rzpanda-primary text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"
                     }`}>
                     {t}
                   </button>
@@ -198,7 +198,7 @@ function NouveauBiberonContent() {
               <div className="flex flex-wrap gap-2 mb-2">
                 {QUANTITES_BIBERON_ML.map((q) => (
                   <button key={q} onClick={() => setQuantite(q)}
-                    className={`px-4 py-2 rounded-lg text-sm font-medium ${quantite === q ? "bg-petitsafe-primary text-white" : "bg-gray-100 text-gray-600"}`}>
+                    className={`px-4 py-2 rounded-lg text-sm font-medium ${quantite === q ? "bg-rzpanda-primary text-white" : "bg-gray-100 text-gray-600"}`}>
                     {q}ml
                   </button>
                 ))}
@@ -214,7 +214,7 @@ function NouveauBiberonContent() {
 
           {/* Submit */}
           <button onClick={handleSubmit} disabled={submitting || blocked}
-            className="w-full h-12 rounded-xl bg-petitsafe-primary text-white font-medium hover:bg-petitsafe-primary/90 disabled:opacity-50 flex items-center justify-center gap-2">
+            className="w-full h-12 rounded-xl bg-rzpanda-primary text-white font-medium hover:bg-rzpanda-primary/90 disabled:opacity-50 flex items-center justify-center gap-2">
             {submitting && <Loader2 size={20} className="animate-spin" />}
             Enregistrer la préparation
           </button>
@@ -228,7 +228,7 @@ export default function NouveauBiberonPage() {
   return (
     <Suspense fallback={
       <div className="flex items-center justify-center py-20">
-        <Loader2 size={32} className="animate-spin text-petitsafe-primary" />
+        <Loader2 size={32} className="animate-spin text-rzpanda-primary" />
       </div>
     }>
       <NouveauBiberonContent />

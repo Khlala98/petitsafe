@@ -6,7 +6,7 @@ test.describe("Dashboard multi-structures", () => {
   test.beforeEach(async ({ page }) => {
     // Connexion gestionnaire multi-structures
     await page.goto("/connexion");
-    await page.getByLabel(/email/i).fill("marie@petitsafe-demo.fr");
+    await page.getByLabel(/email/i).fill("marie@rzpanda-demo.fr");
     await page.getByLabel(/mot de passe/i).fill("password123");
     await page.getByRole("button", { name: /connexion|se connecter/i }).click();
     await page.waitForURL(/dashboard/, { timeout: 10000 });

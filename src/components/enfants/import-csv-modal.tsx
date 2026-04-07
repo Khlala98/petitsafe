@@ -141,7 +141,7 @@ export function ImportCSVModal({ structureId, onClose, onImported }: ImportCSVMo
           {step === 1 && (
             <div className="space-y-4">
               <div onDrop={handleDrop} onDragOver={(e) => e.preventDefault()}
-                className="border-2 border-dashed border-gray-300 rounded-xl p-10 text-center hover:border-petitsafe-primary transition-colors cursor-pointer"
+                className="border-2 border-dashed border-gray-300 rounded-xl p-10 text-center hover:border-rzpanda-primary transition-colors cursor-pointer"
                 onClick={() => document.getElementById("csv-input")?.click()}>
                 <Upload size={32} className="text-gray-400 mx-auto mb-3" />
                 <p className="text-sm text-gray-600">Glissez votre fichier .csv ici ou cliquez pour parcourir</p>
@@ -149,7 +149,7 @@ export function ImportCSVModal({ structureId, onClose, onImported }: ImportCSVMo
                 <input id="csv-input" type="file" accept=".csv,.xlsx,.xls" className="hidden"
                   onChange={(e) => e.target.files?.[0] && handleFile(e.target.files[0])} />
               </div>
-              <a href="/modele-import-enfants.csv" download className="flex items-center gap-2 text-sm text-petitsafe-primary hover:underline justify-center">
+              <a href="/modele-import-enfants.csv" download className="flex items-center gap-2 text-sm text-rzpanda-primary hover:underline justify-center">
                 <Download size={14} /> Télécharger le modèle CSV
               </a>
             </div>
@@ -220,13 +220,13 @@ export function ImportCSVModal({ structureId, onClose, onImported }: ImportCSVMo
             <>
               <button onClick={() => setStep(1)} className="h-10 px-4 rounded-xl border border-gray-300 text-sm text-gray-600">Retour</button>
               <button onClick={handleImport} disabled={importing || validCount === 0}
-                className="h-10 px-6 rounded-xl bg-petitsafe-primary text-white text-sm font-medium hover:bg-petitsafe-primary/90 disabled:opacity-50 flex items-center gap-2">
+                className="h-10 px-6 rounded-xl bg-rzpanda-primary text-white text-sm font-medium hover:bg-rzpanda-primary/90 disabled:opacity-50 flex items-center gap-2">
                 {importing && <Loader2 size={16} className="animate-spin" />}
                 Importer {validCount} enfant{validCount > 1 ? "s" : ""}
               </button>
             </>
           )}
-          {step === 3 && <button onClick={onClose} className="h-10 px-6 rounded-xl bg-petitsafe-primary text-white text-sm font-medium">Fermer</button>}
+          {step === 3 && <button onClick={onClose} className="h-10 px-6 rounded-xl bg-rzpanda-primary text-white text-sm font-medium">Fermer</button>}
         </div>
       </div>
     </div>

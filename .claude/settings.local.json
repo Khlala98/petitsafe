@@ -24,7 +24,13 @@
       "Bash(curl -s -i http://localhost:3030/dashboard)",
       "Bash(curl -s -X POST 'https://lmclmnomqaxevkjkxpqn.supabase.co/auth/v1/token?grant_type=password' -H 'apikey: sb_publishable_WdhDBg-UHTIOSY9yd6GBgg_osGbd9fZ' -H 'Content-Type: application/json' -d '{\"email\":\"test@example.com\",\"password\":\"wrongpass\"}')",
       "Bash(curl -sv -X POST \"https://lmclmnomqaxevkjkxpqn.supabase.co/auth/v1/token?grant_type=password\" -H \"apikey: sb_publishable_WdhDBg-UHTIOSY9yd6GBgg_osGbd9fZ\" -H \"Content-Type: application/json\" -d '{\"email\":\"x@x.com\",\"password\":\"x\"}')",
-      "Bash(curl -sv -k \"https://lmclmnomqaxevkjkxpqn.supabase.co/auth/v1/health\" -H \"apikey: sb_publishable_WdhDBg-UHTIOSY9yd6GBgg_osGbd9fZ\")"
+      "Bash(curl -sv -k \"https://lmclmnomqaxevkjkxpqn.supabase.co/auth/v1/health\" -H \"apikey: sb_publishable_WdhDBg-UHTIOSY9yd6GBgg_osGbd9fZ\")",
+      "Bash(node check-db.mjs)",
+      "Bash(perl -i -pe \"s/PetitSafe/RZPan'Da/g; s/petitsafe/rzpanda/g; s/PETITSAFE/RZPANDA/g\" package-lock.json)",
+      "Bash(perl -i -pe 's/#2E86C1/#4ade80/g; s/#27AE60/#22c55e/g' 'src/app/dashboard/[structureId]/enfants/page.tsx' 'src/app/dashboard/[structureId]/suivi/page.tsx' 'src/app/dashboard/[structureId]/enfants/[id]/page.tsx' 'src/app/dashboard/[structureId]/suivi/groupe/page.tsx' 'src/app/dashboard/[structureId]/temperatures/page.tsx')",
+      "Bash(git add:*)",
+      "Bash(git commit -m ':*)",
+      "Bash(git push:*)"
     ]
   }
 }

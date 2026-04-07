@@ -91,16 +91,16 @@ export default function SignalementsPage() {
   if (loading) {
     return (
       <div className="flex justify-center py-16">
-        <Loader2 size={32} className="animate-spin text-petitsafe-primary" />
+        <Loader2 size={32} className="animate-spin text-rzpanda-primary" />
       </div>
     );
   }
 
-  const inputClass = "w-full h-12 rounded-xl border border-gray-200 px-4 text-sm focus:outline-none focus:ring-2 focus:ring-petitsafe-primary/30 focus:border-petitsafe-primary";
+  const inputClass = "w-full h-12 rounded-xl border border-gray-200 px-4 text-sm focus:outline-none focus:ring-2 focus:ring-rzpanda-primary/30 focus:border-rzpanda-primary";
 
   return (
     <div className="space-y-4">
-      <Link href="/portail-parents" className="inline-flex items-center gap-1 text-sm text-gray-500 hover:text-petitsafe-primary transition-colors">
+      <Link href="/portail-parents" className="inline-flex items-center gap-1 text-sm text-gray-500 hover:text-rzpanda-primary transition-colors">
         <ArrowLeft size={16} />
         Retour à la journée
       </Link>
@@ -113,7 +113,7 @@ export default function SignalementsPage() {
           onClick={() => setActiveTab("absence")}
           className={`flex-1 h-12 rounded-xl text-sm font-medium flex items-center justify-center gap-2 transition-colors ${
             activeTab === "absence"
-              ? "bg-petitsafe-primary text-white"
+              ? "bg-rzpanda-primary text-white"
               : "bg-white border border-gray-200 text-gray-600 hover:bg-gray-50"
           }`}
         >
@@ -124,7 +124,7 @@ export default function SignalementsPage() {
           onClick={() => setActiveTab("apport")}
           className={`flex-1 h-12 rounded-xl text-sm font-medium flex items-center justify-center gap-2 transition-colors ${
             activeTab === "apport"
-              ? "bg-petitsafe-primary text-white"
+              ? "bg-rzpanda-primary text-white"
               : "bg-white border border-gray-200 text-gray-600 hover:bg-gray-50"
           }`}
         >
@@ -165,7 +165,7 @@ export default function SignalementsPage() {
               id="absence-commentaire"
               {...absenceForm.register("commentaire")}
               rows={2}
-              className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-petitsafe-primary/30 focus:border-petitsafe-primary resize-none"
+              className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-rzpanda-primary/30 focus:border-rzpanda-primary resize-none"
               placeholder="Précisions..."
             />
           </div>
@@ -173,7 +173,7 @@ export default function SignalementsPage() {
           <button
             type="submit"
             disabled={absenceForm.formState.isSubmitting}
-            className="w-full h-12 rounded-xl bg-petitsafe-primary text-white font-medium hover:bg-petitsafe-primary/90 disabled:opacity-50 flex items-center justify-center gap-2"
+            className="w-full h-12 rounded-xl bg-rzpanda-primary text-white font-medium hover:bg-rzpanda-primary/90 disabled:opacity-50 flex items-center justify-center gap-2"
           >
             {absenceForm.formState.isSubmitting ? <Loader2 size={20} className="animate-spin" /> : <CalendarOff size={20} />}
             Signaler l&apos;absence
@@ -204,7 +204,7 @@ export default function SignalementsPage() {
               id="apport-description"
               {...apportForm.register("description")}
               rows={3}
-              className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-petitsafe-primary/30 focus:border-petitsafe-primary resize-none"
+              className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-rzpanda-primary/30 focus:border-rzpanda-primary resize-none"
               placeholder="Ex : lait maternel 3 biberons, gâteau anniversaire..."
             />
             {apportForm.formState.errors.description && <p className="text-sm text-red-500 mt-1">{apportForm.formState.errors.description.message}</p>}
@@ -213,7 +213,7 @@ export default function SignalementsPage() {
           <button
             type="submit"
             disabled={apportForm.formState.isSubmitting}
-            className="w-full h-12 rounded-xl bg-petitsafe-primary text-white font-medium hover:bg-petitsafe-primary/90 disabled:opacity-50 flex items-center justify-center gap-2"
+            className="w-full h-12 rounded-xl bg-rzpanda-primary text-white font-medium hover:bg-rzpanda-primary/90 disabled:opacity-50 flex items-center justify-center gap-2"
           >
             {apportForm.formState.isSubmitting ? <Loader2 size={20} className="animate-spin" /> : <Package size={20} />}
             Signaler l&apos;apport

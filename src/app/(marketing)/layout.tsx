@@ -1,23 +1,23 @@
 import type { Metadata } from "next";
 
-const BASE_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://app.petitsafe.fr";
+const BASE_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://app.rzpanda.fr";
 
 export const metadata: Metadata = {
-  title: "PetitSafe — Registre HACCP numerique pour creches et micro-creches",
+  title: "RZPan'Da — Registre HACCP numerique pour creches et micro-creches",
   description:
     "Conformite DDPP, tracabilite alimentaire, biberonnerie ANSES, plan de nettoyage. Le tout-en-un HACCP pour la petite enfance en France. Gratuit 14 jours.",
   openGraph: {
-    title: "PetitSafe — Registre HACCP numerique pour creches",
+    title: "RZPan'Da — Registre HACCP numerique pour creches",
     description:
       "Votre registre HACCP numerique, en 30 secondes par saisie. Conformite DDPP garantie.",
     type: "website",
     locale: "fr_FR",
     url: BASE_URL,
-    siteName: "PetitSafe",
+    siteName: "RZPan'Da",
   },
   twitter: {
     card: "summary_large_image",
-    title: "PetitSafe — HACCP numerique petite enfance",
+    title: "RZPan'Da — HACCP numerique petite enfance",
     description:
       "Registre HACCP, tracabilite alimentaire, biberonnerie ANSES. 30 secondes par saisie.",
   },
@@ -31,7 +31,7 @@ const jsonLd = {
   "@graph": [
     {
       "@type": "Organization",
-      name: "PetitSafe",
+      name: "RZPan'Da",
       url: BASE_URL,
       description:
         "SaaS de gestion HACCP, PMS et tracabilite alimentaire pour les creches, micro-creches, MAM et assistantes maternelles en France.",
@@ -44,7 +44,7 @@ const jsonLd = {
     },
     {
       "@type": "SoftwareApplication",
-      name: "PetitSafe",
+      name: "RZPan'Da",
       applicationCategory: "BusinessApplication",
       operatingSystem: "Web",
       description:
@@ -64,7 +64,7 @@ const jsonLd = {
         },
         {
           "@type": "Offer",
-          name: "PetitSafe Complet",
+          name: "RZPan'Da Complet",
           price: "69",
           priceCurrency: "EUR",
           priceSpecification: {

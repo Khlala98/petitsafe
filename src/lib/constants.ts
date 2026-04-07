@@ -28,10 +28,10 @@ export const DELAI_BOITE_LAIT_JOURS = 30;
 /** Nombre de jours avant DLC pour déclencher l'alerte */
 export const DLC_ALERTE_JOURS = 2;
 
-/** Couleurs de la palette PetitSafe */
+/** Couleurs de la palette RZPan'Da */
 export const COULEURS = {
-  primaire: "#2E86C1",
-  secondaire: "#27AE60",
+  primaire: "#4ade80",
+  secondaire: "#22c55e",
   accent: "#F4A261",
   danger: "#E53E3E",
   warning: "#F39C12",

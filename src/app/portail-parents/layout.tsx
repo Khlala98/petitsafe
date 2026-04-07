@@ -34,17 +34,17 @@ export default function PortailParentsLayout({ children }: { children: React.Rea
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-petitsafe-fond">
-        <Loader2 size={32} className="animate-spin text-petitsafe-primary" />
+      <div className="min-h-screen flex items-center justify-center bg-rzpanda-fond">
+        <Loader2 size={32} className="animate-spin text-rzpanda-primary" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-petitsafe-fond">
+    <div className="min-h-screen bg-rzpanda-fond">
       <header className="bg-white border-b border-gray-100 sticky top-0 z-20">
         <div className="max-w-2xl mx-auto px-4 h-14 flex items-center justify-between">
-          <span className="text-lg font-bold text-petitsafe-primary">PetitSafe</span>
+          <span className="text-lg font-bold text-rzpanda-primary">{"RZPan'Da"}</span>
           <div className="flex items-center gap-3">
             <span className="text-sm text-gray-500">{user?.user_metadata?.prenom ?? "Parent"}</span>
             <button

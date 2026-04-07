@@ -98,7 +98,7 @@ export function Sidebar({ structureId, structureNom, prenom, modulesActifs }: Si
   return (
     <aside className={cn("hidden md:flex flex-col h-screen bg-white border-r border-gray-200 transition-all duration-200 shrink-0", collapsed ? "w-[72px]" : "w-[240px]")}>
       <div className="h-16 flex items-center justify-between px-4 border-b border-gray-100">
-        {!collapsed && <span className="text-xl font-bold text-petitsafe-primary">PetitSafe</span>}
+        {!collapsed && <span className="text-xl font-bold text-rzpanda-primary">{"RZPan'Da"}</span>}
         <button onClick={() => setCollapsed(!collapsed)} className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400" aria-label={collapsed ? "Ouvrir le menu" : "Réduire le menu"}>
           <ChevronLeft size={18} className={cn("transition-transform", collapsed && "rotate-180")} />
         </button>
@@ -125,7 +125,7 @@ export function Sidebar({ structureId, structureNom, prenom, modulesActifs }: Si
                 return (
                   <Link key={item.href} href={fullHref}
                     className={cn("flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors mb-0.5",
-                      isActive ? "bg-petitsafe-primary/10 text-petitsafe-primary" : "text-gray-600 hover:bg-gray-50")}>
+                      isActive ? "bg-rzpanda-primary/10 text-rzpanda-primary" : "text-gray-600 hover:bg-gray-50")}>
                     <item.icon size={20} className="shrink-0" />
                     {!collapsed && <span>{item.label}</span>}
                   </Link>

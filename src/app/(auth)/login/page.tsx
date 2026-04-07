@@ -45,10 +45,10 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-petitsafe-fond flex items-center justify-center px-4">
+    <div className="min-h-screen bg-rzpanda-fond flex items-center justify-center px-4">
       <div className="w-full max-w-sm space-y-8">
         <div className="text-center">
-          <h1 className="text-3xl font-bold text-petitsafe-primary">PetitSafe</h1>
+          <h1 className="text-3xl font-bold text-rzpanda-primary">{"RZPan'Da"}</h1>
           <p className="mt-2 text-sm text-gray-500">
             Conformité HACCP &amp; Traçabilité pour la Petite Enfance
           </p>
@@ -65,7 +65,7 @@ export default function LoginPage() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="votre@email.com"
-              className="w-full h-12 px-4 rounded-xl border border-gray-300 focus:border-petitsafe-primary focus:ring-2 focus:ring-petitsafe-primary/20 outline-none transition-colors"
+              className="w-full h-12 px-4 rounded-xl border border-gray-300 focus:border-rzpanda-primary focus:ring-2 focus:ring-rzpanda-primary/20 outline-none transition-colors"
               autoComplete="email"
             />
           </div>
@@ -81,7 +81,7 @@ export default function LoginPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
-                className="w-full h-12 px-4 pr-12 rounded-xl border border-gray-300 focus:border-petitsafe-primary focus:ring-2 focus:ring-petitsafe-primary/20 outline-none transition-colors"
+                className="w-full h-12 px-4 pr-12 rounded-xl border border-gray-300 focus:border-rzpanda-primary focus:ring-2 focus:ring-rzpanda-primary/20 outline-none transition-colors"
                 autoComplete="current-password"
               />
               <button
@@ -98,7 +98,7 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full h-12 rounded-xl bg-petitsafe-primary text-white font-medium hover:bg-petitsafe-primary/90 active:bg-petitsafe-primary/80 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
+            className="w-full h-12 rounded-xl bg-rzpanda-primary text-white font-medium hover:bg-rzpanda-primary/90 active:bg-rzpanda-primary/80 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
           >
             {loading && <Loader2 size={20} className="animate-spin" />}
             Se connecter
@@ -106,12 +106,12 @@ export default function LoginPage() {
         </form>
 
         <div className="text-center space-y-2 text-sm">
-          <Link href="/forgot-password" className="text-petitsafe-primary hover:underline block">
+          <Link href="/forgot-password" className="text-rzpanda-primary hover:underline block">
             Mot de passe oublié ?
           </Link>
           <p className="text-gray-500">
             Pas encore de compte ?{" "}
-            <Link href="/register" className="text-petitsafe-primary hover:underline font-medium">
+            <Link href="/register" className="text-rzpanda-primary hover:underline font-medium">
               Créer un compte
             </Link>
           </p>

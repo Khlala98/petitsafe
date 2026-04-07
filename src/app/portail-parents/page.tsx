@@ -74,7 +74,7 @@ export default function PortailParentsPage() {
   if (loading) {
     return (
       <div className="flex justify-center py-16">
-        <Loader2 size={32} className="animate-spin text-petitsafe-primary" />
+        <Loader2 size={32} className="animate-spin text-rzpanda-primary" />
       </div>
     );
   }
@@ -105,7 +105,7 @@ export default function PortailParentsPage() {
               onClick={() => setSelectedEnfant(e.id)}
               className={`shrink-0 px-4 py-2 rounded-xl text-sm font-medium transition-colors ${
                 selectedEnfant === e.id
-                  ? "bg-petitsafe-primary text-white"
+                  ? "bg-rzpanda-primary text-white"
                   : "bg-white border border-gray-200 text-gray-600 hover:bg-gray-50"
               }`}
             >

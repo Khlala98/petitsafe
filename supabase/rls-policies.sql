@@ -1,5 +1,5 @@
 -- ═══════════════════════════════════════════════════════════
--- PetitSafe — Policies RLS Supabase (idempotent)
+-- RZPan'Da — Policies RLS Supabase (idempotent)
 -- À exécuter après la première migration Prisma :
 --   psql $DIRECT_URL -f supabase/rls-policies.sql
 -- ═══════════════════════════════════════════════════════════

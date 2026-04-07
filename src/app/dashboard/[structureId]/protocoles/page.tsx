@@ -131,13 +131,13 @@ export default function ProtocolesPage() {
 
   const selected = selectedId ? protocoles.find((p) => p.id === selectedId) : null;
 
-  if (loading) return <div className="flex items-center justify-center py-20"><Loader2 size={32} className="animate-spin text-petitsafe-primary" /></div>;
+  if (loading) return <div className="flex items-center justify-center py-20"><Loader2 size={32} className="animate-spin text-rzpanda-primary" /></div>;
 
   // ═══ DETAIL VIEW ═══
   if (selected) {
     return (
       <div className="max-w-3xl mx-auto space-y-4">
-        <button onClick={() => setSelectedId(null)} className="flex items-center gap-2 text-sm text-gray-500 hover:text-petitsafe-primary">
+        <button onClick={() => setSelectedId(null)} className="flex items-center gap-2 text-sm text-gray-500 hover:text-rzpanda-primary">
           <ArrowLeft size={16} /> Retour
         </button>
 
@@ -154,7 +154,7 @@ export default function ProtocolesPage() {
             </div>
             {isGestionnaire && (
               <div className="flex gap-2">
-                <button onClick={() => openEdit(selected)} className="p-2 rounded-lg text-gray-400 hover:text-petitsafe-primary hover:bg-petitsafe-primary/5" aria-label="Modifier">
+                <button onClick={() => openEdit(selected)} className="p-2 rounded-lg text-gray-400 hover:text-rzpanda-primary hover:bg-rzpanda-primary/5" aria-label="Modifier">
                   <Edit size={18} />
                 </button>
                 <button onClick={() => handleArchiver(selected.id)} className="p-2 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50" aria-label="Archiver">
@@ -177,7 +177,7 @@ export default function ProtocolesPage() {
   if (showForm) {
     return (
       <div className="max-w-3xl mx-auto space-y-4">
-        <button onClick={() => setShowForm(false)} className="flex items-center gap-2 text-sm text-gray-500 hover:text-petitsafe-primary">
+        <button onClick={() => setShowForm(false)} className="flex items-center gap-2 text-sm text-gray-500 hover:text-rzpanda-primary">
           <ArrowLeft size={16} /> Annuler
         </button>
 
@@ -201,11 +201,11 @@ export default function ProtocolesPage() {
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Contenu (Markdown)</label>
             <textarea value={formContenu} onChange={(e) => setFormContenu(e.target.value)} placeholder="Écrivez le contenu du protocole…" rows={12}
-              className="w-full px-3 py-2.5 rounded-xl border border-gray-300 text-sm resize-y font-mono focus:outline-none focus:ring-2 focus:ring-petitsafe-primary/30 focus:border-petitsafe-primary" aria-label="Contenu du protocole" />
+              className="w-full px-3 py-2.5 rounded-xl border border-gray-300 text-sm resize-y font-mono focus:outline-none focus:ring-2 focus:ring-rzpanda-primary/30 focus:border-rzpanda-primary" aria-label="Contenu du protocole" />
           </div>
 
           <button onClick={handleSubmit} disabled={submitting}
-            className="w-full h-12 rounded-xl bg-petitsafe-primary text-white text-sm font-medium hover:bg-petitsafe-primary/90 disabled:opacity-50 flex items-center justify-center gap-2">
+            className="w-full h-12 rounded-xl bg-rzpanda-primary text-white text-sm font-medium hover:bg-rzpanda-primary/90 disabled:opacity-50 flex items-center justify-center gap-2">
             {submitting ? <Loader2 size={18} className="animate-spin" /> : null}
             {editingId ? "Enregistrer les modifications" : "Créer le protocole"}
           </button>
@@ -226,7 +226,7 @@ export default function ProtocolesPage() {
               {importing ? <Loader2 size={16} className="animate-spin" /> : <Download size={16} />}
               Importer les modèles
             </button>
-            <button onClick={openCreate} className="h-10 px-4 rounded-xl bg-petitsafe-primary text-white text-sm font-medium hover:bg-petitsafe-primary/90 flex items-center gap-2">
+            <button onClick={openCreate} className="h-10 px-4 rounded-xl bg-rzpanda-primary text-white text-sm font-medium hover:bg-rzpanda-primary/90 flex items-center gap-2">
               <Plus size={16} /> Nouveau
             </button>
           </div>
@@ -242,10 +242,10 @@ export default function ProtocolesPage() {
 
       {/* Category filters */}
       <div className="flex gap-2 flex-wrap">
-        <button onClick={() => setFilterCat(null)} className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${filterCat === null ? "bg-petitsafe-primary text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"}`}>Tous</button>
+        <button onClick={() => setFilterCat(null)} className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${filterCat === null ? "bg-rzpanda-primary text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"}`}>Tous</button>
         {CATEGORIES_PROTOCOLE.map((c) => (
           <button key={c} onClick={() => setFilterCat(filterCat === c ? null : c)}
-            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${filterCat === c ? "bg-petitsafe-primary text-white" : CATEGORIE_COLORS[c] ?? "bg-gray-100 text-gray-600"}`}>
+            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${filterCat === c ? "bg-rzpanda-primary text-white" : CATEGORIE_COLORS[c] ?? "bg-gray-100 text-gray-600"}`}>
             {c}
           </button>
         ))}
@@ -266,8 +266,8 @@ export default function ProtocolesPage() {
               {protos.map((p) => (
                 <button key={p.id} onClick={() => setSelectedId(p.id)}
                   className="w-full flex items-center gap-3 p-4 hover:bg-gray-50 text-left transition-colors">
-                  <div className="shrink-0 h-10 w-10 rounded-xl bg-petitsafe-primary/10 flex items-center justify-center">
-                    <FileText size={18} className="text-petitsafe-primary" />
+                  <div className="shrink-0 h-10 w-10 rounded-xl bg-rzpanda-primary/10 flex items-center justify-center">
+                    <FileText size={18} className="text-rzpanda-primary" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium text-gray-800 truncate">{p.titre}</p>

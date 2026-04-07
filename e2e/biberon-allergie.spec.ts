@@ -5,7 +5,7 @@ import { test, expect } from "@playwright/test";
 test.describe("Biberon — Blocage allergie PLV", () => {
   test.beforeEach(async ({ page }) => {
     await page.goto("/connexion");
-    await page.getByLabel(/email/i).fill("marie@petitsafe-demo.fr");
+    await page.getByLabel(/email/i).fill("marie@rzpanda-demo.fr");
     await page.getByLabel(/mot de passe/i).fill("password123");
     await page.getByRole("button", { name: /connexion|se connecter/i }).click();
     await page.waitForURL(/dashboard/, { timeout: 10000 });
