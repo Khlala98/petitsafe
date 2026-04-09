@@ -12,6 +12,7 @@ import { BadgeAllergie } from "@/components/shared/badge-allergie";
 import { BadgeRegime } from "@/components/shared/badge-regime";
 import { Loader2, ArrowLeft, Edit, Trash2, Phone, User, MessageSquare, Link2, Copy, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
+import { useProfil } from "@/hooks/use-profil";
 
 interface Enfant {
   id: string; prenom: string; nom: string; date_naissance: string; sexe?: string | null;
@@ -34,6 +35,7 @@ export default function FicheEnfantPage() {
   const router = useRouter();
   const structureId = params.structureId as string;
   const enfantId = params.id as string;
+  const { isAdmin } = useProfil();
   const [enfant, setEnfant] = useState<Enfant | null>(null);
   const [transmissions, setTransmissions] = useState<TransmissionEnfant[]>([]);
   const [loading, setLoading] = useState(true);
@@ -125,18 +127,20 @@ export default function FicheEnfantPage() {
         <button onClick={() => router.push(`/dashboard/${structureId}/enfants`)} className="flex items-center gap-2 text-sm text-gray-500 hover:text-rzpanda-primary">
           <ArrowLeft size={16} /> Retour
         </button>
-        <div className="flex gap-2">
-          <button onClick={() => router.push(`/dashboard/${structureId}/enfants/${enfantId}/modifier`)}
-            className="h-9 px-3 rounded-lg border border-gray-300 text-sm text-gray-600 hover:bg-gray-50 flex items-center gap-2">
-            <Edit size={14} /> Modifier
-          </button>
-          <button onClick={handleArchive} className="h-9 px-3 rounded-lg border border-gray-300 text-sm text-gray-600 hover:bg-gray-50 flex items-center gap-2">
-            <Edit size={14} /> Archiver
-          </button>
-          <button onClick={handleDelete} className="h-9 px-3 rounded-lg border border-red-300 text-sm text-red-600 hover:bg-red-50 flex items-center gap-2">
-            <Trash2 size={14} /> Supprimer
-          </button>
-        </div>
+        {isAdmin && (
+          <div className="flex gap-2">
+            <button onClick={() => router.push(`/dashboard/${structureId}/enfants/${enfantId}/modifier`)}
+              className="h-9 px-3 rounded-lg border border-gray-300 text-sm text-gray-600 hover:bg-gray-50 flex items-center gap-2">
+              <Edit size={14} /> Modifier
+            </button>
+            <button onClick={handleArchive} className="h-9 px-3 rounded-lg border border-gray-300 text-sm text-gray-600 hover:bg-gray-50 flex items-center gap-2">
+              <Edit size={14} /> Archiver
+            </button>
+            <button onClick={handleDelete} className="h-9 px-3 rounded-lg border border-red-300 text-sm text-red-600 hover:bg-red-50 flex items-center gap-2">
+              <Trash2 size={14} /> Supprimer
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Header */}

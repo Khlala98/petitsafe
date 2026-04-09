@@ -27,6 +27,7 @@ export async function creerTransmission(data: {
   contenu: string;
   type_transm: string;
   auteur: string;
+  profil_id?: string;
 }) {
   try {
     const parsed = transmissionSchema.safeParse(data);
@@ -40,6 +41,7 @@ export async function creerTransmission(data: {
         contenu: parsed.data.contenu,
         auteur: parsed.data.auteur,
         type_transm: parsed.data.type_transm as "GENERAL" | "ENFANT" | "EQUIPE",
+        profil_id: data.profil_id || null,
       },
       include: { enfant: { select: { id: true, prenom: true, nom: true } } },
     });

@@ -4,7 +4,7 @@ import { prisma } from "@/lib/supabase/prisma";
 
 export interface AlerteItem {
   id: string;
-  type: "dlc_depassee" | "dlc_proche" | "biberon_attente";
+  type: "dlc_depassee" | "dlc_proche" | "biberon_attente" | "lait_dlc";
   niveau: "rouge" | "orange";
   titre: string;
   detail: string;
@@ -22,7 +22,10 @@ export async function getAlertes(structureId: string) {
     const stockHref = `/dashboard/${structureId}/stock`;
     const biberonHref = `/dashboard/${structureId}/biberonnerie`;
 
-    const [receptionsExpirees, receptionsProches, biberonsEnAttente] = await Promise.all([
+    const septJoursAvant = new Date(aujourdhuiDebut);
+    septJoursAvant.setDate(septJoursAvant.getDate() - 7);
+
+    const [receptionsExpirees, receptionsProches, biberonsEnAttente, biberonsAvecDLC] = await Promise.all([
       // DLC dépassée (avant aujourd'hui à minuit) et toujours en stock
       prisma.receptionMarchandise.findMany({
         where: {
@@ -50,6 +53,16 @@ export async function getAlertes(structureId: string) {
         },
         include: { enfant: { select: { prenom: true } } },
         orderBy: { heure_preparation: "asc" },
+      }),
+      // Biberons récents avec DLC lait renseignée (pour alertes péremption lait)
+      prisma.biberon.findMany({
+        where: {
+          structure_id: structureId,
+          date_peremption_lait: { not: null },
+          date: { gte: septJoursAvant },
+        },
+        include: { enfant: { select: { id: true, prenom: true } } },
+        orderBy: { date: "desc" },
       }),
     ]);
 
@@ -97,6 +110,48 @@ export async function getAlertes(structureId: string) {
         href: biberonHref,
       });
     }
+
+    // Alertes DLC lait — un seul alert par enfant (biberon le plus récent)
+    const enfantsDLC = new Map<string, { prenom: string; dlc: Date; biberonId: string }>();
+    for (const b of biberonsAvecDLC) {
+      if (!b.date_peremption_lait) continue;
+      if (!enfantsDLC.has(b.enfant.id)) {
+        enfantsDLC.set(b.enfant.id, { prenom: b.enfant.prenom, dlc: b.date_peremption_lait, biberonId: b.id });
+      }
+    }
+    enfantsDLC.forEach((info, enfantId) => {
+      const dlcDate = new Date(info.dlc);
+      const dlcDebut = new Date(dlcDate.getFullYear(), dlcDate.getMonth(), dlcDate.getDate());
+      const diffJours = Math.round((dlcDebut.getTime() - aujourdhuiDebut.getTime()) / (1000 * 60 * 60 * 24));
+
+      if (diffJours > 3) return;
+
+      let detail: string;
+      let niveau: "rouge" | "orange";
+
+      if (diffJours < 0) {
+        detail = `Le lait de ${info.prenom} est périmé — NE PAS UTILISER`;
+        niveau = "rouge";
+      } else if (diffJours === 0) {
+        detail = `Le lait de ${info.prenom} expire AUJOURD'HUI`;
+        niveau = "rouge";
+      } else if (diffJours === 1) {
+        detail = `Le lait de ${info.prenom} expire DEMAIN`;
+        niveau = "rouge";
+      } else {
+        detail = `Le lait de ${info.prenom} expire dans ${diffJours} jours — pensez à demander aux parents d'en ramener`;
+        niveau = "orange";
+      }
+
+      alertes.push({
+        id: `lait-dlc-${enfantId}`,
+        type: "lait_dlc",
+        niveau,
+        titre: `Lait ${info.prenom}`,
+        detail,
+        href: biberonHref,
+      });
+    });
 
     return { success: true as const, data: alertes };
   } catch {

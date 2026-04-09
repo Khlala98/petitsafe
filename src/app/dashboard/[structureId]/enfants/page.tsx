@@ -5,13 +5,15 @@ export const dynamic = 'force-dynamic';
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { getEnfants } from "@/app/actions/enfants";
-import { calculerAge } from "@/lib/business-logic";
+import { getSeuilsAge } from "@/app/actions/structure";
+import { calculerAge, calculerGroupeAuto, joursAvantBascule } from "@/lib/business-logic";
 import { BadgeAllergie } from "@/components/shared/badge-allergie";
 import { BadgeRegime } from "@/components/shared/badge-regime";
 import { BoutonAction } from "@/components/shared/bouton-action";
 import { GROUPES_ENFANTS } from "@/lib/constants";
 import { Plus, Search, Upload, Loader2, AlertTriangle } from "lucide-react";
 import { ImportCSVModal } from "@/components/enfants/import-csv-modal";
+import { useProfil } from "@/hooks/use-profil";
 
 interface Enfant {
   id: string;
@@ -20,6 +22,7 @@ interface Enfant {
   date_naissance: string;
   sexe?: string | null;
   groupe?: string | null;
+  groupe_force?: boolean;
   photo_url?: string | null;
   allergies: { id: string; allergene: string; severite: "LEGERE" | "MODEREE" | "SEVERE" }[];
   regimes: string[];
@@ -31,16 +34,24 @@ export default function EnfantsPage() {
   const params = useParams();
   const router = useRouter();
   const structureId = params.structureId as string;
+  const { isAdmin } = useProfil();
   const [enfants, setEnfants] = useState<Enfant[]>([]);
+  const [seuils, setSeuils] = useState({ seuil_bebes_max: 18, seuil_moyens_max: 30 });
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [groupeFiltre, setGroupeFiltre] = useState<string>("Tous");
   const [showImport, setShowImport] = useState(false);
 
   const fetchEnfants = async () => {
-    const result = await getEnfants(structureId);
+    const [result, seuilsRes] = await Promise.all([
+      getEnfants(structureId),
+      getSeuilsAge(structureId),
+    ]);
     if (result.success && result.data) {
-      setEnfants(result.data.map((e) => ({ ...e, date_naissance: e.date_naissance.toISOString() })));
+      setEnfants(result.data.map((e) => ({ ...e, date_naissance: e.date_naissance.toISOString(), groupe_force: (e as unknown as { groupe_force: boolean }).groupe_force })));
+    }
+    if (seuilsRes.success && seuilsRes.data) {
+      setSeuils(seuilsRes.data);
     }
     setLoading(false);
   };
@@ -48,8 +59,15 @@ export default function EnfantsPage() {
   useEffect(() => { fetchEnfants(); }, [structureId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const maintenant = new Date();
+
+  // Calculer le groupe effectif de chaque enfant
+  const getGroupeEffectif = (e: Enfant): string => {
+    if (e.groupe_force && e.groupe) return e.groupe;
+    return calculerGroupeAuto(new Date(e.date_naissance), seuils.seuil_bebes_max, seuils.seuil_moyens_max, maintenant);
+  };
+
   const filtres = enfants
-    .filter((e) => groupeFiltre === "Tous" || e.groupe === groupeFiltre)
+    .filter((e) => groupeFiltre === "Tous" || getGroupeEffectif(e) === groupeFiltre)
     .filter((e) => e.prenom.toLowerCase().includes(search.toLowerCase()) || e.nom.toLowerCase().includes(search.toLowerCase()));
 
   if (loading) {
@@ -60,14 +78,16 @@ export default function EnfantsPage() {
     <div className="max-w-5xl mx-auto space-y-6">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <h1 className="text-2xl font-bold text-gray-800">Enfants</h1>
-        <div className="flex gap-2">
-          <button onClick={() => setShowImport(true)}
-            className="h-10 px-4 rounded-xl border border-gray-300 text-sm text-gray-600 hover:bg-gray-50 flex items-center gap-2">
-            <Upload size={16} /> Importer un CSV
-          </button>
-          <BoutonAction label="Ajouter un enfant" icon={Plus} size="md"
-            onClick={() => router.push(`/dashboard/${structureId}/enfants/nouveau`)} />
-        </div>
+        {isAdmin && (
+          <div className="flex gap-2">
+            <button onClick={() => setShowImport(true)}
+              className="h-10 px-4 rounded-xl border border-gray-300 text-sm text-gray-600 hover:bg-gray-50 flex items-center gap-2">
+              <Upload size={16} /> Importer un CSV
+            </button>
+            <BoutonAction label="Ajouter un enfant" icon={Plus} size="md"
+              onClick={() => router.push(`/dashboard/${structureId}/enfants/nouveau`)} />
+          </div>
+        )}
       </div>
 
       {/* Filters */}
@@ -101,6 +121,8 @@ export default function EnfantsPage() {
             const age = calculerAge(new Date(enfant.date_naissance), maintenant);
             const couleur = COULEURS_AVATAR[enfant.prenom.charCodeAt(0) % COULEURS_AVATAR.length];
             const initiale = enfant.prenom.charAt(0).toUpperCase();
+            const groupeEffectif = getGroupeEffectif(enfant);
+            const bascule = !enfant.groupe_force ? joursAvantBascule(new Date(enfant.date_naissance), seuils.seuil_bebes_max, seuils.seuil_moyens_max, maintenant) : null;
 
             return (
               <button key={enfant.id} onClick={() => router.push(`/dashboard/${structureId}/enfants/${enfant.id}`)}
@@ -115,7 +137,15 @@ export default function EnfantsPage() {
                   )}
                   <div className="min-w-0 flex-1">
                     <p className="font-semibold text-gray-800 truncate">{enfant.prenom} {enfant.nom}</p>
-                    <p className="text-sm text-gray-500">{age}{enfant.groupe ? ` · ${enfant.groupe}` : ""}</p>
+                    <p className="text-sm text-gray-500">
+                      {age} · {groupeEffectif}
+                      {enfant.groupe_force && <span className="ml-1 text-[10px] text-amber-600">(forcé)</span>}
+                    </p>
+                    {bascule && bascule.jours <= 30 && (
+                      <p className="text-[10px] text-blue-600 mt-0.5">
+                        Bascule {bascule.prochainGroupe} dans {bascule.jours} jour{bascule.jours > 1 ? "s" : ""}
+                      </p>
+                    )}
                   </div>
                   {enfant.allergies.length > 0 && (
                     <AlertTriangle size={18} className="text-red-500 shrink-0 mt-1" aria-label="Allergies" />

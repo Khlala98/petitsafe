@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { getBiberonsDuJour, marquerServi, marquerNettoye } from "@/app/actions/biberons";
 import { getEnfants } from "@/app/actions/enfants";
+import { getAlertes, type AlerteItem } from "@/app/actions/alertes";
 import { getStatutBiberon } from "@/lib/business-logic";
 import { QUANTITES_BIBERON_ML } from "@/lib/constants";
 import { useRealtimeSubscription } from "@/hooks/use-realtime-subscription";
@@ -30,15 +31,17 @@ export default function BiberonneriePage() {
   const structureId = params.structureId as string;
   const [biberons, setBiberons] = useState<Biberon[]>([]);
   const [enfants, setEnfants] = useState<Enfant[]>([]);
+  const [alertesLait, setAlertesLait] = useState<AlerteItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [tick, setTick] = useState(0);
   const [showServiModal, setShowServiModal] = useState<string | null>(null);
   const [quantiteBue, setQuantiteBue] = useState<number | null>(null);
 
   const fetchData = async () => {
-    const [bibRes, enfRes] = await Promise.all([
+    const [bibRes, enfRes, alertesRes] = await Promise.all([
       getBiberonsDuJour(structureId),
       getEnfants(structureId),
+      getAlertes(structureId),
     ]);
     if (bibRes.success && bibRes.data) {
       setBiberons(bibRes.data.map((b) => ({
@@ -48,6 +51,9 @@ export default function BiberonneriePage() {
     }
     if (enfRes.success && enfRes.data) {
       setEnfants(enfRes.data.map((e) => ({ id: e.id, prenom: e.prenom, allergies: e.allergies })));
+    }
+    if (alertesRes.success && alertesRes.data) {
+      setAlertesLait(alertesRes.data.filter((a) => a.type === "lait_dlc"));
     }
     setLoading(false);
   };
@@ -90,6 +96,21 @@ export default function BiberonneriePage() {
           <Plus size={16} /> Nouveau biberon
         </Link>
       </div>
+
+      {/* Alertes DLC lait */}
+      {alertesLait.length > 0 && (
+        <div className="space-y-2">
+          {alertesLait.map((alerte) => (
+            <div key={alerte.id}
+              className={`flex items-start gap-2 p-3 rounded-lg border ${alerte.niveau === "rouge" ? "bg-red-50 border-red-200" : "bg-orange-50 border-orange-200"}`}>
+              <AlertTriangle size={16} className={`shrink-0 mt-0.5 ${alerte.niveau === "rouge" ? "text-red-500" : "text-orange-500"}`} />
+              <p className={`text-sm font-medium ${alerte.niveau === "rouge" ? "text-red-700" : "text-orange-700"}`}>
+                {alerte.detail}
+              </p>
+            </div>
+          ))}
+        </div>
+      )}
 
       {/* ANSES reminder */}
       <div className="flex items-start gap-2 p-3 rounded-lg bg-blue-50 border border-blue-100">

@@ -5,11 +5,14 @@ export const dynamic = 'force-dynamic';
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/use-auth";
+import { useProfil, type ProfilActif } from "@/hooks/use-profil";
 import { updateModulesActifs } from "@/app/actions/stock";
-import { getStructureInfo, updateStructureInfo, nettoyerDonneesAberrantes } from "@/app/actions/structure";
+import { getStructureInfo, updateStructureInfo, nettoyerDonneesAberrantes, getSeuilsAge, updateSeuilsAge } from "@/app/actions/structure";
+import { creerProfil, modifierProfil, desactiverProfil, listerTousProfils } from "@/app/actions/profils";
 import { MODULES_DISPONIBLES, PRESETS_MODULES, type ModuleId } from "@/lib/constants";
 import { toast } from "sonner";
-import { Shield, Sparkles, Loader2, Check, Trash2 } from "lucide-react";
+import { Shield, Sparkles, Loader2, Check, Trash2, Users, Plus, Pencil, UserX, UserCheck, Baby } from "lucide-react";
+import { RoleProfil } from "@prisma/client";
 
 export default function ParametresPage() {
   const params = useParams();
@@ -30,7 +33,29 @@ export default function ParametresPage() {
   const [infoSaving, setInfoSaving] = useState(false);
   const [cleaning, setCleaning] = useState(false);
 
-  const isGestionnaire = activeRole === "GESTIONNAIRE";
+  // Seuils d'âge
+  const [seuilBebes, setSeuilBebes] = useState(18);
+  const [seuilMoyens, setSeuilMoyens] = useState(30);
+  const [seuilsLoaded, setSeuilsLoaded] = useState(false);
+  const [seuilsSaving, setSeuilsSaving] = useState(false);
+
+  // Équipe
+  const { refreshProfils } = useProfil();
+  const [equipeProfils, setEquipeProfils] = useState<ProfilActif[]>([]);
+  const [equipeLoaded, setEquipeLoaded] = useState(false);
+  const [showEquipeForm, setShowEquipeForm] = useState(false);
+  const [editingProfil, setEditingProfil] = useState<ProfilActif | null>(null);
+  const [equipeForm, setEquipeForm] = useState({ prenom: "", nom: "", poste: "", role: "PROFESSIONNEL" as RoleProfil, telephone: "", email: "", certifications: "", notes: "" });
+  const [equipeSaving, setEquipeSaving] = useState(false);
+
+  const { isAdmin } = useProfil();
+  const isGestionnaire = isAdmin || activeRole === "GESTIONNAIRE";
+
+  const loadEquipe = async () => {
+    const res = await listerTousProfils(structureId);
+    if (res.success) setEquipeProfils(res.data as ProfilActif[]);
+    setEquipeLoaded(true);
+  };
 
   useEffect(() => {
     getStructureInfo(structureId).then((res) => {
@@ -44,7 +69,15 @@ export default function ParametresPage() {
       }
       setInfoLoaded(true);
     });
-  }, [structureId]);
+    loadEquipe();
+    getSeuilsAge(structureId).then((res) => {
+      if (res.success && res.data) {
+        setSeuilBebes(res.data.seuil_bebes_max);
+        setSeuilMoyens(res.data.seuil_moyens_max);
+      }
+      setSeuilsLoaded(true);
+    });
+  }, [structureId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleSaveInfo = async () => {
     setInfoSaving(true);
@@ -75,6 +108,90 @@ export default function ParametresPage() {
       toast.success(`Nettoyage terminé : ${relevesSupprimes} relevés, ${equipementsSupprimes} équipements, ${stocksSupprimes} stocks, ${receptionsSupprimees} réceptions supprimés.`);
     } else {
       toast.error(result.success ? "Erreur" : result.error);
+    }
+  };
+
+  const handleSaveSeuils = async () => {
+    setSeuilsSaving(true);
+    const result = await updateSeuilsAge(structureId, seuilBebes, seuilMoyens);
+    setSeuilsSaving(false);
+    if (result.success) toast.success("Seuils d'âge enregistrés !");
+    else toast.error(result.error);
+  };
+
+  const resetEquipeForm = () => {
+    setEquipeForm({ prenom: "", nom: "", poste: "", role: "PROFESSIONNEL" as RoleProfil, telephone: "", email: "", certifications: "", notes: "" });
+    setEditingProfil(null);
+    setShowEquipeForm(false);
+  };
+
+  const handleEditProfil = (p: ProfilActif) => {
+    setEditingProfil(p);
+    setEquipeForm({
+      prenom: p.prenom,
+      nom: p.nom,
+      poste: p.poste || "",
+      role: p.role as RoleProfil,
+      telephone: p.telephone || "",
+      email: p.email || "",
+      certifications: p.certifications || "",
+      notes: p.notes || "",
+    });
+    setShowEquipeForm(true);
+  };
+
+  const handleSaveEquipe = async () => {
+    if (!equipeForm.prenom.trim() || !equipeForm.nom.trim()) {
+      toast.error("Le prénom et le nom sont obligatoires.");
+      return;
+    }
+    setEquipeSaving(true);
+    const payload = {
+      prenom: equipeForm.prenom,
+      nom: equipeForm.nom,
+      poste: equipeForm.poste || undefined,
+      role: equipeForm.role,
+      telephone: equipeForm.telephone || undefined,
+      email: equipeForm.email || undefined,
+      certifications: equipeForm.certifications || undefined,
+      notes: equipeForm.notes || undefined,
+    };
+
+    const result = editingProfil
+      ? await modifierProfil(editingProfil.id, payload)
+      : await creerProfil({ structure_id: structureId, ...payload });
+
+    setEquipeSaving(false);
+    if (result.success) {
+      toast.success(editingProfil ? "Profil modifié !" : "Profil créé !");
+      resetEquipeForm();
+      await loadEquipe();
+      await refreshProfils();
+    } else {
+      toast.error(result.error);
+    }
+  };
+
+  const handleDesactiverProfil = async (profilId: string, actif: boolean) => {
+    if (actif && !confirm("Désactiver ce profil ? Il ne pourra plus se connecter.")) return;
+    if (!actif) {
+      const result = await modifierProfil(profilId, { actif: true });
+      if (result.success) {
+        toast.success("Profil réactivé !");
+        await loadEquipe();
+        await refreshProfils();
+      } else {
+        toast.error(result.error);
+      }
+      return;
+    }
+    const result = await desactiverProfil(profilId);
+    if (result.success) {
+      toast.success("Profil désactivé.");
+      await loadEquipe();
+      await refreshProfils();
+    } else {
+      toast.error(result.error);
     }
   };
 
@@ -171,6 +288,185 @@ export default function ParametresPage() {
                   className="h-11 px-5 rounded-xl bg-rzpanda-primary text-white text-sm font-medium hover:bg-rzpanda-primary/90 disabled:opacity-50 flex items-center gap-2">
                   {infoSaving && <Loader2 size={16} className="animate-spin" />}
                   Enregistrer
+                </button>
+              </>
+            )}
+          </div>
+
+          {/* Section Équipe */}
+          <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-lg font-semibold text-gray-800 flex items-center gap-2">
+                  <Users size={20} className="text-rzpanda-primary" />
+                  Équipe
+                </h2>
+                <p className="text-sm text-gray-500 mt-1">Gérez les profils de votre équipe. Chaque salarié sélectionne son prénom à la connexion.</p>
+              </div>
+              {!showEquipeForm && (
+                <button onClick={() => { resetEquipeForm(); setShowEquipeForm(true); }}
+                  className="h-9 px-4 rounded-lg bg-rzpanda-primary text-white text-sm font-medium hover:bg-rzpanda-primary/90 flex items-center gap-1.5">
+                  <Plus size={16} />
+                  Ajouter
+                </button>
+              )}
+            </div>
+
+            {/* Formulaire ajout/édition */}
+            {showEquipeForm && (
+              <div className="border border-rzpanda-primary/20 rounded-xl p-4 bg-rzpanda-primary/5 space-y-3">
+                <p className="text-sm font-medium text-gray-700">{editingProfil ? "Modifier le profil" : "Nouveau profil"}</p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-xs font-medium text-gray-600 mb-1">Prénom *</label>
+                    <input type="text" value={equipeForm.prenom} onChange={(e) => setEquipeForm((f) => ({ ...f, prenom: e.target.value }))}
+                      className="w-full h-10 px-3 rounded-lg border border-gray-300 focus:border-rzpanda-primary outline-none text-sm" placeholder="Marie" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-gray-600 mb-1">Nom *</label>
+                    <input type="text" value={equipeForm.nom} onChange={(e) => setEquipeForm((f) => ({ ...f, nom: e.target.value }))}
+                      className="w-full h-10 px-3 rounded-lg border border-gray-300 focus:border-rzpanda-primary outline-none text-sm" placeholder="Dupont" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-gray-600 mb-1">Poste</label>
+                    <select value={equipeForm.poste} onChange={(e) => setEquipeForm((f) => ({ ...f, poste: e.target.value }))}
+                      className="w-full h-10 px-3 rounded-lg border border-gray-300 focus:border-rzpanda-primary outline-none text-sm bg-white">
+                      <option value="">— Choisir —</option>
+                      <option value="Directrice">Directrice</option>
+                      <option value="Auxiliaire">Auxiliaire de puériculture</option>
+                      <option value="EJE">EJE</option>
+                      <option value="Stagiaire">Stagiaire</option>
+                      <option value="Agent">Agent</option>
+                      <option value="Autre">Autre</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-gray-600 mb-1">Rôle</label>
+                    <select value={equipeForm.role} onChange={(e) => setEquipeForm((f) => ({ ...f, role: e.target.value as RoleProfil }))}
+                      className="w-full h-10 px-3 rounded-lg border border-gray-300 focus:border-rzpanda-primary outline-none text-sm bg-white">
+                      <option value="PROFESSIONNEL">Professionnel</option>
+                      <option value="ADMINISTRATEUR">Administrateur</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-gray-600 mb-1">Téléphone</label>
+                    <input type="tel" value={equipeForm.telephone} onChange={(e) => setEquipeForm((f) => ({ ...f, telephone: e.target.value }))}
+                      className="w-full h-10 px-3 rounded-lg border border-gray-300 focus:border-rzpanda-primary outline-none text-sm" placeholder="06 12 34 56 78" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-gray-600 mb-1">Email perso</label>
+                    <input type="email" value={equipeForm.email} onChange={(e) => setEquipeForm((f) => ({ ...f, email: e.target.value }))}
+                      className="w-full h-10 px-3 rounded-lg border border-gray-300 focus:border-rzpanda-primary outline-none text-sm" placeholder="marie@email.com" />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-600 mb-1">Certifications</label>
+                  <input type="text" value={equipeForm.certifications} onChange={(e) => setEquipeForm((f) => ({ ...f, certifications: e.target.value }))}
+                    className="w-full h-10 px-3 rounded-lg border border-gray-300 focus:border-rzpanda-primary outline-none text-sm" placeholder="CAP Petite enfance, PSC1..." />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-600 mb-1">Notes</label>
+                  <textarea value={equipeForm.notes} onChange={(e) => setEquipeForm((f) => ({ ...f, notes: e.target.value }))}
+                    className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:border-rzpanda-primary outline-none text-sm resize-none" rows={2} placeholder="Infos complémentaires..." />
+                </div>
+                <div className="flex gap-2">
+                  <button onClick={handleSaveEquipe} disabled={equipeSaving}
+                    className="h-10 px-5 rounded-lg bg-rzpanda-primary text-white text-sm font-medium hover:bg-rzpanda-primary/90 disabled:opacity-50 flex items-center gap-2">
+                    {equipeSaving && <Loader2 size={14} className="animate-spin" />}
+                    {editingProfil ? "Modifier" : "Créer le profil"}
+                  </button>
+                  <button onClick={resetEquipeForm} className="h-10 px-4 rounded-lg border border-gray-300 text-sm text-gray-600 hover:bg-gray-50">
+                    Annuler
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Liste des profils */}
+            {!equipeLoaded ? (
+              <div className="flex justify-center py-4"><Loader2 size={20} className="animate-spin text-rzpanda-primary" /></div>
+            ) : equipeProfils.length === 0 ? (
+              <p className="text-sm text-gray-400 text-center py-4">Aucun profil créé.</p>
+            ) : (
+              <div className="space-y-2">
+                {equipeProfils.map((p) => (
+                  <div key={p.id} className={`flex items-center justify-between p-3 rounded-lg ${p.actif ? "bg-gray-50" : "bg-gray-100 opacity-60"}`}>
+                    <div className="flex items-center gap-3">
+                      <div className={`h-10 w-10 rounded-full flex items-center justify-center text-white text-sm font-bold ${p.actif ? "bg-rzpanda-primary" : "bg-gray-400"}`}>
+                        {p.prenom.charAt(0)}{p.nom.charAt(0)}
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm font-medium text-gray-800">{p.prenom} {p.nom}</span>
+                          {p.role === "ADMINISTRATEUR" && (
+                            <span className="text-[10px] font-medium bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded-full">Admin</span>
+                          )}
+                          {!p.actif && (
+                            <span className="text-[10px] font-medium bg-gray-200 text-gray-500 px-1.5 py-0.5 rounded-full">Inactif</span>
+                          )}
+                        </div>
+                        <span className="text-xs text-gray-500">{p.poste || "—"}</span>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <button onClick={() => handleEditProfil(p)} className="p-2 rounded-lg hover:bg-white text-gray-400 hover:text-gray-600" title="Modifier">
+                        <Pencil size={14} />
+                      </button>
+                      <button onClick={() => handleDesactiverProfil(p.id, p.actif)}
+                        className={`p-2 rounded-lg hover:bg-white ${p.actif ? "text-gray-400 hover:text-red-500" : "text-gray-400 hover:text-green-500"}`}
+                        title={p.actif ? "Désactiver" : "Réactiver"}>
+                        {p.actif ? <UserX size={14} /> : <UserCheck size={14} />}
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Seuils d'âge — groupes */}
+          <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 space-y-4">
+            <div>
+              <h2 className="text-lg font-semibold text-gray-800 flex items-center gap-2">
+                <Baby size={20} className="text-rzpanda-primary" />
+                Groupes d&apos;âge
+              </h2>
+              <p className="text-sm text-gray-500 mt-1">Configurez les seuils pour la bascule automatique des groupes. Les enfants avec un groupe forcé manuellement ne sont pas affectés.</p>
+            </div>
+            {!seuilsLoaded ? (
+              <div className="flex justify-center py-4"><Loader2 size={20} className="animate-spin text-rzpanda-primary" /></div>
+            ) : (
+              <>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div className="p-4 rounded-xl bg-blue-50 border border-blue-100">
+                    <p className="text-sm font-medium text-blue-800 mb-2">Bébés</p>
+                    <p className="text-xs text-blue-600 mb-1">0 à <strong>{seuilBebes}</strong> mois</p>
+                    <div className="flex items-center gap-2">
+                      <input type="range" min={6} max={36} value={seuilBebes}
+                        onChange={(e) => setSeuilBebes(Number(e.target.value))}
+                        className="flex-1 accent-blue-500" />
+                      <span className="text-sm font-mono font-bold text-blue-700 w-8 text-right">{seuilBebes}</span>
+                    </div>
+                  </div>
+                  <div className="p-4 rounded-xl bg-amber-50 border border-amber-100">
+                    <p className="text-sm font-medium text-amber-800 mb-2">Moyens</p>
+                    <p className="text-xs text-amber-600 mb-1">{seuilBebes} à <strong>{seuilMoyens}</strong> mois</p>
+                    <div className="flex items-center gap-2">
+                      <input type="range" min={seuilBebes + 1} max={48} value={seuilMoyens}
+                        onChange={(e) => setSeuilMoyens(Number(e.target.value))}
+                        className="flex-1 accent-amber-500" />
+                      <span className="text-sm font-mono font-bold text-amber-700 w-8 text-right">{seuilMoyens}</span>
+                    </div>
+                  </div>
+                  <div className="p-4 rounded-xl bg-green-50 border border-green-100">
+                    <p className="text-sm font-medium text-green-800 mb-2">Grands</p>
+                    <p className="text-xs text-green-600">{seuilMoyens} mois et +</p>
+                  </div>
+                </div>
+                <button onClick={handleSaveSeuils} disabled={seuilsSaving}
+                  className="h-11 px-5 rounded-xl bg-rzpanda-primary text-white text-sm font-medium hover:bg-rzpanda-primary/90 disabled:opacity-50 flex items-center gap-2">
+                  {seuilsSaving && <Loader2 size={16} className="animate-spin" />}
+                  Enregistrer les seuils
                 </button>
               </>
             )}

@@ -7,6 +7,7 @@ import { useParams, useRouter } from "next/navigation";
 import { getEnfants } from "@/app/actions/enfants";
 import { enregistrerRepas, enregistrerChange, debuterSieste, finirSieste, getSiesteEnCours, enregistrerTransmission, enregistrerIncident, getHistoriqueDuJour } from "@/app/actions/suivi";
 import { useAuth } from "@/hooks/use-auth";
+import { useProfil } from "@/hooks/use-profil";
 import { useModules } from "@/hooks/use-modules";
 import { BadgeAllergie } from "@/components/shared/badge-allergie";
 import { BadgeRegime } from "@/components/shared/badge-regime";
@@ -29,6 +30,7 @@ export default function SuiviPage() {
   const router = useRouter();
   const structureId = params.structureId as string;
   const { user, modulesActifs } = useAuth();
+  const { profil } = useProfil();
   const { isActif } = useModules(modulesActifs);
   const [enfants, setEnfants] = useState<Enfant[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -116,7 +118,7 @@ export default function SuiviPage() {
 
   const handleChange = async (type: string) => {
     if (!selectedId) return;
-    const result = await enregistrerChange({ structure_id: structureId, enfant_id: selectedId, type_change: type, professionnel_id: proId });
+    const result = await enregistrerChange({ structure_id: structureId, enfant_id: selectedId, type_change: type, professionnel_id: proId, profil_id: profil?.id });
     if (result.success) { toast.success("Change enregistré !"); refreshHistorique(); }
     else toast.error(result.error);
   };
@@ -128,7 +130,7 @@ export default function SuiviPage() {
       entree: entree || undefined, entree_quantite: entreeQte || undefined,
       plat: plat || undefined, plat_quantite: platQte || undefined,
       dessert: dessert || undefined, dessert_quantite: dessertQte || undefined,
-      observations: observations || undefined, professionnel_id: proId,
+      observations: observations || undefined, professionnel_id: proId, profil_id: profil?.id,
     });
     if (result.success) { toast.success("Repas enregistré !"); setActiveForm(null); resetRepas(); refreshHistorique(); }
     else toast.error(result.error);
@@ -143,7 +145,7 @@ export default function SuiviPage() {
       if (result.success) { toast.success("Sieste terminée !"); setSiesteEnCours(null); refreshHistorique(); }
       else toast.error(result.error);
     } else {
-      const result = await debuterSieste({ structure_id: structureId, enfant_id: selectedId, professionnel_id: proId });
+      const result = await debuterSieste({ structure_id: structureId, enfant_id: selectedId, professionnel_id: proId, profil_id: profil?.id });
       if (result.success && result.data) {
         toast.success("Sieste démarrée !");
         setSiesteEnCours({ id: result.data.id, heure_debut: result.data.heure_debut.toISOString() });
@@ -156,7 +158,7 @@ export default function SuiviPage() {
     if (!transContenu.trim()) { toast.error("Écrivez un message."); return; }
     const result = await enregistrerTransmission({
       structure_id: structureId, enfant_id: transType === "ENFANT" ? selectedId ?? undefined : undefined,
-      contenu: transContenu, type_transm: transType, auteur: user?.user_metadata?.prenom ?? "Pro",
+      contenu: transContenu, type_transm: transType, auteur: profil?.prenom ?? user?.user_metadata?.prenom ?? "Pro", profil_id: profil?.id,
     });
     if (result.success) { toast.success("Transmission enregistrée !"); setActiveForm(null); setTransContenu(""); refreshHistorique(); }
     else toast.error(result.error);
@@ -169,7 +171,7 @@ export default function SuiviPage() {
     const result = await enregistrerIncident({
       structure_id: structureId, enfant_id: selectedId, type_incident: incType,
       description: incDescription, gravite: incGravite, action_prise: incAction,
-      parents_prevenu: incParents, heure: incHeure, professionnel_id: proId,
+      parents_prevenu: incParents, heure: incHeure, professionnel_id: proId, profil_id: profil?.id,
     });
     if (result.success) {
       toast.success("Incident enregistré");

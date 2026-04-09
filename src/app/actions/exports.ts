@@ -21,7 +21,7 @@ export interface ExportDDPPData {
     conforme: boolean; statut: string;
   }[];
   nettoyage: {
-    zone: string; tache: string; date: string; professionnel_nom: string;
+    zone: string; tache: string; date: string; professionnel_nom: string; heure: string;
   }[];
   biberons: {
     id: string; date: string; enfant_prenom: string; type_lait: string;
@@ -133,6 +133,7 @@ export async function getExportDDPPData(
           tache: v.tache.nom,
           date: v.date.toISOString(),
           professionnel_nom: v.professionnel_nom,
+          heure: v.heure.toISOString(),
         })),
         biberons: biberons.map((b) => ({
           id: b.id,

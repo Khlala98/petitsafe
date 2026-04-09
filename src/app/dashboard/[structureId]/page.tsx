@@ -3,6 +3,7 @@
 export const dynamic = 'force-dynamic';
 
 import { useAuth } from "@/hooks/use-auth";
+import { useProfil } from "@/hooks/use-profil";
 import { useModules } from "@/hooks/use-modules";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -16,7 +17,9 @@ import {
 } from "lucide-react";
 
 export default function DashboardPage() {
-  const { prenom, modulesActifs } = useAuth();
+  const { prenom: authPrenom, modulesActifs } = useAuth();
+  const { profil } = useProfil();
+  const prenom = profil?.prenom || authPrenom;
   const { isActif } = useModules(modulesActifs);
   const params = useParams();
   const structureId = params.structureId as string;
@@ -176,6 +179,27 @@ export default function DashboardPage() {
             )}
             <Link href={`/dashboard/${structureId}/biberonnerie`} className="text-xs text-rzpanda-primary hover:underline block mt-2">
               Voir les biberons <ArrowRight size={12} className="inline" />
+            </Link>
+          </div>
+        )}
+
+        {/* Alertes DLC lait */}
+        {isActif("biberonnerie") && data.alertesLait.length > 0 && (
+          <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+            <div className="flex items-center gap-2 mb-3">
+              <AlertTriangle size={20} className="text-orange-500" />
+              <span className="text-sm font-medium text-gray-600">Alertes lait</span>
+            </div>
+            <div className="space-y-2">
+              {data.alertesLait.map((a, i) => (
+                <div key={i} className={`flex items-start gap-2 p-2 rounded-lg text-sm ${a.niveau === "rouge" ? "bg-red-50 text-red-700" : "bg-orange-50 text-orange-700"}`}>
+                  <span className={`inline-block h-2 w-2 rounded-full shrink-0 mt-1.5 ${a.niveau === "rouge" ? "bg-red-500" : "bg-orange-400"}`} />
+                  <span><strong>{a.enfantPrenom}</strong> — {a.message}</span>
+                </div>
+              ))}
+            </div>
+            <Link href={`/dashboard/${structureId}/biberonnerie`} className="text-xs text-rzpanda-primary hover:underline block mt-2">
+              Voir la biberonnerie <ArrowRight size={12} className="inline" />
             </Link>
           </div>
         )}

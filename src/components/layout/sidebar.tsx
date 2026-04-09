@@ -7,6 +7,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { createClient } from "@/lib/supabase/client";
 import { useModules } from "@/hooks/use-modules";
+import { useProfil } from "@/hooks/use-profil";
 import {
   LayoutDashboard, Baby, ClipboardList, Thermometer, Package, Sparkles,
   MessageSquare, FileText, FileDown, Settings, LogOut, ChevronLeft, Moon,
@@ -32,6 +33,7 @@ interface MenuItem {
   href: string;
   moduleId?: ModuleId;
   alwaysVisible?: boolean;
+  adminOnly?: boolean;
   condition?: (isActif: (m: ModuleId) => boolean) => boolean;
 }
 
@@ -48,7 +50,7 @@ const SECTIONS: { title: string; category?: string; items: MenuItem[] }[] = [
     items: [
       { label: "Températures", icon: Thermometer, href: "/temperatures", moduleId: "temperatures" },
       { label: "Biberonnerie", icon: Baby, href: "/biberonnerie", moduleId: "biberonnerie" },
-      { label: "Réceptions & Stock", icon: Package, href: "/stock", condition: (isActif) => isActif("tracabilite") || isActif("stocks") },
+      { label: "Réceptions & Stock", icon: Package, href: "/stock", adminOnly: true, condition: (isActif) => isActif("tracabilite") || isActif("stocks") },
       { label: "Nettoyage", icon: Sparkles, href: "/nettoyage", moduleId: "nettoyage" },
     ],
   },
@@ -65,8 +67,8 @@ const SECTIONS: { title: string; category?: string; items: MenuItem[] }[] = [
     title: "Gestion",
     items: [
       { label: "Protocoles", icon: FileText, href: "/protocoles", moduleId: "protocoles" },
-      { label: "Exports PDF", icon: FileDown, href: "/exports", alwaysVisible: true },
-      { label: "Paramètres", icon: Settings, href: "/parametres", alwaysVisible: true },
+      { label: "Exports PDF", icon: FileDown, href: "/exports", alwaysVisible: true, adminOnly: true },
+      { label: "Paramètres", icon: Settings, href: "/parametres", alwaysVisible: true, adminOnly: true },
     ],
   },
 ];
@@ -77,6 +79,7 @@ export function Sidebar({ structureId, structureNom, prenom, modulesActifs }: Si
   const supabase = createClient();
   const [collapsed, setCollapsed] = useState(false);
   const { isActif, modulesParCategorie } = useModules(modulesActifs);
+  const { profil, isAdmin } = useProfil();
   const basePath = `/dashboard/${structureId}`;
 
   const handleLogout = async () => {
@@ -86,6 +89,7 @@ export function Sidebar({ structureId, structureNom, prenom, modulesActifs }: Si
   };
 
   const isItemVisible = (item: MenuItem): boolean => {
+    if (item.adminOnly && !isAdmin) return false;
     if (item.alwaysVisible) return true;
     if (item.condition) return item.condition(isActif);
     if (item.moduleId) return isActif(item.moduleId);
@@ -141,7 +145,7 @@ export function Sidebar({ structureId, structureNom, prenom, modulesActifs }: Si
         })}
       </nav>
       <div className="border-t border-gray-100 p-3">
-        {!collapsed && <p className="text-sm font-medium text-gray-700 mb-2 truncate px-1">{prenom}</p>}
+        {!collapsed && <p className="text-sm font-medium text-gray-700 mb-2 truncate px-1">{profil?.prenom || prenom}</p>}
         <button onClick={handleLogout} className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-gray-500 hover:bg-red-50 hover:text-red-600 transition-colors w-full" aria-label="Se déconnecter">
           <LogOut size={20} className="shrink-0" />
           {!collapsed && <span>Déconnexion</span>}

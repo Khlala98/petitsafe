@@ -9,6 +9,8 @@ import { getAlerteDLC } from "@/lib/business-logic";
 import { SEUILS_TEMPERATURE } from "@/lib/constants";
 import { PastilleStatut } from "@/components/shared/pastille-statut";
 import { useAuth } from "@/hooks/use-auth";
+import { useProfil } from "@/hooks/use-profil";
+import { AdminGuard } from "@/components/shared/admin-guard";
 import { toast } from "sonner";
 import { Loader2, Plus, AlertTriangle, Minus, Trash2, Package } from "lucide-react";
 
@@ -21,8 +23,9 @@ export default function StockPage() {
   const params = useParams();
   const structureId = params.structureId as string;
   const { user } = useAuth();
+  const { profil } = useProfil();
   const proId = user?.id ?? "";
-  const proNom = user?.user_metadata?.prenom ?? "";
+  const proNom = profil?.prenom ?? user?.user_metadata?.prenom ?? "";
 
   const [tab, setTab] = useState<"receptions" | "alimentaire" | "consommables">("receptions");
   const [receptions, setReceptions] = useState<Reception[]>([]);
@@ -60,7 +63,7 @@ export default function StockPage() {
       structure_id: structureId, nom_produit: fNom, fournisseur: fFourn, numero_lot: fLot,
       dlc: fDlc, temperature_reception: fTemp !== "" ? Number(fTemp) : undefined,
       emballage_conforme: fEmballage, conforme: fConforme,
-      motif_non_conformite: fMotif || undefined, professionnel_id: proId,
+      motif_non_conformite: fMotif || undefined, professionnel_id: proId, profil_id: profil?.id,
     });
     if (result.success) { toast.success("Réception enregistrée !"); setShowForm(false); setFNom(""); setFFourn(""); setFLot(""); setFDlc(""); setFTemp(""); setFMotif(""); fetchData(); }
     else toast.error(result.error);
@@ -107,6 +110,7 @@ export default function StockPage() {
   const enStock = receptions.filter((r) => r.statut === "EN_STOCK");
 
   return (
+    <AdminGuard>
     <div className="max-w-5xl mx-auto space-y-6">
       <h1 className="text-2xl font-bold text-gray-800">Réceptions &amp; Stock</h1>
 
@@ -285,5 +289,6 @@ export default function StockPage() {
         </div>
       )}
     </div>
+    </AdminGuard>
   );
 }

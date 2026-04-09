@@ -13,7 +13,7 @@ interface Contact { nom: string; lien: string; telephone: string; est_autorise_r
 interface EnfantFormProps {
   mode: "create" | "edit";
   initial?: {
-    id: string; prenom: string; nom: string; date_naissance: string; sexe?: string | null; groupe?: string | null;
+    id: string; prenom: string; nom: string; date_naissance: string; sexe?: string | null; groupe?: string | null; groupe_force?: boolean;
     allergies: Allergie[]; contacts: Contact[]; regimes?: string[];
   };
 }
@@ -29,6 +29,7 @@ export function EnfantForm({ mode, initial }: EnfantFormProps) {
   const [dateNaissance, setDateNaissance] = useState(initial?.date_naissance ? initial.date_naissance.split("T")[0] : "");
   const [sexe, setSexe] = useState(initial?.sexe ?? "");
   const [groupe, setGroupe] = useState(initial?.groupe ?? "");
+  const [groupeForce, setGroupeForce] = useState(initial?.groupe_force ?? false);
   const [allergies, setAllergies] = useState<Allergie[]>(initial?.allergies ?? []);
   const [contacts, setContacts] = useState<Contact[]>(initial?.contacts ?? []);
   const [regimes, setRegimes] = useState<string[]>(initial?.regimes ?? []);
@@ -64,7 +65,7 @@ export function EnfantForm({ mode, initial }: EnfantFormProps) {
     const data = {
       prenom, nom, date_naissance: dateNaissance,
       sexe: sexe === "FILLE" || sexe === "GARCON" ? sexe as "FILLE" | "GARCON" : null,
-      groupe: groupe || null, photo_url: null,
+      groupe: groupe || null, groupe_force: groupeForce && !!groupe, photo_url: null,
       allergies: allergies.filter((a) => a.allergene),
       contacts: contacts.filter((c) => c.nom && c.telephone),
       regimes,
@@ -122,9 +123,16 @@ export function EnfantForm({ mode, initial }: EnfantFormProps) {
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Groupe</label>
             <select value={groupe} onChange={(e) => setGroupe(e.target.value)} className={`${inputClass} bg-white`}>
-              <option value="">—</option>
+              <option value="">Automatique (selon l&apos;âge)</option>
               {GROUPES_ENFANTS.map((g) => <option key={g} value={g}>{g}</option>)}
             </select>
+            {groupe && (
+              <label className="flex items-center gap-2 mt-2 text-sm text-gray-600 cursor-pointer">
+                <input type="checkbox" checked={groupeForce} onChange={(e) => setGroupeForce(e.target.checked)}
+                  className="rounded border-gray-300 text-rzpanda-primary focus:ring-rzpanda-primary" />
+                Forcer ce groupe (ignorer la bascule automatique)
+              </label>
+            )}
           </div>
         </div>
       </div>

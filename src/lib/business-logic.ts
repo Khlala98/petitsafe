@@ -12,6 +12,7 @@ import {
 export type StatutConformite = "conforme" | "attention" | "alerte";
 export type StatutBiberon = "ok" | "attention" | "alerte";
 export type AlerteDLC = null | "warning" | "alerte" | "critique";
+export type AlerteDLCDetail = { niveau: AlerteDLC; joursRestants: number; message: string } | null;
 
 // Fréquences de nettoyage — aligné avec l'enum Prisma
 type Frequence =
@@ -138,6 +139,31 @@ export function getAlerteDLC(dlc: Date, maintenant: Date): AlerteDLC {
   return null;
 }
 
+export function getAlerteDLCDetail(dlc: Date, prenomEnfant: string, maintenant: Date = new Date()): AlerteDLCDetail {
+  const aujourdhuiDebut = new Date(maintenant.getFullYear(), maintenant.getMonth(), maintenant.getDate());
+  const dlcDebut = new Date(dlc.getFullYear(), dlc.getMonth(), dlc.getDate());
+
+  const diffMs = dlcDebut.getTime() - aujourdhuiDebut.getTime();
+  const diffJours = Math.round(diffMs / (1000 * 60 * 60 * 24));
+
+  if (diffJours < 0) {
+    return { niveau: "critique", joursRestants: diffJours, message: `Le lait de ${prenomEnfant} est périmé — NE PAS UTILISER` };
+  }
+  if (diffJours === 0) {
+    return { niveau: "alerte", joursRestants: 0, message: `Le lait de ${prenomEnfant} expire AUJOURD'HUI` };
+  }
+  if (diffJours === 1) {
+    return { niveau: "alerte", joursRestants: 1, message: `Le lait de ${prenomEnfant} expire DEMAIN` };
+  }
+  if (diffJours === 2) {
+    return { niveau: "warning", joursRestants: 2, message: `Le lait de ${prenomEnfant} expire dans 2 jours — pensez à demander aux parents d'en ramener` };
+  }
+  if (diffJours === 3) {
+    return { niveau: "warning", joursRestants: 3, message: `Le lait de ${prenomEnfant} expire dans 3 jours — pensez à demander aux parents d'en ramener` };
+  }
+  return null;
+}
+
 /**
  * Calcule l'âge lisible d'un enfant.
  * - < 1 mois → "X jours"
@@ -173,6 +199,59 @@ export function calculerAge(dateNaissance: Date, maintenant: Date): string {
   }
 
   return `${ans} ans`;
+}
+
+export function calculerAgeMois(dateNaissance: Date, maintenant: Date = new Date()): number {
+  if (dateNaissance > maintenant) return 0;
+  let totalMois =
+    (maintenant.getFullYear() - dateNaissance.getFullYear()) * 12 +
+    (maintenant.getMonth() - dateNaissance.getMonth());
+  if (maintenant.getDate() < dateNaissance.getDate()) totalMois -= 1;
+  return Math.max(0, totalMois);
+}
+
+export function calculerGroupeAuto(
+  dateNaissance: Date,
+  seuilBebesMax: number,
+  seuilMoyensMax: number,
+  maintenant: Date = new Date()
+): string {
+  const ageMois = calculerAgeMois(dateNaissance, maintenant);
+  if (ageMois < seuilBebesMax) return "Bébés";
+  if (ageMois < seuilMoyensMax) return "Moyens";
+  return "Grands";
+}
+
+export function joursAvantBascule(
+  dateNaissance: Date,
+  seuilBebesMax: number,
+  seuilMoyensMax: number,
+  maintenant: Date = new Date()
+): { prochainGroupe: string; jours: number } | null {
+  const ageMois = calculerAgeMois(dateNaissance, maintenant);
+
+  let prochainSeuil: number;
+  let prochainGroupe: string;
+
+  if (ageMois < seuilBebesMax) {
+    prochainSeuil = seuilBebesMax;
+    prochainGroupe = "Moyens";
+  } else if (ageMois < seuilMoyensMax) {
+    prochainSeuil = seuilMoyensMax;
+    prochainGroupe = "Grands";
+  } else {
+    return null; // Déjà dans Grands
+  }
+
+  // Calculer la date exacte de la bascule
+  const dateBascule = new Date(dateNaissance);
+  dateBascule.setMonth(dateBascule.getMonth() + prochainSeuil);
+
+  const msParJour = 1000 * 60 * 60 * 24;
+  const jours = Math.ceil((dateBascule.getTime() - maintenant.getTime()) / msParJour);
+
+  if (jours <= 0) return null;
+  return { prochainGroupe, jours };
 }
 
 /**

@@ -3,10 +3,18 @@
 import { prisma } from "@/lib/supabase/prisma";
 import { getNettoyageKpi } from "@/app/actions/nettoyage";
 
+export interface AlerteLaitDashboard {
+  enfantPrenom: string;
+  joursRestants: number;
+  niveau: "rouge" | "orange";
+  message: string;
+}
+
 export interface DashboardData {
   enfantsCount: number;
   nettoyage: { fait: number; total: number; pct: number } | null;
   prochainesDlc: { id: string; nom_produit: string; dlc: string; joursRestants: number }[];
+  alertesLait: AlerteLaitDashboard[];
   biberonsEnAttente: { count: number; plusAncienPrep: string | null };
   temperatures: {
     relevesAujourdhui: number;
@@ -60,6 +68,44 @@ export async function getDashboardData(
           joursRestants,
         });
       }
+    }
+
+    // 3b. Alertes DLC lait (biberons)
+    const alertesLait: AlerteLaitDashboard[] = [];
+    if (isActif("biberonnerie")) {
+      const septJoursAvant = new Date(todayStart);
+      septJoursAvant.setDate(septJoursAvant.getDate() - 7);
+
+      const biberonsAvecDLC = await prisma.biberon.findMany({
+        where: {
+          structure_id: structureId,
+          date_peremption_lait: { not: null },
+          date: { gte: septJoursAvant },
+        },
+        include: { enfant: { select: { id: true, prenom: true } } },
+        orderBy: { date: "desc" },
+      });
+
+      const enfantsDLC = new Map<string, { prenom: string; dlc: Date }>();
+      for (const b of biberonsAvecDLC) {
+        if (!b.date_peremption_lait) continue;
+        if (!enfantsDLC.has(b.enfant.id)) {
+          enfantsDLC.set(b.enfant.id, { prenom: b.enfant.prenom, dlc: b.date_peremption_lait });
+        }
+      }
+      enfantsDLC.forEach((info) => {
+        const dlcDebut = new Date(info.dlc.getFullYear(), info.dlc.getMonth(), info.dlc.getDate());
+        const diffJours = Math.round((dlcDebut.getTime() - todayStart.getTime()) / (1000 * 60 * 60 * 24));
+        if (diffJours > 3) return;
+
+        let message: string;
+        let niveau: "rouge" | "orange";
+        if (diffJours < 0) { message = `Lait périmé — NE PAS UTILISER`; niveau = "rouge"; }
+        else if (diffJours <= 1) { message = diffJours === 0 ? "Expire aujourd'hui" : "Expire demain"; niveau = "rouge"; }
+        else { message = `Expire dans ${diffJours} jours`; niveau = "orange"; }
+
+        alertesLait.push({ enfantPrenom: info.prenom, joursRestants: diffJours, niveau, message });
+      });
     }
 
     // 4. Biberons en attente (préparés, non servis)
@@ -156,7 +202,7 @@ export async function getDashboardData(
 
     return {
       success: true,
-      data: { enfantsCount, nettoyage, prochainesDlc, biberonsEnAttente, temperatures, activiteRecente },
+      data: { enfantsCount, nettoyage, prochainesDlc, alertesLait, biberonsEnAttente, temperatures, activiteRecente },
     };
   } catch {
     return { success: false, error: "Erreur lors du chargement du tableau de bord." };

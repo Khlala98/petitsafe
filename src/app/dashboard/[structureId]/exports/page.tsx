@@ -5,6 +5,7 @@ export const dynamic = 'force-dynamic';
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import { useAuth } from "@/hooks/use-auth";
+import { AdminGuard } from "@/components/shared/admin-guard";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { exportFormSchema, type ExportFormData } from "@/lib/schemas/exports";
@@ -124,6 +125,7 @@ export default function ExportsPage() {
   };
 
   return (
+    <AdminGuard>
     <div className="max-w-3xl mx-auto space-y-6">
       <h1 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
         <FileDown size={24} className="text-rzpanda-primary" />
@@ -237,5 +239,6 @@ export default function ExportsPage() {
         )}
       </div>
     </div>
+    </AdminGuard>
   );
 }

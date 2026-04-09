@@ -1,6 +1,7 @@
 "use server";
 
 import { prisma } from "@/lib/supabase/prisma";
+import { verifierAdmin } from "@/lib/permissions";
 import { validerPlageTemperature } from "@/lib/business-logic";
 
 export async function getEquipements(structureId: string) {
@@ -26,8 +27,11 @@ export async function creerEquipement(data: {
   }
 }
 
-export async function supprimerEquipement(equipementId: string) {
+export async function supprimerEquipement(equipementId: string, profilId?: string) {
   try {
+    if (profilId && !(await verifierAdmin(profilId))) {
+      return { success: false as const, error: "Action réservée aux administrateurs." };
+    }
     await prisma.equipement.delete({ where: { id: equipementId } });
     return { success: true as const };
   } catch {
@@ -35,8 +39,11 @@ export async function supprimerEquipement(equipementId: string) {
   }
 }
 
-export async function supprimerReleve(releveId: string) {
+export async function supprimerReleve(releveId: string, profilId?: string) {
   try {
+    if (profilId && !(await verifierAdmin(profilId))) {
+      return { success: false as const, error: "Action réservée aux administrateurs." };
+    }
     await prisma.releveTemperature.delete({ where: { id: releveId } });
     return { success: true as const };
   } catch {
@@ -63,7 +70,7 @@ export async function getReleves(structureId: string, date: string) {
 export async function creerReleve(data: {
   structure_id: string; equipement_id: string; temperature: number;
   conforme: boolean; action_corrective?: string; professionnel_id: string;
-  heure?: string; plage_confirmee?: boolean;
+  profil_id?: string; heure?: string; plage_confirmee?: boolean;
 }) {
   try {
     if (!data.conforme && !data.action_corrective) {
@@ -92,6 +99,7 @@ export async function creerReleve(data: {
         conforme: data.conforme,
         action_corrective: data.action_corrective || null,
         professionnel_id: data.professionnel_id,
+        profil_id: data.profil_id || null,
       },
     });
     return { success: true as const, data: releve };
@@ -119,7 +127,7 @@ export async function creerRelevePlat(data: {
   structure_id: string; nom_plat: string; type_plat: "CHAUD" | "FROID";
   temperature_avant: number; heure_avant: string;
   temperature_apres: number; heure_apres: string; conforme: boolean;
-  action_corrective?: string; professionnel_id: string;
+  action_corrective?: string; professionnel_id: string; profil_id?: string;
 }) {
   try {
     if (!data.conforme && !data.action_corrective) {
@@ -139,6 +147,7 @@ export async function creerRelevePlat(data: {
         conforme: data.conforme,
         action_corrective: data.action_corrective || null,
         professionnel_id: data.professionnel_id,
+        profil_id: data.profil_id || null,
       },
     });
     return { success: true as const, data: releve };

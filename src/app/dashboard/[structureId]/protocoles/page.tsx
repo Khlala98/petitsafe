@@ -5,6 +5,7 @@ export const dynamic = 'force-dynamic';
 import { useEffect, useState, useCallback } from "react";
 import { useParams } from "next/navigation";
 import { useAuth } from "@/hooks/use-auth";
+import { useProfil } from "@/hooks/use-profil";
 import { getProtocoles, creerProtocole, modifierProtocole, archiverProtocole, importerModelesProtocoles } from "@/app/actions/protocoles";
 import { CATEGORIES_PROTOCOLE } from "@/lib/schemas/protocole";
 import { toast } from "sonner";
@@ -27,8 +28,9 @@ export default function ProtocolesPage() {
   const params = useParams();
   const structureId = params.structureId as string;
   const { user, activeRole } = useAuth();
+  const { isAdmin } = useProfil();
   const userId = user?.id ?? "";
-  const isGestionnaire = activeRole === "GESTIONNAIRE";
+  const isGestionnaire = isAdmin || activeRole === "GESTIONNAIRE";
 
   const [protocoles, setProtocoles] = useState<Protocole[]>([]);
   const [loading, setLoading] = useState(true);

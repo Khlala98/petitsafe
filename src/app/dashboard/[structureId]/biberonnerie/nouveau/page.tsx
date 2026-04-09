@@ -7,6 +7,7 @@ import { creerBiberon } from "@/app/actions/biberons";
 import { isBoiteLaitExpiree } from "@/lib/business-logic";
 import { TYPES_LAIT, QUANTITES_BIBERON_ML } from "@/lib/constants";
 import { useAuth } from "@/hooks/use-auth";
+import { useProfil } from "@/hooks/use-profil";
 import { BadgeAllergie } from "@/components/shared/badge-allergie";
 import { BadgeRegime } from "@/components/shared/badge-regime";
 import { toast } from "sonner";
@@ -36,6 +37,7 @@ function NouveauBiberonContent() {
   const structureId = params.structureId as string;
   const preselectedEnfantId = searchParams.get("enfant");
   const { user } = useAuth();
+  const { profil } = useProfil();
 
   const [enfants, setEnfants] = useState<Enfant[]>([]);
   const [selectedEnfantId, setSelectedEnfantId] = useState<string>(preselectedEnfantId ?? "");
@@ -46,7 +48,7 @@ function NouveauBiberonContent() {
   const [dateOuverture, setDateOuverture] = useState(new Date().toISOString().split("T")[0]);
   const [dosettes, setDosettes] = useState<number | "">("");
   const [quantite, setQuantite] = useState<number | "">("");
-  const [preparateur, setPreparateur] = useState(user?.user_metadata?.prenom ?? "");
+  const [preparateur, setPreparateur] = useState(profil?.prenom ?? user?.user_metadata?.prenom ?? "");
   const [observations, setObservations] = useState("");
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -62,7 +64,7 @@ function NouveauBiberonContent() {
     fetch();
   }, [structureId]);
 
-  useEffect(() => { setPreparateur(user?.user_metadata?.prenom ?? ""); }, [user]);
+  useEffect(() => { setPreparateur(profil?.prenom ?? user?.user_metadata?.prenom ?? ""); }, [profil, user]);
 
   const selected = enfants.find((e) => e.id === selectedEnfantId) ?? null;
   const plvAllergy = selected ? hasPLVAllergy(selected.allergies) : false;
@@ -84,7 +86,7 @@ function NouveauBiberonContent() {
       date_peremption_lait: datePeremption || undefined, date_ouverture_boite: dateOuverture || undefined,
       nombre_dosettes: dosettes ? Number(dosettes) : undefined,
       quantite_preparee_ml: Number(quantite), preparateur_nom: preparateur,
-      professionnel_id: user?.id ?? "", observations: observations || undefined,
+      professionnel_id: user?.id ?? "", profil_id: profil?.id, observations: observations || undefined,
     });
     setSubmitting(false);
 

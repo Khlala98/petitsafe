@@ -25,6 +25,35 @@ export async function getStructureInfo(structureId: string) {
   }
 }
 
+export async function getSeuilsAge(structureId: string) {
+  try {
+    const structure = await prisma.structure.findUnique({
+      where: { id: structureId },
+      select: { seuil_bebes_max: true, seuil_moyens_max: true },
+    });
+    if (!structure) return { success: false as const, error: "Structure introuvable." };
+    return { success: true as const, data: structure };
+  } catch {
+    return { success: false as const, error: "Erreur lors du chargement." };
+  }
+}
+
+export async function updateSeuilsAge(structureId: string, seuilBebesMax: number, seuilMoyensMax: number) {
+  try {
+    if (seuilBebesMax < 6 || seuilBebesMax > 48) return { success: false as const, error: "Le seuil bébés doit être entre 6 et 48 mois." };
+    if (seuilMoyensMax <= seuilBebesMax) return { success: false as const, error: "Le seuil moyens doit être supérieur au seuil bébés." };
+    if (seuilMoyensMax > 60) return { success: false as const, error: "Le seuil moyens ne peut pas dépasser 60 mois." };
+
+    await prisma.structure.update({
+      where: { id: structureId },
+      data: { seuil_bebes_max: seuilBebesMax, seuil_moyens_max: seuilMoyensMax },
+    });
+    return { success: true as const };
+  } catch {
+    return { success: false as const, error: "Erreur lors de la mise à jour des seuils." };
+  }
+}
+
 export async function updateStructureInfo(
   structureId: string,
   data: {

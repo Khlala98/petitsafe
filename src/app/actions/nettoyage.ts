@@ -1,6 +1,7 @@
 "use server";
 
 import { prisma } from "@/lib/supabase/prisma";
+import { verifierAdmin } from "@/lib/permissions";
 import { TACHES_NETTOYAGE_DEFAUT } from "@/lib/data/taches-nettoyage-defaut";
 import { validationNettoyageSchema, zoneNettoyageSchema, tacheNettoyageSchema } from "@/lib/schemas/nettoyage";
 
@@ -67,8 +68,11 @@ export async function creerZone(structureId: string, data: { nom: string; couleu
   }
 }
 
-export async function supprimerZone(zoneId: string, structureId: string) {
+export async function supprimerZone(zoneId: string, structureId: string, profilId?: string) {
   try {
+    if (profilId && !(await verifierAdmin(profilId))) {
+      return { success: false as const, error: "Action réservée aux administrateurs." };
+    }
     await prisma.zoneNettoyage.deleteMany({ where: { id: zoneId, structure_id: structureId } });
     return { success: true as const };
   } catch {
@@ -88,8 +92,11 @@ export async function creerTache(data: { zone_id: string; nom: string; frequence
   }
 }
 
-export async function supprimerTache(tacheId: string) {
+export async function supprimerTache(tacheId: string, profilId?: string) {
   try {
+    if (profilId && !(await verifierAdmin(profilId))) {
+      return { success: false as const, error: "Action réservée aux administrateurs." };
+    }
     await prisma.tacheNettoyage.update({ where: { id: tacheId }, data: { actif: false } });
     return { success: true as const };
   } catch {
@@ -99,7 +106,7 @@ export async function supprimerTache(tacheId: string) {
 
 // ═══ VALIDATIONS ═══
 
-export async function validerTache(data: { tache_id: string; professionnel_id: string; professionnel_nom: string; observations?: string }) {
+export async function validerTache(data: { tache_id: string; professionnel_id: string; professionnel_nom: string; profil_id?: string; observations?: string }) {
   try {
     const parsed = validationNettoyageSchema.safeParse(data);
     if (!parsed.success) return { success: false as const, error: "Données invalides." };
@@ -112,12 +119,25 @@ export async function validerTache(data: { tache_id: string; professionnel_id: s
         heure: now,
         professionnel_id: parsed.data.professionnel_id,
         professionnel_nom: parsed.data.professionnel_nom,
+        profil_id: data.profil_id || null,
         observations: parsed.data.observations ?? null,
       },
     });
     return { success: true as const, data: validation };
   } catch {
     return { success: false as const, error: "Erreur lors de la validation." };
+  }
+}
+
+export async function annulerValidation(validationId: string, profilId?: string) {
+  try {
+    if (profilId && !(await verifierAdmin(profilId))) {
+      return { success: false as const, error: "Seul un administrateur peut annuler une validation." };
+    }
+    await prisma.validationNettoyage.delete({ where: { id: validationId } });
+    return { success: true as const };
+  } catch {
+    return { success: false as const, error: "Erreur lors de l'annulation." };
   }
 }
 

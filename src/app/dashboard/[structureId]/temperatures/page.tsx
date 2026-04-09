@@ -9,6 +9,7 @@ import { getConformiteTemperature, getConformitePlat, validerPlageTemperature } 
 import { SEUILS_TEMPERATURE } from "@/lib/constants";
 import { PastilleStatut } from "@/components/shared/pastille-statut";
 import { useAuth } from "@/hooks/use-auth";
+import { useProfil } from "@/hooks/use-profil";
 import { useRealtimeSubscription } from "@/hooks/use-realtime-subscription";
 import { toast } from "sonner";
 import { Loader2, Plus, ChevronLeft, ChevronRight, AlertTriangle, Thermometer, Trash2 } from "lucide-react";
@@ -22,8 +23,9 @@ export default function TemperaturesPage() {
   const params = useParams();
   const structureId = params.structureId as string;
   const { user } = useAuth();
+  const { profil } = useProfil();
   const proId = user?.id ?? "";
-  const proNom = user?.user_metadata?.prenom ?? "";
+  const proNom = profil?.prenom ?? user?.user_metadata?.prenom ?? "";
 
   const [tab, setTab] = useState<"enceintes" | "plats">("enceintes");
   const [equipements, setEquipements] = useState<Equipement[]>([]);
@@ -117,7 +119,7 @@ export default function TemperaturesPage() {
     const result = await creerReleve({
       structure_id: structureId, equipement_id: formEquipId, temperature: Number(formTemp),
       conforme: formConformite !== "alerte", action_corrective: formAction || undefined,
-      professionnel_id: proId, heure: today.toISOString(),
+      professionnel_id: proId, profil_id: profil?.id, heure: today.toISOString(),
       plage_confirmee: formPlageConfirmed,
     });
     if (result.success) { toast.success("Relevé enregistré !"); setShowForm(false); setFormTemp(""); setFormAction(""); setFormPlageWarning(null); setFormPlageConfirmed(false); fetchData(); }
@@ -134,7 +136,7 @@ export default function TemperaturesPage() {
       structure_id: structureId, nom_plat: platNom, type_plat: platType,
       temperature_avant: Number(platAvant), heure_avant: platHeureAvant || now.toISOString(),
       temperature_apres: Number(platApres), heure_apres: platHeureApres || now.toISOString(),
-      conforme, action_corrective: platAction || undefined, professionnel_id: proId,
+      conforme, action_corrective: platAction || undefined, professionnel_id: proId, profil_id: profil?.id,
     });
     if (result.success) { toast.success("Relevé plat enregistré !"); setShowFormPlat(false); setPlatNom(""); setPlatType("CHAUD"); setPlatAvant(""); setPlatApres(""); setPlatAction(""); fetchData(); }
     else toast.error(result.error);
@@ -210,7 +212,7 @@ export default function TemperaturesPage() {
                       <p className="font-semibold text-gray-800">{eq.nom}</p>
                       <div className="flex items-center gap-2">
                         <span className="text-xs text-gray-400">{eq.type === "REFRIGERATEUR" ? "Frigo" : "Congélateur"}</span>
-                        <button onClick={() => handleSupprimerEquip(eq.id, eq.nom)} className="h-7 w-7 rounded-lg text-red-500 hover:bg-red-50 flex items-center justify-center" aria-label="Supprimer l'équipement"><Trash2 size={14} /></button>
+                        {profil?.role === "ADMINISTRATEUR" && <button onClick={() => handleSupprimerEquip(eq.id, eq.nom)} className="h-7 w-7 rounded-lg text-red-500 hover:bg-red-50 flex items-center justify-center" aria-label="Supprimer l'équipement"><Trash2 size={14} /></button>}
                       </div>
                     </div>
                     {dernierReleve ? (
@@ -232,7 +234,7 @@ export default function TemperaturesPage() {
           {/* Actions */}
           <div className="flex gap-2">
             <button onClick={() => setShowForm(true)} className="h-10 px-4 rounded-xl bg-rzpanda-primary text-white text-sm font-medium flex items-center gap-2"><Plus size={16} /> Nouveau relevé</button>
-            <button onClick={() => setShowAddEquip(true)} className="h-10 px-4 rounded-xl border border-gray-300 text-sm text-gray-600 flex items-center gap-2"><Plus size={16} /> Ajouter un équipement</button>
+            {profil?.role === "ADMINISTRATEUR" && <button onClick={() => setShowAddEquip(true)} className="h-10 px-4 rounded-xl border border-gray-300 text-sm text-gray-600 flex items-center gap-2"><Plus size={16} /> Ajouter un équipement</button>}
           </div>
 
           {/* Form relevé */}
@@ -342,7 +344,7 @@ export default function TemperaturesPage() {
                     <span className="text-sm text-gray-600">{r.equipement.nom}</span>
                     {r.action_corrective && <span className="text-xs text-red-500">⚠️ {r.action_corrective}</span>}
                     <span className="text-xs text-gray-400 ml-auto">{new Date(r.heure).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}</span>
-                    <button onClick={() => handleSupprimerReleve(r.id)} className="h-7 w-7 rounded-lg text-red-500 hover:bg-red-100 flex items-center justify-center" aria-label="Supprimer le relevé"><Trash2 size={14} /></button>
+                    {profil?.role === "ADMINISTRATEUR" && <button onClick={() => handleSupprimerReleve(r.id)} className="h-7 w-7 rounded-lg text-red-500 hover:bg-red-100 flex items-center justify-center" aria-label="Supprimer le relevé"><Trash2 size={14} /></button>}
                   </div>
                 ))}
               </div>

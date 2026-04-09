@@ -30,6 +30,7 @@ export const enfantSchema = z.object({
     }, "Date de naissance invalide (l'enfant doit avoir moins de 7 ans et être déjà né)"),
   sexe: z.enum(["FILLE", "GARCON"]).optional().nullable(),
   groupe: z.string().optional().nullable(),
+  groupe_force: z.boolean().optional().default(false),
   photo_url: z.string().optional().nullable(),
   allergies: z.array(allergieSchema).default([]),
   contacts: z.array(contactSchema).default([]),

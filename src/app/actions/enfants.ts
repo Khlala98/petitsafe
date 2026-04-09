@@ -1,6 +1,7 @@
 "use server";
 
 import { prisma } from "@/lib/supabase/prisma";
+import { verifierAdmin } from "@/lib/permissions";
 import { enfantSchema, importEnfantSchema } from "@/lib/schemas/enfant";
 import { z } from "zod";
 
@@ -17,6 +18,7 @@ export async function creerEnfant(structureId: string, data: z.infer<typeof enfa
         date_naissance: new Date(parsed.data.date_naissance),
         sexe: parsed.data.sexe ?? undefined,
         groupe: parsed.data.groupe ?? undefined,
+        groupe_force: parsed.data.groupe_force ?? false,
         photo_url: parsed.data.photo_url ?? undefined,
         regimes: parsed.data.regimes,
         allergies: {
@@ -62,6 +64,7 @@ export async function modifierEnfant(enfantId: string, structureId: string, data
         date_naissance: new Date(parsed.data.date_naissance),
         sexe: parsed.data.sexe ?? undefined,
         groupe: parsed.data.groupe ?? undefined,
+        groupe_force: parsed.data.groupe_force ?? false,
         photo_url: parsed.data.photo_url ?? undefined,
         regimes: parsed.data.regimes,
         allergies: {
@@ -90,8 +93,11 @@ export async function modifierEnfant(enfantId: string, structureId: string, data
   }
 }
 
-export async function archiverEnfant(enfantId: string, structureId: string) {
+export async function archiverEnfant(enfantId: string, structureId: string, profilId?: string) {
   try {
+    if (profilId && !(await verifierAdmin(profilId))) {
+      return { success: false as const, error: "Action réservée aux administrateurs." };
+    }
     await prisma.enfant.update({
       where: { id: enfantId, structure_id: structureId },
       data: { actif: false },
@@ -102,8 +108,11 @@ export async function archiverEnfant(enfantId: string, structureId: string) {
   }
 }
 
-export async function supprimerEnfant(enfantId: string, structureId: string) {
+export async function supprimerEnfant(enfantId: string, structureId: string, profilId?: string) {
   try {
+    if (profilId && !(await verifierAdmin(profilId))) {
+      return { success: false as const, error: "Action réservée aux administrateurs." };
+    }
     await prisma.enfant.delete({
       where: { id: enfantId, structure_id: structureId },
     });

@@ -107,6 +107,11 @@ enum TypeExport {
   INTERNE
 }
 
+enum RoleProfil {
+  ADMINISTRATEUR
+  PROFESSIONNEL
+}
+
 enum CategorieStock {
   COUCHES
   ENTRETIEN
@@ -144,9 +149,12 @@ model Structure {
   capacite_accueil Int?
   numero_agrement  String?
   modules_actifs   String[]      @default(["temperatures", "tracabilite", "nettoyage", "biberonnerie", "repas", "changes", "siestes", "transmissions", "stocks", "protocoles"])
+  seuil_bebes_max  Int           @default(18)
+  seuil_moyens_max Int           @default(30)
   created_at       DateTime      @default(now())
 
   users            UserStructure[]
+  profils          Profil[]
   enfants          Enfant[]
   equipements      Equipement[]
   zones_nettoyage  ZoneNettoyage[]
@@ -177,6 +185,40 @@ model UserStructure {
   @@index([structure_id])
 }
 
+// ═══ PROFILS (système multi-profils par structure) ═══
+
+model Profil {
+  id             String     @id @default(uuid())
+  structure_id   String
+  prenom         String
+  nom            String
+  poste          String?
+  role           RoleProfil @default(PROFESSIONNEL)
+  telephone      String?
+  email          String?
+  certifications String?
+  notes          String?
+  actif          Boolean    @default(true)
+  created_at     DateTime   @default(now())
+  updated_at     DateTime   @updatedAt
+
+  structure      Structure  @relation(fields: [structure_id], references: [id], onDelete: Cascade)
+
+  releves_temp           ReleveTemperature[]
+  biberons               Biberon[]
+  validations_nettoyage  ValidationNettoyage[]
+  repas                  Repas[]
+  changes                Change[]
+  siestes                Sieste[]
+  transmissions          Transmission[]
+  incidents              Incident[]
+  receptions             ReceptionMarchandise[]
+  releves_plat           RelevePlat[]
+
+  @@index([structure_id])
+  @@index([structure_id, actif])
+}
+
 // ═══ ENFANTS ═══
 
 model Enfant {
@@ -187,6 +229,7 @@ model Enfant {
   date_naissance DateTime
   sexe           Sexe?
   groupe         String?
+  groupe_force   Boolean  @default(false)
   photo_url      String?
   actif          Boolean  @default(true)
   date_entree    DateTime?
@@ -257,9 +300,11 @@ model Biberon {
   conforme_anses       Boolean   @default(true)
   observations         String?
   professionnel_id     String
+  profil_id            String?
 
   structure            Structure @relation(fields: [structure_id], references: [id], onDelete: Cascade)
   enfant               Enfant    @relation(fields: [enfant_id], references: [id], onDelete: Cascade)
+  profil               Profil?   @relation(fields: [profil_id], references: [id], onDelete: SetNull)
 
   @@index([structure_id, date])
   @@index([enfant_id, date])
@@ -279,9 +324,11 @@ model Repas {
   dessert_quantite Quantite?
   observations     String?
   professionnel_id String
+  profil_id        String?
 
   structure        Structure @relation(fields: [structure_id], references: [id], onDelete: Cascade)
   enfant           Enfant    @relation(fields: [enfant_id], references: [id], onDelete: Cascade)
+  profil           Profil?   @relation(fields: [profil_id], references: [id], onDelete: SetNull)
 
   @@index([structure_id, date])
   @@index([enfant_id, date])
@@ -296,9 +343,11 @@ model Change {
   type_change      TypeChange
   observations     String?
   professionnel_id String
+  profil_id        String?
 
   structure        Structure @relation(fields: [structure_id], references: [id], onDelete: Cascade)
   enfant           Enfant    @relation(fields: [enfant_id], references: [id], onDelete: Cascade)
+  profil           Profil?   @relation(fields: [profil_id], references: [id], onDelete: SetNull)
 
   @@index([structure_id, date])
   @@index([enfant_id, date])
@@ -314,9 +363,11 @@ model Sieste {
   duree_minutes    Int?
   qualite          QualiteSieste?
   professionnel_id String
+  profil_id        String?
 
   structure        Structure @relation(fields: [structure_id], references: [id], onDelete: Cascade)
   enfant           Enfant    @relation(fields: [enfant_id], references: [id], onDelete: Cascade)
+  profil           Profil?   @relation(fields: [profil_id], references: [id], onDelete: SetNull)
 
   @@index([structure_id, date])
   @@index([enfant_id, date])
@@ -336,9 +387,11 @@ model Incident {
   action_prise     String
   parents_prevenu  Boolean         @default(false)
   professionnel_id String
+  profil_id        String?
 
   structure        Structure @relation(fields: [structure_id], references: [id], onDelete: Cascade)
   enfant           Enfant    @relation(fields: [enfant_id], references: [id], onDelete: Cascade)
+  profil           Profil?   @relation(fields: [profil_id], references: [id], onDelete: SetNull)
 
   @@index([structure_id, date])
   @@index([enfant_id, date])
@@ -371,9 +424,11 @@ model ReleveTemperature {
   conforme          Boolean
   action_corrective String?
   professionnel_id  String
+  profil_id         String?
 
   structure         Structure  @relation(fields: [structure_id], references: [id], onDelete: Cascade)
   equipement        Equipement @relation(fields: [equipement_id], references: [id], onDelete: Cascade)
+  profil            Profil?    @relation(fields: [profil_id], references: [id], onDelete: SetNull)
 
   @@index([structure_id, date])
   @@index([equipement_id, date])
@@ -392,8 +447,10 @@ model RelevePlat {
   conforme          Boolean
   action_corrective String?
   professionnel_id  String
+  profil_id         String?
 
   structure         Structure @relation(fields: [structure_id], references: [id], onDelete: Cascade)
+  profil            Profil?   @relation(fields: [profil_id], references: [id], onDelete: SetNull)
 
   @@index([structure_id, date])
 }
@@ -417,8 +474,10 @@ model ReceptionMarchandise {
   statut               StatutProduit @default(EN_STOCK)
   motif_destruction    String?
   professionnel_id     String
+  profil_id            String?
 
   structure            Structure @relation(fields: [structure_id], references: [id], onDelete: Cascade)
+  profil               Profil?   @relation(fields: [profil_id], references: [id], onDelete: SetNull)
 
   @@index([structure_id, date])
   @@index([structure_id, dlc])
@@ -463,8 +522,10 @@ model ValidationNettoyage {
   professionnel_id String
   professionnel_nom String
   observations     String?
+  profil_id        String?
 
   tache            TacheNettoyage @relation(fields: [tache_id], references: [id], onDelete: Cascade)
+  profil           Profil?        @relation(fields: [profil_id], references: [id], onDelete: SetNull)
 
   @@index([tache_id, date])
 }
@@ -512,9 +573,11 @@ model Transmission {
   contenu      String
   auteur       String
   type_transm  TypeTransmission
+  profil_id    String?
 
   structure    Structure @relation(fields: [structure_id], references: [id], onDelete: Cascade)
   enfant       Enfant?   @relation(fields: [enfant_id], references: [id], onDelete: SetNull)
+  profil       Profil?   @relation(fields: [profil_id], references: [id], onDelete: SetNull)
 
   @@index([structure_id, date])
   @@index([enfant_id, date])

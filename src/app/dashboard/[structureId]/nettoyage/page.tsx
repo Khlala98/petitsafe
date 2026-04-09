@@ -5,16 +5,17 @@ export const dynamic = 'force-dynamic';
 import { useEffect, useState, useCallback } from "react";
 import { useParams } from "next/navigation";
 import { useAuth } from "@/hooks/use-auth";
+import { useProfil } from "@/hooks/use-profil";
 import { useRealtimeSubscription } from "@/hooks/use-realtime-subscription";
 import { getTachesJour } from "@/lib/business-logic";
 import { PastilleStatut } from "@/components/shared/pastille-statut";
 import {
-  getZonesAvecTaches, initialiserZonesDefaut, validerTache,
+  getZonesAvecTaches, initialiserZonesDefaut, validerTache, annulerValidation,
   getValidationsDuJour, getHistoriqueNettoyage, creerZone, creerTache, supprimerZone, supprimerTache,
 } from "@/app/actions/nettoyage";
 import { toast } from "sonner";
 import {
-  Loader2, ChevronLeft, ChevronRight, Plus, Trash2, Calendar, CheckCircle2, Clock, Settings2,
+  Loader2, ChevronLeft, ChevronRight, Plus, Trash2, Calendar, CheckCircle2, Clock, Settings2, X,
 } from "lucide-react";
 
 type Frequence = "APRES_UTILISATION" | "QUOTIDIEN" | "BIQUOTIDIEN" | "HEBDO" | "BIMENSUEL" | "MENSUEL";
@@ -39,8 +40,9 @@ export default function NettoyagePage() {
   const params = useParams();
   const structureId = params.structureId as string;
   const { user, activeRole } = useAuth();
+  const { profil, isAdmin: isProfilAdmin } = useProfil();
   const proId = user?.id ?? "";
-  const proNom = user?.user_metadata?.prenom ?? "Professionnel";
+  const proNom = profil?.prenom ?? user?.user_metadata?.prenom ?? "Professionnel";
 
   const [zones, setZones] = useState<Zone[]>([]);
   const [validations, setValidations] = useState<Validation[]>([]);
@@ -62,7 +64,7 @@ export default function NettoyagePage() {
   const [newTacheProduit, setNewTacheProduit] = useState("");
   const [newTacheZoneId, setNewTacheZoneId] = useState("");
 
-  const isGestionnaire = activeRole === "GESTIONNAIRE";
+  const isGestionnaire = isProfilAdmin || activeRole === "GESTIONNAIRE";
 
   const fetchAll = useCallback(async () => {
     const [zonesRes, valsRes] = await Promise.all([
@@ -118,9 +120,20 @@ export default function NettoyagePage() {
   const globalStatus = globalPct === 100 ? "conforme" : globalPct >= 50 ? "attention" : "alerte";
 
   const handleValider = async (tacheId: string) => {
-    const res = await validerTache({ tache_id: tacheId, professionnel_id: proId, professionnel_nom: proNom });
+    const res = await validerTache({ tache_id: tacheId, professionnel_id: proId, professionnel_nom: proNom, profil_id: profil?.id });
     if (res.success) {
       toast.success("Tâche validée");
+      fetchAll();
+    } else {
+      toast.error(res.error);
+    }
+  };
+
+  const handleAnnulerValidation = async (validationId: string) => {
+    if (!confirm("Annuler cet émargement ?")) return;
+    const res = await annulerValidation(validationId, profil?.id);
+    if (res.success) {
+      toast.success("Émargement annulé");
       fetchAll();
     } else {
       toast.error(res.error);
@@ -371,12 +384,23 @@ export default function NettoyagePage() {
                         {tache.notes && <p className="text-xs text-orange-600 mt-0.5">{tache.notes}</p>}
                       </div>
                       {isValidated && validation && (
-                        <div className="shrink-0 text-right">
-                          <p className="text-xs text-green-600 font-medium">{validation.professionnel_nom}</p>
-                          <p className="text-xs text-rzpanda-primary flex items-center gap-1 justify-end">
-                            <Clock size={10} />
-                            {new Date(validation.heure).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}
-                          </p>
+                        <div className="shrink-0 flex items-center gap-2">
+                          <div className="h-8 w-8 rounded-full bg-green-500 flex items-center justify-center text-white text-[10px] font-bold" title={`Émargé par ${validation.professionnel_nom}`}>
+                            {validation.professionnel_nom.split(" ").map((w: string) => w.charAt(0)).join("").toUpperCase().slice(0, 2) || validation.professionnel_nom.charAt(0).toUpperCase()}
+                          </div>
+                          <div className="text-right">
+                            <p className="text-xs text-green-700 font-medium">{validation.professionnel_nom}</p>
+                            <p className="text-[10px] text-gray-400">
+                              {new Date(validation.heure).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}
+                            </p>
+                          </div>
+                          {isProfilAdmin && (
+                            <button onClick={() => handleAnnulerValidation(validation.id)}
+                              className="h-6 w-6 rounded-full hover:bg-red-100 text-gray-300 hover:text-red-500 flex items-center justify-center transition-colors"
+                              title="Annuler l'émargement" aria-label="Annuler l'émargement">
+                              <X size={12} />
+                            </button>
+                          )}
                         </div>
                       )}
                     </div>

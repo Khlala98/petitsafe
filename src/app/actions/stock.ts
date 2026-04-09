@@ -20,7 +20,7 @@ export async function getReceptions(structureId: string) {
 export async function creerReception(data: {
   structure_id: string; nom_produit: string; fournisseur: string; numero_lot: string;
   dlc: string; temperature_reception?: number; emballage_conforme: boolean;
-  conforme: boolean; motif_non_conformite?: string; professionnel_id: string;
+  conforme: boolean; motif_non_conformite?: string; professionnel_id: string; profil_id?: string;
 }) {
   try {
     if (!data.conforme && !data.motif_non_conformite) {
@@ -34,6 +34,7 @@ export async function creerReception(data: {
         emballage_conforme: data.emballage_conforme, conforme: data.conforme,
         motif_non_conformite: data.motif_non_conformite || null,
         professionnel_id: data.professionnel_id,
+        profil_id: data.profil_id || null,
       },
     });
     return { success: true as const, data: reception };

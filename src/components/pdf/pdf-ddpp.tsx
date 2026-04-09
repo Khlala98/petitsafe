@@ -148,17 +148,19 @@ export function PdfDDPP({ data }: { data: ExportDDPPData }) {
         ) : (
           <View>
             <View style={s.tableHeader}>
-              <Text style={{ ...s.headerCell, width: "15%" }}>Date</Text>
-              <Text style={{ ...s.headerCell, width: "25%" }}>Zone</Text>
-              <Text style={{ ...s.headerCell, width: "35%" }}>Tâche</Text>
-              <Text style={{ ...s.headerCell, width: "25%" }}>Professionnel</Text>
+              <Text style={{ ...s.headerCell, width: "12%" }}>Date</Text>
+              <Text style={{ ...s.headerCell, width: "22%" }}>Zone</Text>
+              <Text style={{ ...s.headerCell, width: "28%" }}>Tâche</Text>
+              <Text style={{ ...s.headerCell, width: "20%" }}>Émargement</Text>
+              <Text style={{ ...s.headerCell, width: "18%" }}>Heure</Text>
             </View>
             {data.nettoyage.map((n, i) => (
               <View key={i} style={s.tableRow}>
-                <Text style={{ ...s.cell, width: "15%" }}>{formatDate(n.date)}</Text>
-                <Text style={{ ...s.cell, width: "25%" }}>{n.zone}</Text>
-                <Text style={{ ...s.cell, width: "35%" }}>{n.tache}</Text>
-                <Text style={{ ...s.cell, width: "25%" }}>{n.professionnel_nom}</Text>
+                <Text style={{ ...s.cell, width: "12%" }}>{formatDate(n.date)}</Text>
+                <Text style={{ ...s.cell, width: "22%" }}>{n.zone}</Text>
+                <Text style={{ ...s.cell, width: "28%" }}>{n.tache}</Text>
+                <Text style={{ ...s.cell, width: "20%" }}>{n.professionnel_nom}</Text>
+                <Text style={{ ...s.cell, width: "18%" }}>{n.heure ? formatHeure(n.heure) : "—"}</Text>
               </View>
             ))}
           </View>

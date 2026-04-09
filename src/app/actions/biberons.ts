@@ -6,7 +6,7 @@ export async function creerBiberon(data: {
   structure_id: string; enfant_id: string; type_lait: string; nom_lait?: string;
   numero_lot: string; date_peremption_lait?: string; date_ouverture_boite?: string;
   nombre_dosettes?: number; quantite_preparee_ml: number; preparateur_nom: string; professionnel_id: string;
-  observations?: string;
+  profil_id?: string; observations?: string;
 }) {
   try {
     if (!data.numero_lot) return { success: false as const, error: "Numéro de lot obligatoire (traçabilité)." };
@@ -28,6 +28,7 @@ export async function creerBiberon(data: {
         quantite_preparee_ml: data.quantite_preparee_ml,
         preparateur_nom: data.preparateur_nom,
         professionnel_id: data.professionnel_id,
+        profil_id: data.profil_id || null,
         observations: data.observations || null,
       },
     });

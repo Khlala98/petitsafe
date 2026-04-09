@@ -35,7 +35,9 @@
       "Bash(curl -sI http://localhost:3000/rzpanda-icon.svg)",
       "Bash(curl -s http://localhost:3000/rzpanda-icon.svg)",
       "Bash(curl -s http://localhost:3000/login)",
-      "Bash(npx kill-port:*)"
+      "Bash(npx kill-port:*)",
+      "Bash(npx next:*)",
+      "Bash(grep -v \"^$\")"
     ]
   }
 }

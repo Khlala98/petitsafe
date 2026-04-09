@@ -7,7 +7,7 @@ import { prisma } from "@/lib/supabase/prisma";
 export async function enregistrerRepas(data: {
   structure_id: string; enfant_id: string; type_repas: string;
   entree?: string; entree_quantite?: string; plat?: string; plat_quantite?: string;
-  dessert?: string; dessert_quantite?: string; observations?: string; professionnel_id: string;
+  dessert?: string; dessert_quantite?: string; observations?: string; professionnel_id: string; profil_id?: string;
 }) {
   try {
     const repas = await prisma.repas.create({
@@ -24,6 +24,7 @@ export async function enregistrerRepas(data: {
         dessert_quantite: data.dessert_quantite as "TOUT" | "BIEN" | "PEU" | "RIEN" | undefined,
         observations: data.observations || null,
         professionnel_id: data.professionnel_id,
+        profil_id: data.profil_id || null,
       },
     });
     return { success: true as const, data: repas };
@@ -36,7 +37,7 @@ export async function enregistrerRepas(data: {
 
 export async function enregistrerChange(data: {
   structure_id: string; enfant_id: string; type_change: string;
-  observations?: string; professionnel_id: string;
+  observations?: string; professionnel_id: string; profil_id?: string;
 }) {
   try {
     const now = new Date();
@@ -49,6 +50,7 @@ export async function enregistrerChange(data: {
         type_change: data.type_change as "MOUILLEE" | "SELLE" | "LES_DEUX",
         observations: data.observations || null,
         professionnel_id: data.professionnel_id,
+        profil_id: data.profil_id || null,
       },
     });
     return { success: true as const, data: change };
@@ -60,7 +62,7 @@ export async function enregistrerChange(data: {
 // ═══ SIESTE ═══
 
 export async function debuterSieste(data: {
-  structure_id: string; enfant_id: string; professionnel_id: string;
+  structure_id: string; enfant_id: string; professionnel_id: string; profil_id?: string;
 }) {
   try {
     const now = new Date();
@@ -71,6 +73,7 @@ export async function debuterSieste(data: {
         date: now,
         heure_debut: now,
         professionnel_id: data.professionnel_id,
+        profil_id: data.profil_id || null,
       },
     });
     return { success: true as const, data: sieste };
@@ -119,7 +122,7 @@ export async function getSiesteEnCours(structureId: string, enfantId: string) {
 
 export async function enregistrerTransmission(data: {
   structure_id: string; enfant_id?: string; contenu: string;
-  type_transm: string; auteur: string;
+  type_transm: string; auteur: string; profil_id?: string;
 }) {
   try {
     const transmission = await prisma.transmission.create({
@@ -130,6 +133,7 @@ export async function enregistrerTransmission(data: {
         contenu: data.contenu,
         auteur: data.auteur,
         type_transm: data.type_transm as "GENERAL" | "ENFANT" | "EQUIPE",
+        profil_id: data.profil_id || null,
       },
     });
     return { success: true as const, data: transmission };
@@ -143,7 +147,7 @@ export async function enregistrerTransmission(data: {
 export async function enregistrerIncident(data: {
   structure_id: string; enfant_id: string; type_incident: string;
   description: string; gravite: string; action_prise: string;
-  parents_prevenu: boolean; heure: string; professionnel_id: string;
+  parents_prevenu: boolean; heure: string; professionnel_id: string; profil_id?: string;
 }) {
   try {
     const now = new Date();
@@ -163,6 +167,7 @@ export async function enregistrerIncident(data: {
         action_prise: data.action_prise,
         parents_prevenu: data.parents_prevenu,
         professionnel_id: data.professionnel_id,
+        profil_id: data.profil_id || null,
       },
     });
     return { success: true as const, data: incident };

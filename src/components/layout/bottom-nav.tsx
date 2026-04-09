@@ -5,6 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { createClient } from "@/lib/supabase/client";
 import { useModules } from "@/hooks/use-modules";
+import { useProfil } from "@/hooks/use-profil";
 import { LayoutDashboard, Thermometer, Baby, Sparkles, Package, Menu, X, ClipboardList, MessageSquare, FileText, FileDown, Settings, LogOut, Moon } from "lucide-react";
 import { useState } from "react";
 import type { ModuleId } from "@/lib/constants";
@@ -19,6 +20,7 @@ export function BottomNav({ structureId, modulesActifs }: BottomNavProps) {
   const router = useRouter();
   const supabase = createClient();
   const { isActif } = useModules(modulesActifs);
+  const { isAdmin } = useProfil();
   const [showMore, setShowMore] = useState(false);
   const basePath = `/dashboard/${structureId}`;
 
@@ -29,7 +31,10 @@ export function BottomNav({ structureId, modulesActifs }: BottomNavProps) {
     { label: "Nettoyage", icon: Sparkles, href: "/nettoyage", moduleId: "nettoyage" },
     { label: "Stock", icon: Package, href: "/stock", moduleId: "tracabilite" },
   ];
-  const activeHaccpItems = haccpItems.filter((item) => isActif(item.moduleId)).slice(0, 3);
+  const activeHaccpItems = haccpItems.filter((item) => {
+    if (item.moduleId === "tracabilite" && !isAdmin) return false;
+    return isActif(item.moduleId);
+  }).slice(0, 3);
 
   const mainItems = [
     { label: "Dashboard", icon: LayoutDashboard, href: "" },
@@ -41,8 +46,8 @@ export function BottomNav({ structureId, modulesActifs }: BottomNavProps) {
     ...(isActif("repas") || isActif("changes") || isActif("siestes") ? [{ label: "Suivi", icon: ClipboardList, href: "/suivi" }] : []),
     ...(isActif("transmissions") ? [{ label: "Transmissions", icon: MessageSquare, href: "/transmissions" }] : []),
     ...(isActif("protocoles") ? [{ label: "Protocoles", icon: FileText, href: "/protocoles" }] : []),
-    { label: "Exports", icon: FileDown, href: "/exports" },
-    { label: "Paramètres", icon: Settings, href: "/parametres" },
+    ...(isAdmin ? [{ label: "Exports", icon: FileDown, href: "/exports" }] : []),
+    ...(isAdmin ? [{ label: "Paramètres", icon: Settings, href: "/parametres" }] : []),
   ];
 
   const handleLogout = async () => {
