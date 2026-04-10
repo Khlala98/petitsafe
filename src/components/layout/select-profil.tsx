@@ -61,11 +61,15 @@ export function SelectProfil({ structureId, userPrenom, userNom, children }: Sel
         return;
       }
       try {
+        console.log("[SelectProfil] init démarré, structureId:", structureId, "userPrenom:", userPrenom);
         if (userPrenom) {
-          await assurerProfilAdmin(structureId, userPrenom, userNom || userPrenom);
+          const adminResult = await assurerProfilAdmin(structureId, userPrenom, userNom || userPrenom);
+          console.log("[SelectProfil] assurerProfilAdmin résultat:", JSON.stringify(adminResult));
         }
         // Toujours recharger les profils après l'init
+        console.log("[SelectProfil] appel refreshProfils...");
         await refreshProfils();
+        console.log("[SelectProfil] refreshProfils terminé");
       } catch (e) {
         console.error("[SelectProfil] Erreur init:", e);
       } finally {

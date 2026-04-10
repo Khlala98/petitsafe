@@ -55,9 +55,12 @@ export function ProfilProvider({ structureId, children }: { structureId: string 
     }
 
     try {
+      console.log("[useProfil] loadProfils appelée, structureId:", structureId);
       const result = await listerProfils(structureId);
+      console.log("[useProfil] résultat listerProfils:", JSON.stringify(result).substring(0, 200));
       if (result.success) {
         const data = result.data as ProfilActif[];
+        console.log("[useProfil] profils chargés:", data.length);
         setProfils(data);
         // Toujours forcer la sélection + saisie du mot de passe
         setProfil(null);

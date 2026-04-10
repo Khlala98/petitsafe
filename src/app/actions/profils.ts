@@ -6,6 +6,7 @@ import { hash, compare } from "bcryptjs";
 
 // ═══ Lister les profils actifs d'une structure (sans le pin) ═══
 export async function listerProfils(structureId: string) {
+  console.log("[listerProfils] appelée avec structureId:", structureId);
   try {
     const profils = await prisma.profil.findMany({
       where: { structure_id: structureId, actif: true },
@@ -24,8 +25,10 @@ export async function listerProfils(structureId: string) {
         actif: true,
       },
     });
+    console.log("[listerProfils] résultat:", profils.length, "profils trouvés");
     return { success: true as const, data: profils };
-  } catch {
+  } catch (e) {
+    console.error("[listerProfils] ERREUR:", e);
     return { success: false as const, error: "Erreur lors du chargement des profils." };
   }
 }
@@ -211,8 +214,10 @@ export async function verifierProfilPin(profilId: string, pin: string) {
 
 // ═══ Auto-créer le profil admin si aucun profil n'existe ═══
 export async function assurerProfilAdmin(structureId: string, prenom: string, nom: string) {
+  console.log("[assurerProfilAdmin] appelée avec structureId:", structureId, "prenom:", prenom, "nom:", nom);
   try {
     const count = await prisma.profil.count({ where: { structure_id: structureId } });
+    console.log("[assurerProfilAdmin] count profils:", count);
     if (count > 0) return { success: true as const, created: false };
 
     const defaultPin = await hash("0000", 10);
