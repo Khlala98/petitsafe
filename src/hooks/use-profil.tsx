@@ -61,9 +61,13 @@ export function ProfilProvider({ structureId, children }: { structureId: string 
         setProfils(data);
         // Toujours forcer la sélection + saisie du mot de passe
         setProfil(null);
+      } else {
+        console.error("[useProfil] Échec listerProfils:", result.error);
+        setProfils([]);
       }
     } catch (e) {
       console.error("[useProfil] Erreur chargement profils:", e);
+      setProfils([]);
     } finally {
       setLoading(false);
     }

@@ -2,14 +2,27 @@
 
 import { prisma } from "@/lib/supabase/prisma";
 import { RoleProfil } from "@prisma/client";
-import bcrypt from "bcryptjs";
+import { hash, compare } from "bcryptjs";
 
-// ═══ Lister les profils actifs d'une structure ═══
+// ═══ Lister les profils actifs d'une structure (sans le pin) ═══
 export async function listerProfils(structureId: string) {
   try {
     const profils = await prisma.profil.findMany({
       where: { structure_id: structureId, actif: true },
       orderBy: [{ role: "asc" }, { prenom: "asc" }],
+      select: {
+        id: true,
+        structure_id: true,
+        prenom: true,
+        nom: true,
+        poste: true,
+        role: true,
+        telephone: true,
+        email: true,
+        certifications: true,
+        notes: true,
+        actif: true,
+      },
     });
     return { success: true as const, data: profils };
   } catch {
@@ -23,6 +36,19 @@ export async function listerTousProfils(structureId: string) {
     const profils = await prisma.profil.findMany({
       where: { structure_id: structureId },
       orderBy: [{ actif: "desc" }, { role: "asc" }, { prenom: "asc" }],
+      select: {
+        id: true,
+        structure_id: true,
+        prenom: true,
+        nom: true,
+        poste: true,
+        role: true,
+        telephone: true,
+        email: true,
+        certifications: true,
+        notes: true,
+        actif: true,
+      },
     });
     return { success: true as const, data: profils };
   } catch {
@@ -59,7 +85,7 @@ export async function creerProfil(data: {
     if (!data.nom?.trim()) return { success: false as const, error: "Le nom est obligatoire." };
     if (!data.pin?.trim()) return { success: false as const, error: "Le mot de passe profil est obligatoire." };
 
-    const hashedPin = await bcrypt.hash(data.pin.trim(), 10);
+    const hashedPin = await hash(data.pin.trim(), 10);
 
     const profil = await prisma.profil.create({
       data: {
@@ -111,7 +137,7 @@ export async function modifierProfil(
     };
 
     if (data.pin) {
-      updateData.pin = await bcrypt.hash(data.pin.trim(), 10);
+      updateData.pin = await hash(data.pin.trim(), 10);
     }
 
     const profil = await prisma.profil.update({
@@ -163,9 +189,18 @@ export async function verifierProfilPin(profilId: string, pin: string) {
       select: { id: true, pin: true },
     });
     if (!profil) return { success: false as const, error: "Profil introuvable." };
-    if (!profil.pin) return { success: false as const, error: "Aucun mot de passe défini pour ce profil." };
 
-    const valid = await bcrypt.compare(pin, profil.pin);
+    // Profil existant sans PIN → attribuer le PIN par défaut "0000"
+    if (!profil.pin) {
+      const defaultPin = await hash("0000", 10);
+      await prisma.profil.update({ where: { id: profilId }, data: { pin: defaultPin } });
+      // Vérifier avec le PIN fourni
+      const valid = pin === "0000";
+      if (!valid) return { success: false as const, error: "Mot de passe par défaut : 0000. Changez-le dans Paramètres → Équipe." };
+      return { success: true as const };
+    }
+
+    const valid = await compare(pin, profil.pin);
     if (!valid) return { success: false as const, error: "Mot de passe incorrect." };
 
     return { success: true as const };
@@ -180,7 +215,7 @@ export async function assurerProfilAdmin(structureId: string, prenom: string, no
     const count = await prisma.profil.count({ where: { structure_id: structureId } });
     if (count > 0) return { success: true as const, created: false };
 
-    const defaultPin = await bcrypt.hash("0000", 10);
+    const defaultPin = await hash("0000", 10);
 
     const profil = await prisma.profil.create({
       data: {

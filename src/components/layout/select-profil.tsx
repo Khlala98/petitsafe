@@ -189,6 +189,15 @@ export function SelectProfil({ structureId, userPrenom, userNom, children }: Sel
           <p className="text-gray-500">Sélectionnez votre profil pour commencer</p>
         </div>
 
+        {profils.length === 0 && (
+          <div className="text-center py-8">
+            <p className="text-gray-400 text-sm">Aucun profil trouvé. Rechargez la page.</p>
+            <button onClick={() => window.location.reload()} className="mt-3 h-10 px-5 rounded-xl bg-rzpanda-primary text-white text-sm font-medium hover:bg-rzpanda-primary/90">
+              Recharger
+            </button>
+          </div>
+        )}
+
         <div className="grid grid-cols-2 gap-4">
           {profils.map((p: ProfilActif, index: number) => (
             <button
