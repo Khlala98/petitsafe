@@ -53,18 +53,19 @@ export function SelectProfil({ structureId, userPrenom, userNom, children }: Sel
   const [pinError, setPinError] = useState("");
   const [verifying, setVerifying] = useState(false);
 
-  // Auto-créer le profil admin si c'est la première fois
+  // Auto-créer le profil admin si c'est la première fois, puis charger les profils
   useEffect(() => {
     const init = async () => {
-      if (!structureId || !userPrenom) {
+      if (!structureId) {
         setInitializing(false);
         return;
       }
       try {
-        const result = await assurerProfilAdmin(structureId, userPrenom, userNom || userPrenom);
-        if (result.success && result.created) {
-          await refreshProfils();
+        if (userPrenom) {
+          await assurerProfilAdmin(structureId, userPrenom, userNom || userPrenom);
         }
+        // Toujours recharger les profils après l'init
+        await refreshProfils();
       } catch (e) {
         console.error("[SelectProfil] Erreur init:", e);
       } finally {
