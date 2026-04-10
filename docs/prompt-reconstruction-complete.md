@@ -2,7 +2,9 @@
 
 > Ce document décrit l'intégralité du projet **RZPan'Da** (anciennement PetitSafe) — un SaaS HACCP, traçabilité alimentaire et suivi enfants pour crèches, micro-crèches, MAM et assistantes maternelles. Il est dimensionné pour qu'un développeur ou une IA puisse recréer le produit à l'identique sans accès au code source.
 >
-> **Dernière mise à jour** : Phase 4 — Profils partagés, droits d'accès, groupes d'âge, alertes lait, émargement nettoyage, annuaire équipe.
+> **Dernière mise à jour** : Phase 4 — Profils partagés avec PIN, droits d'accès, groupes d'âge, alertes lait, émargement nettoyage, annuaire équipe.
+>
+> **Domaine production** : https://rzpanda.fr (alias : https://rzpanda.vercel.app)
 
 ---
 
@@ -46,6 +48,7 @@
 - **PostgreSQL** via **Supabase** (Auth + Storage + Realtime + Postgres)
 - **Prisma 5.22.0** (ORM, source unique du schéma DB)
 - **@supabase/ssr 0.5.2** + **@supabase/supabase-js 2.47.10** (auth cookies + realtime client)
+- **bcryptjs 3.x** + **@types/bcryptjs** (hachage PIN profils — import nommé `import { hash, compare } from "bcryptjs"`)
 
 ### UI / styling
 - **Tailwind CSS 3.4.16** + **tailwindcss-animate 1.0.7**
@@ -108,9 +111,11 @@
     "sonner": "^1.7.1",
     "tailwind-merge": "^2.6.0",
     "tailwindcss-animate": "^1.0.7",
+    "bcryptjs": "^3.0.2",
     "zod": "^3.24.1"
   },
   "devDependencies": {
+    "@types/bcryptjs": "^2.4.6",
     "@playwright/test": "^1.49.1",
     "@types/node": "^22.10.2",
     "@types/react": "^18.3.14",
@@ -525,6 +530,7 @@ model Profil {
   email          String?
   certifications String?
   notes          String?
+  pin            String?    // Mot de passe profil, hashé bcrypt — obligatoire à la création, PIN par défaut "0000"
   actif          Boolean    @default(true)
   created_at     DateTime   @default(now())
   updated_at     DateTime   @updatedAt
@@ -964,7 +970,7 @@ model DemandeDemo {
 ### Points clés du schéma
 
 - **19 enums** : StructureType, Role, Sexe, Severite, TypeRepas, Quantite, TypeChange, QualiteSieste, TypeEquipement, TypePlat, StatutProduit, Frequence, TypeMouvement, TypeTransmission, TypeExport, **RoleProfil**, CategorieStock, TypeIncident, GraviteIncident
-- **29 models** dont le model **Profil** (Phase 4)
+- **29 models** dont le model **Profil** (Phase 4) avec **champ `pin`** (hashé bcrypt, PIN par défaut `0000`)
 - **Champ `profil_id` optionnel** sur toutes les tables d'action : Biberon, Repas, Change, Sieste, Incident, ReleveTemperature, RelevePlat, ReceptionMarchandise, ValidationNettoyage, Transmission
 - **Relations `onDelete: SetNull`** pour profil_id (le profil peut être désactivé sans perdre l'historique)
 - **Champs `seuil_bebes_max` et `seuil_moyens_max`** sur Structure (défauts : 18 et 30 mois)
@@ -1222,20 +1228,29 @@ if (process.env.NODE_ENV !== "production") {
 
 5. **Hook `useAuth`** : charge user + structures via Supabase query sur `UserStructure` join `Structure`, persiste `activeStructureId` dans localStorage
 
-6. **Sélection profil** (Phase 4) :
+6. **Sélection profil + PIN** (Phase 4) :
    - `ProfilProvider` wrape le dashboard layout
-   - Au premier login → `assurerProfilAdmin()` crée automatiquement un profil ADMINISTRATEUR avec prenom/nom du user Supabase
-   - Si 1 seul profil → auto-sélection, skip de l'écran
-   - Si plusieurs profils → écran "Qui êtes-vous ?" avec grille de profils
-   - Profil sélectionné persiste dans `localStorage("activeProfilId")`
+   - Au premier login → `assurerProfilAdmin()` crée automatiquement un profil ADMINISTRATEUR avec prenom/nom du user Supabase et PIN par défaut `0000` (hashé bcrypt)
+   - L'écran "Qui êtes-vous ?" s'affiche **TOUJOURS** (pas d'auto-skip, pas de restauration localStorage)
+   - L'utilisateur clique sur son profil → champ mot de passe → `verifierProfilPin()` → accès dashboard
+   - Profils existants sans PIN reçoivent automatiquement le PIN `0000` lors de la première tentative de vérification
+   - Profil sélectionné persiste dans `localStorage("activeProfilId")` uniquement après vérification PIN réussie
 
 ---
 
-## 9. Système de profils partagés (Phase 4)
+## 9. Système de profils partagés avec PIN (Phase 4)
 
 ### Concept
 
-Un seul compte Supabase par structure (email/mot de passe partagés). Chaque professionnel est représenté par un `Profil` dans la DB. Au login, l'écran "Qui êtes-vous ?" permet de sélectionner qui utilise l'appareil.
+Un seul compte Supabase par structure (email/mot de passe partagés). Chaque professionnel est représenté par un `Profil` dans la DB. Au login, l'écran "Qui êtes-vous ?" s'affiche **TOUJOURS** (même avec 1 seul profil — pas d'auto-skip). L'utilisateur sélectionne son profil puis saisit son **mot de passe profil** (champ `pin` hashé bcrypt).
+
+### Sécurité PIN
+
+- **Hachage** : `bcryptjs` avec import nommé `import { hash, compare } from "bcryptjs"` (⚠️ NE PAS utiliser `import bcrypt from "bcryptjs"` — l'import par défaut CJS casse les Server Actions Next.js)
+- **PIN par défaut** : `0000` (attribué automatiquement à la création du profil admin et aux profils existants sans PIN)
+- **PIN obligatoire** à la création d'un profil dans Paramètres → Équipe
+- **PIN optionnel** lors de la modification (laisser vide = pas de changement)
+- Le champ `pin` n'est **jamais renvoyé au client** — les fonctions `listerProfils` et `listerTousProfils` utilisent `select` pour exclure `pin`
 
 ### ProfilProvider (`src/hooks/use-profil.tsx`)
 
@@ -1274,9 +1289,11 @@ const STORAGE_KEY = "activeProfilId";
 
 // Provider wrape le dashboard layout
 export function ProfilProvider({ structureId, children }: { structureId: string | null; children: ReactNode }) {
-  // ... charge profils via listerProfils(structureId)
-  // Restaure profil depuis localStorage
-  // Auto-sélection si 1 seul profil
+  // loadProfils() : appelle listerProfils(structureId), trie par rôle puis prénom
+  // ⚠️ TOUJOURS force setProfil(null) — pas de restauration localStorage, pas d'auto-skip
+  //    → l'écran "Qui êtes-vous ?" + saisie PIN s'affiche à CHAQUE session
+  // selectProfil(p) : appelé APRÈS vérification du PIN → setProfil + localStorage
+  // clearProfil() : supprime localStorage + remet profil à null → réaffiche l'écran de sélection
   // isAdmin = profil?.role === "ADMINISTRATEUR"
   // needsSelection = !loading && profils.length > 0 && !profil
 }
@@ -1287,24 +1304,46 @@ export function useProfil() {
 ```
 
 **Comportements clés** :
-- `loadProfils()` : appelle `listerProfils(structureId)`, trie par rôle puis prénom
-- Restauration localStorage : vérifie si le `savedId` existe encore dans la liste des profils actifs
-- Auto-skip : si `data.length === 1`, sélectionne automatiquement + persiste
+- `loadProfils()` : appelle `listerProfils(structureId)` (qui exclut le `pin` via `select`), trie par rôle puis prénom
+- **Pas de restauration localStorage** : à chaque session, `profil` est remis à `null` → force la sélection + saisie PIN
+- **Pas d'auto-skip** : même avec 1 seul profil, l'écran de sélection s'affiche
+- `selectProfil(p)` : appelé uniquement après vérification PIN réussie
 - `clearProfil()` : supprime localStorage + remet profil à null → réaffiche l'écran de sélection
 - `isAdmin` : dérivé de `profil?.role === "ADMINISTRATEUR"`
 
 ### Écran "Qui êtes-vous ?" (`src/components/layout/select-profil.tsx`)
 
+**Flux en 2 étapes** :
+
 ```typescript
 export function SelectProfil({ structureId, userPrenom, userNom, children }: SelectProfilProps) {
-  // 1. useEffect au mount : appelle assurerProfilAdmin(structureId, prenom, nom)
-  //    pour auto-créer le premier profil admin si inexistant
+  // État : selectedProfil, pin, pinError, verifying
+
+  // 1. useEffect au mount :
+  //    - Appelle assurerProfilAdmin(structureId, prenom, nom) pour auto-créer le premier profil admin (PIN 0000)
+  //    - Appelle TOUJOURS refreshProfils() après l'init (même si aucun profil créé)
+  //      ⚠️ Important : si on n'appelle refreshProfils que quand created=true,
+  //         les profils existants ne se chargent jamais si le 1er fetch a échoué
+
   // 2. Si loading || initializing → spinner
-  // 3. Si profil sélectionné → render children (le dashboard)
-  // 4. Sinon → écran de sélection :
+
+  // 3. Si profil sélectionné et vérifié (profil && !needsSelection) → render children (le dashboard)
+
+  // 4. Si un profil est cliqué (selectedProfil !== null) → ÉTAPE 2 : écran de saisie PIN
+  //    - Avatar cercle coloré (grande taille) avec initiales
+  //    - Nom complet + poste
+  //    - Champ mot de passe (type="password", autoFocus, onKeyDown Enter)
+  //    - Bouton "Valider" → appelle verifierProfilPin(selectedProfil.id, pin)
+  //      → Si succès : selectProfil(selectedProfil) → accès dashboard
+  //      → Si échec : affiche pinError (message d'erreur rouge)
+  //    - Bouton "Changer de profil" → retour à l'étape 1
+
+  // 5. Sinon → ÉTAPE 1 : écran de sélection
   //    - Titre "Qui êtes-vous ?"
+  //    - Si profils.length === 0 : message "Aucun profil trouvé" + bouton "Recharger"
   //    - Grille 2 colonnes de boutons-profils
   //    - Chaque bouton : cercle coloré (8 couleurs rotatives) avec initiales, prénom, poste, badge "Admin"
+  //    - Click → handleSelectProfil(p) → passe à l'étape 2
 }
 ```
 
@@ -1490,12 +1529,10 @@ export function Topbar({ structures, activeStructureId, onSwitchStructure, preno
         {/* Cloche notifications */}
         <NotificationsBell structureId={activeStructureId} />
 
-        {/* Bouton "Changer" de profil (visible si >1 profil) */}
-        {profils.length > 1 && (
-          <button onClick={clearProfil}>
-            <RefreshCw size={14} /> Changer
-          </button>
-        )}
+        {/* Bouton "Changer" de profil (toujours visible — PIN requis à chaque changement) */}
+        <button onClick={clearProfil}>
+          <RefreshCw size={14} /> Changer
+        </button>
 
         {/* Avatar initiale + prénom + poste */}
         <div className="h-8 w-8 rounded-full bg-rzpanda-primary/10 ...">
@@ -1801,14 +1838,18 @@ export async function getAlertes(structureId: string):
      - 1 : rouge, "expire DEMAIN"
      - 2-3 : orange, "expire dans X jours"
 
-### `actions/profils.ts` — Profils (Phase 4)
+### `actions/profils.ts` — Profils avec PIN (Phase 4)
+
+⚠️ **Import bcryptjs** : `import { hash, compare } from "bcryptjs"` (import nommé obligatoire — l'import par défaut casse les Server Actions)
 
 ```typescript
 export async function listerProfils(structureId: string): Promise<ActionResult>
 // Retourne les profils actifs, triés par rôle puis prénom
+// ⚠️ Utilise `select` pour EXCLURE le champ `pin` — ne jamais envoyer le hash au client
 
 export async function listerTousProfils(structureId: string): Promise<ActionResult>
 // Retourne TOUS les profils (actifs et inactifs), admin-only
+// ⚠️ Exclut aussi `pin` via `select`
 
 export async function obtenirProfil(profilId: string): Promise<ActionResult>
 
@@ -1822,7 +1863,9 @@ export async function creerProfil(data: {
   email?: string;
   certifications?: string;
   notes?: string;
+  pin?: string;             // Obligatoire — hashé bcrypt avant stockage
 }): Promise<ActionResult>
+// Valide prenom + nom + pin obligatoires, hash(pin, 10) avant insert
 
 export async function modifierProfil(profilId: string, data: Partial<{
   prenom: string;
@@ -1833,14 +1876,22 @@ export async function modifierProfil(profilId: string, data: Partial<{
   email: string;
   certifications: string;
   notes: string;
+  pin: string;              // Optionnel — si fourni, hashé avant update
 }>): Promise<ActionResult>
 
 export async function desactiverProfil(profilId: string): Promise<ActionResult>
 // Guard : refuse de désactiver le dernier ADMINISTRATEUR
 
+export async function verifierProfilPin(profilId: string, pin: string): Promise<ActionResult>
+// 1. Récupère profil.pin depuis la DB
+// 2. Si pin est null → attribue hash("0000", 10) au profil, vérifie avec "0000"
+//    (migration automatique des profils existants sans PIN)
+// 3. Si pin existe → compare(pin, profil.pin) via bcrypt
+// 4. Retourne success ou error avec message
+
 export async function assurerProfilAdmin(structureId: string, prenom: string, nom: string):
   Promise<ActionResult<{ created: boolean; data?: Profil }>>
-// Vérifie si un admin existe déjà ; sinon en crée un automatiquement
+// Vérifie si un profil existe déjà (count > 0) ; sinon crée un admin avec pin = hash("0000", 10)
 ```
 
 ### `actions/biberons.ts` — Biberonnerie
@@ -2401,6 +2452,8 @@ Le dashboard affiche les KPI du jour, adaptés aux modules actifs :
 - **Modules actifs** : activation/désactivation individuelle des 10 modules
 - **Seuils groupes d'âge** (Phase 4) : `seuil_bebes_max` (défaut 18 mois), `seuil_moyens_max` (défaut 30 mois)
 - **Gestion profils** (Phase 4) : créer, modifier, désactiver des profils professionnels
+  - **Champ "Mot de passe profil"** dans le formulaire d'ajout (obligatoire) et modification (optionnel — "Laisser vide pour ne pas changer")
+  - L'admin peut réinitialiser le mot de passe de n'importe quel profil
 - **Nettoyage données** : `nettoyerDonneesAberrantes()` pour purger relevés/équipements/stocks orphelins
 
 ---
@@ -2628,7 +2681,7 @@ export function useAuth() {
 | `SUPABASE_SERVICE_ROLE_KEY` | Production, Preview | Clé service Supabase (server-only) |
 | `DATABASE_URL` | All | Connection string PostgreSQL (pooled) |
 | `DIRECT_URL` | All | Connection string PostgreSQL (direct) |
-| `NEXT_PUBLIC_APP_URL` | Production | URL de production (ex: https://rzpanda.vercel.app) |
+| `NEXT_PUBLIC_APP_URL` | Production | URL de production (https://rzpanda.fr ou https://rzpanda.vercel.app) |
 
 ### Build settings
 - **Framework Preset** : Next.js
@@ -2642,11 +2695,17 @@ export function useAuth() {
 - **RLS (Row Level Security)** : les données sont accédées via Prisma côté serveur (Server Actions), pas directement depuis le client. Les Server Actions vérifient l'auth via Supabase et filtrent par structure_id.
 - **Storage** : bucket pour photos enfants et documents PAI (si activé)
 
+### Domaine personnalisé
+- **Domaine principal** : `rzpanda.fr`
+- **Alias Vercel** : `rzpanda.vercel.app`, `petitsafe-3qmv.vercel.app`
+
 ### Post-déploiement
-1. Appliquer les migrations : `npx prisma migrate deploy`
-2. Optionnel : `npx tsx prisma/seed.ts` pour données de démonstration
-3. Créer un premier compte via `/register`
-4. Le profil admin est automatiquement créé au premier login (Phase 4)
+1. Appliquer les migrations : `npx prisma migrate deploy` (ou `npx prisma db push`)
+2. ⚠️ **Mettre à jour les variables `DATABASE_URL` et `DIRECT_URL` sur Vercel** si le mot de passe DB a changé (erreur `prisma:error P1000` sinon)
+3. Optionnel : `npx tsx prisma/seed.ts` pour données de démonstration
+4. Créer un premier compte via `/register`
+5. Le profil admin est automatiquement créé au premier login avec **PIN par défaut `0000`** (Phase 4)
+6. Changer le PIN par défaut dans Paramètres → Équipe
 
 ---
 
@@ -2673,10 +2732,13 @@ export function useAuth() {
 - Protocoles internes
 
 ### Phase 4 — Profils partagés & droits (actuelle)
-- **Système multi-profils** : model Profil, ProfilProvider, écran "Qui êtes-vous ?", auto-skip 1 profil, auto-création admin
+- **Système multi-profils avec PIN** : model Profil (champ `pin` hashé bcrypt), ProfilProvider, écran "Qui êtes-vous ?" **TOUJOURS affiché** (pas d'auto-skip), saisie mot de passe après sélection profil, auto-création admin avec PIN `0000`, migration auto des profils existants sans PIN
+- **Sécurité bcryptjs** : import nommé `import { hash, compare } from "bcryptjs"` (⚠️ l'import par défaut casse les Server Actions), `listerProfils` exclut le `pin` du retour via `select`, `verifierProfilPin()` pour validation côté serveur
+- **Gestion PIN dans Paramètres → Équipe** : champ "Mot de passe profil" obligatoire à la création, optionnel en édition, réinitialisation par admin
 - **Droits d'accès** : enum RoleProfil (ADMINISTRATEUR/PROFESSIONNEL), AdminOnly, OwnerOrAdmin, AdminGuard, useAdminGuard, verifierAdmin server-side, filtrage Sidebar/BottomNav
 - **Bascule groupes d'âge** : seuils configurables sur Structure, calculerGroupeAuto, joursAvantBascule, forçage manuel (groupe_force), alerte dashboard
 - **Alertes lait péremption** : date_peremption_lait sur Biberon, getAlertes (lait_dlc), niveaux 3j→expiré, affichage cloche/biberonnerie/dashboard
 - **Émargement nettoyage** : initiales cercle coloré, horodatage, profil_id sur ValidationNettoyage, annulation admin-only, export PDF DDPP
 - **Annuaire équipe** : onglet dans Transmissions, recherche, fiches profils, notes admin, transmission ciblée
 - **profil_id ajouté** sur toutes les tables d'action (Biberon, Repas, Change, Sieste, Incident, ReleveTemperature, RelevePlat, ReceptionMarchandise, Transmission)
+- **Domaine production** : rzpanda.fr
