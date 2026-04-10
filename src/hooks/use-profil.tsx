@@ -59,20 +59,8 @@ export function ProfilProvider({ structureId, children }: { structureId: string 
       if (result.success) {
         const data = result.data as ProfilActif[];
         setProfils(data);
-
-        // Restaurer le profil depuis localStorage
-        const savedId = localStorage.getItem(STORAGE_KEY);
-        const savedProfil = data.find((p) => p.id === savedId);
-
-        if (savedProfil) {
-          setProfil(savedProfil);
-        } else if (data.length === 1) {
-          // Skip auto si un seul profil
-          setProfil(data[0]);
-          localStorage.setItem(STORAGE_KEY, data[0].id);
-        } else {
-          setProfil(null);
-        }
+        // Toujours forcer la sélection + saisie du mot de passe
+        setProfil(null);
       }
     } catch (e) {
       console.error("[useProfil] Erreur chargement profils:", e);

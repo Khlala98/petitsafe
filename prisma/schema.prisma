@@ -198,6 +198,7 @@ model Profil {
   email          String?
   certifications String?
   notes          String?
+  pin            String?
   actif          Boolean    @default(true)
   created_at     DateTime   @default(now())
   updated_at     DateTime   @updatedAt

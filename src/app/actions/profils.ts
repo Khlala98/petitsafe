@@ -2,6 +2,7 @@
 
 import { prisma } from "@/lib/supabase/prisma";
 import { RoleProfil } from "@prisma/client";
+import bcrypt from "bcryptjs";
 
 // ═══ Lister les profils actifs d'une structure ═══
 export async function listerProfils(structureId: string) {
@@ -51,10 +52,14 @@ export async function creerProfil(data: {
   email?: string;
   certifications?: string;
   notes?: string;
+  pin?: string;
 }) {
   try {
     if (!data.prenom?.trim()) return { success: false as const, error: "Le prénom est obligatoire." };
     if (!data.nom?.trim()) return { success: false as const, error: "Le nom est obligatoire." };
+    if (!data.pin?.trim()) return { success: false as const, error: "Le mot de passe profil est obligatoire." };
+
+    const hashedPin = await bcrypt.hash(data.pin.trim(), 10);
 
     const profil = await prisma.profil.create({
       data: {
@@ -67,6 +72,7 @@ export async function creerProfil(data: {
         email: data.email || null,
         certifications: data.certifications || null,
         notes: data.notes || null,
+        pin: hashedPin,
       },
     });
     return { success: true as const, data: profil };
@@ -88,22 +94,29 @@ export async function modifierProfil(
     certifications?: string;
     notes?: string;
     actif?: boolean;
+    pin?: string;
   }
 ) {
   try {
+    const updateData: Record<string, unknown> = {
+      ...(data.prenom !== undefined && { prenom: data.prenom.trim() }),
+      ...(data.nom !== undefined && { nom: data.nom.trim() }),
+      ...(data.poste !== undefined && { poste: data.poste || null }),
+      ...(data.role !== undefined && { role: data.role }),
+      ...(data.telephone !== undefined && { telephone: data.telephone || null }),
+      ...(data.email !== undefined && { email: data.email || null }),
+      ...(data.certifications !== undefined && { certifications: data.certifications || null }),
+      ...(data.notes !== undefined && { notes: data.notes || null }),
+      ...(data.actif !== undefined && { actif: data.actif }),
+    };
+
+    if (data.pin) {
+      updateData.pin = await bcrypt.hash(data.pin.trim(), 10);
+    }
+
     const profil = await prisma.profil.update({
       where: { id: profilId },
-      data: {
-        ...(data.prenom !== undefined && { prenom: data.prenom.trim() }),
-        ...(data.nom !== undefined && { nom: data.nom.trim() }),
-        ...(data.poste !== undefined && { poste: data.poste || null }),
-        ...(data.role !== undefined && { role: data.role }),
-        ...(data.telephone !== undefined && { telephone: data.telephone || null }),
-        ...(data.email !== undefined && { email: data.email || null }),
-        ...(data.certifications !== undefined && { certifications: data.certifications || null }),
-        ...(data.notes !== undefined && { notes: data.notes || null }),
-        ...(data.actif !== undefined && { actif: data.actif }),
-      },
+      data: updateData,
     });
     return { success: true as const, data: profil };
   } catch {
@@ -142,11 +155,32 @@ export async function desactiverProfil(profilId: string) {
   }
 }
 
+// ═══ Vérifier le mot de passe d'un profil ═══
+export async function verifierProfilPin(profilId: string, pin: string) {
+  try {
+    const profil = await prisma.profil.findUnique({
+      where: { id: profilId },
+      select: { id: true, pin: true },
+    });
+    if (!profil) return { success: false as const, error: "Profil introuvable." };
+    if (!profil.pin) return { success: false as const, error: "Aucun mot de passe défini pour ce profil." };
+
+    const valid = await bcrypt.compare(pin, profil.pin);
+    if (!valid) return { success: false as const, error: "Mot de passe incorrect." };
+
+    return { success: true as const };
+  } catch {
+    return { success: false as const, error: "Erreur lors de la vérification." };
+  }
+}
+
 // ═══ Auto-créer le profil admin si aucun profil n'existe ═══
 export async function assurerProfilAdmin(structureId: string, prenom: string, nom: string) {
   try {
     const count = await prisma.profil.count({ where: { structure_id: structureId } });
     if (count > 0) return { success: true as const, created: false };
+
+    const defaultPin = await bcrypt.hash("0000", 10);
 
     const profil = await prisma.profil.create({
       data: {
@@ -155,6 +189,7 @@ export async function assurerProfilAdmin(structureId: string, prenom: string, no
         nom: nom.trim(),
         poste: "Directrice",
         role: RoleProfil.ADMINISTRATEUR,
+        pin: defaultPin,
       },
     });
     return { success: true as const, created: true, data: profil };

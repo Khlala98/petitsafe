@@ -45,7 +45,7 @@ export default function ParametresPage() {
   const [equipeLoaded, setEquipeLoaded] = useState(false);
   const [showEquipeForm, setShowEquipeForm] = useState(false);
   const [editingProfil, setEditingProfil] = useState<ProfilActif | null>(null);
-  const [equipeForm, setEquipeForm] = useState({ prenom: "", nom: "", poste: "", role: "PROFESSIONNEL" as RoleProfil, telephone: "", email: "", certifications: "", notes: "" });
+  const [equipeForm, setEquipeForm] = useState({ prenom: "", nom: "", poste: "", role: "PROFESSIONNEL" as RoleProfil, telephone: "", email: "", certifications: "", notes: "", pin: "" });
   const [equipeSaving, setEquipeSaving] = useState(false);
 
   const { isAdmin } = useProfil();
@@ -120,7 +120,7 @@ export default function ParametresPage() {
   };
 
   const resetEquipeForm = () => {
-    setEquipeForm({ prenom: "", nom: "", poste: "", role: "PROFESSIONNEL" as RoleProfil, telephone: "", email: "", certifications: "", notes: "" });
+    setEquipeForm({ prenom: "", nom: "", poste: "", role: "PROFESSIONNEL" as RoleProfil, telephone: "", email: "", certifications: "", notes: "", pin: "" });
     setEditingProfil(null);
     setShowEquipeForm(false);
   };
@@ -136,6 +136,7 @@ export default function ParametresPage() {
       email: p.email || "",
       certifications: p.certifications || "",
       notes: p.notes || "",
+      pin: "",
     });
     setShowEquipeForm(true);
   };
@@ -143,6 +144,10 @@ export default function ParametresPage() {
   const handleSaveEquipe = async () => {
     if (!equipeForm.prenom.trim() || !equipeForm.nom.trim()) {
       toast.error("Le prénom et le nom sont obligatoires.");
+      return;
+    }
+    if (!editingProfil && !equipeForm.pin.trim()) {
+      toast.error("Le mot de passe profil est obligatoire.");
       return;
     }
     setEquipeSaving(true);
@@ -155,6 +160,7 @@ export default function ParametresPage() {
       email: equipeForm.email || undefined,
       certifications: equipeForm.certifications || undefined,
       notes: equipeForm.notes || undefined,
+      pin: equipeForm.pin.trim() || undefined,
     };
 
     const result = editingProfil
@@ -357,6 +363,14 @@ export default function ParametresPage() {
                     <label className="block text-xs font-medium text-gray-600 mb-1">Email perso</label>
                     <input type="email" value={equipeForm.email} onChange={(e) => setEquipeForm((f) => ({ ...f, email: e.target.value }))}
                       className="w-full h-10 px-3 rounded-lg border border-gray-300 focus:border-rzpanda-primary outline-none text-sm" placeholder="marie@email.com" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-gray-600 mb-1">
+                      Mot de passe profil {!editingProfil && "*"}
+                    </label>
+                    <input type="password" value={equipeForm.pin} onChange={(e) => setEquipeForm((f) => ({ ...f, pin: e.target.value }))}
+                      className="w-full h-10 px-3 rounded-lg border border-gray-300 focus:border-rzpanda-primary outline-none text-sm"
+                      placeholder={editingProfil ? "Laisser vide pour ne pas changer" : "Mot de passe obligatoire"} />
                   </div>
                 </div>
                 <div>
