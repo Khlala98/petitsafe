@@ -2,8 +2,11 @@
 
 import { useEffect, useState, Suspense } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
+import Link from "next/link";
 import { getEnfants } from "@/app/actions/enfants";
 import { creerBiberon } from "@/app/actions/biberons";
+import { listerBoitesLait } from "@/app/actions/boites-lait";
+import { listerLaitsMaternels } from "@/app/actions/lait-maternel";
 import { isBoiteLaitExpiree } from "@/lib/business-logic";
 import { TYPES_LAIT, QUANTITES_BIBERON_ML } from "@/lib/constants";
 import { useAuth } from "@/hooks/use-auth";
@@ -11,7 +14,8 @@ import { useProfil } from "@/hooks/use-profil";
 import { BadgeAllergie } from "@/components/shared/badge-allergie";
 import { BadgeRegime } from "@/components/shared/badge-regime";
 import { toast } from "sonner";
-import { Loader2, ArrowLeft, AlertTriangle } from "lucide-react";
+import { Loader2, ArrowLeft, AlertTriangle, Box, Milk } from "lucide-react";
+import type { TypeBoiteLait } from "@prisma/client";
 
 interface Enfant {
   id: string; prenom: string; nom: string;
@@ -40,9 +44,14 @@ function NouveauBiberonContent() {
   const { profil } = useProfil();
 
   const [enfants, setEnfants] = useState<Enfant[]>([]);
+  const [boites, setBoites] = useState<{ id: string; marque: string; type: TypeBoiteLait; numero_lot: string; dlc: string; date_ouverture: string | null }[]>([]);
+  const [laitsMaternels, setLaitsMaternels] = useState<{ id: string; enfant_id: string; date_recueil: string; congele: boolean; quantite_restante_ml: number | null; quantite_ml: number; dlc: string }[]>([]);
   const [selectedEnfantId, setSelectedEnfantId] = useState<string>(preselectedEnfantId ?? "");
   const [typeLait, setTypeLait] = useState("");
   const [nomLait, setNomLait] = useState("");
+  const [boiteLaitId, setBoiteLaitId] = useState<string>("");
+  const [laitMaternelId, setLaitMaternelId] = useState<string>("");
+  const [saisieManuelle, setSaisieManuelle] = useState(false);
   const [numeroLot, setNumeroLot] = useState("");
   const [datePeremption, setDatePeremption] = useState("");
   const [dateOuverture, setDateOuverture] = useState(new Date().toISOString().split("T")[0]);
@@ -55,9 +64,38 @@ function NouveauBiberonContent() {
 
   useEffect(() => {
     const fetch = async () => {
-      const result = await getEnfants(structureId);
+      const [result, boitesRes, lmRes] = await Promise.all([
+        getEnfants(structureId),
+        listerBoitesLait(structureId, { actifsSeulement: true }),
+        listerLaitsMaternels(structureId, { statut: "DISPONIBLE" }),
+      ]);
       if (result.success && result.data) {
         setEnfants(result.data.map((e) => ({ id: e.id, prenom: e.prenom, nom: e.nom, allergies: e.allergies, regimes: e.regimes })));
+      }
+      if (boitesRes.success && boitesRes.data) {
+        setBoites(
+          boitesRes.data.map((b) => ({
+            id: b.id,
+            marque: b.marque,
+            type: b.type,
+            numero_lot: b.numero_lot,
+            dlc: b.dlc.toISOString(),
+            date_ouverture: b.date_ouverture?.toISOString() ?? null,
+          })),
+        );
+      }
+      if (lmRes.success && lmRes.data) {
+        setLaitsMaternels(
+          lmRes.data.map((lm) => ({
+            id: lm.id,
+            enfant_id: lm.enfant_id,
+            date_recueil: lm.date_recueil.toISOString(),
+            congele: lm.congele,
+            quantite_restante_ml: lm.quantite_restante_ml,
+            quantite_ml: lm.quantite_ml,
+            dlc: lm.dlc.toISOString(),
+          })),
+        );
       }
       setLoading(false);
     };
@@ -70,23 +108,44 @@ function NouveauBiberonContent() {
   const plvAllergy = selected ? hasPLVAllergy(selected.allergies) : false;
   const blocked = isLaitIncompatible(typeLait, plvAllergy);
   const boiteExpiree = dateOuverture ? isBoiteLaitExpiree(new Date(dateOuverture), new Date()) : false;
+  const boiteSelectionnee = boites.find((b) => b.id === boiteLaitId) ?? null;
+  const boiteSelectionneePerimee = boiteSelectionnee ? new Date(boiteSelectionnee.dlc) < new Date() : false;
+  const isLaitMaternel = typeLait === "Maternel";
+  const laitsMaternelsEnfant = isLaitMaternel ? laitsMaternels.filter((lm) => lm.enfant_id === selectedEnfantId) : [];
+  const laitMaternelSelectionne = laitsMaternels.find((lm) => lm.id === laitMaternelId) ?? null;
+  const laitMaternelPerime = laitMaternelSelectionne ? new Date(laitMaternelSelectionne.dlc) < new Date() : false;
 
   const handleSubmit = async () => {
     if (!selectedEnfantId) { toast.error("Sélectionnez un enfant."); return; }
     if (!typeLait) { toast.error("Sélectionnez le type de lait."); return; }
     if (blocked) { toast.error("Ce lait est incompatible avec l'allergie de l'enfant."); return; }
-    if (!numeroLot) { toast.error("Numéro de lot obligatoire (traçabilité)."); return; }
+    const utiliseBoite = !isLaitMaternel && !!boiteLaitId && !saisieManuelle;
+    const utiliseLaitMaternel = isLaitMaternel && !!laitMaternelId;
+    if (!utiliseBoite && !utiliseLaitMaternel && !numeroLot && !isLaitMaternel) {
+      toast.error("Sélectionnez une boîte ou saisissez un numéro de lot.");
+      return;
+    }
+    if (isLaitMaternel && !laitMaternelId) {
+      toast.error("Sélectionnez un recueil de lait maternel disponible.");
+      return;
+    }
+    if (utiliseBoite && boiteSelectionneePerimee) { toast.error("La boîte sélectionnée a une DLC dépassée."); return; }
+    if (utiliseLaitMaternel && laitMaternelPerime) { toast.error("Ce lait maternel est périmé — ne pas utiliser."); return; }
     if (!quantite) { toast.error("Quantité requise."); return; }
     if (!preparateur) { toast.error("Nom du préparateur obligatoire (émargement)."); return; }
 
     setSubmitting(true);
     const result = await creerBiberon({
       structure_id: structureId, enfant_id: selectedEnfantId, type_lait: typeLait,
-      nom_lait: nomLait || undefined, numero_lot: numeroLot,
-      date_peremption_lait: datePeremption || undefined, date_ouverture_boite: dateOuverture || undefined,
+      nom_lait: nomLait || undefined,
+      numero_lot: utiliseBoite || utiliseLaitMaternel ? "" : numeroLot,
+      date_peremption_lait: utiliseBoite || utiliseLaitMaternel ? undefined : (datePeremption || undefined),
+      date_ouverture_boite: utiliseBoite || utiliseLaitMaternel ? undefined : (dateOuverture || undefined),
       nombre_dosettes: dosettes ? Number(dosettes) : undefined,
       quantite_preparee_ml: Number(quantite), preparateur_nom: preparateur,
       professionnel_id: user?.id ?? "", profil_id: profil?.id, observations: observations || undefined,
+      boite_lait_id: utiliseBoite ? boiteLaitId : undefined,
+      lait_maternel_id: utiliseLaitMaternel ? laitMaternelId : undefined,
     });
     setSubmitting(false);
 
@@ -165,25 +224,161 @@ function NouveauBiberonContent() {
 
           {/* Traçabilité */}
           <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 space-y-4">
-            <h3 className="font-semibold text-gray-700">Traçabilité</h3>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Numéro de lot *</label>
-              <input type="text" value={numeroLot} onChange={(e) => setNumeroLot(e.target.value)} placeholder="Ex: G2024-1150" className={inputClass} />
+            <div className="flex items-center justify-between flex-wrap gap-2">
+              <h3 className="font-semibold text-gray-700 flex items-center gap-2">
+                {isLaitMaternel ? (
+                  <>
+                    <Milk size={18} className="text-pink-500" /> Lait maternel
+                  </>
+                ) : (
+                  <>
+                    <Box size={18} className="text-rzpanda-primary" /> Traçabilité
+                  </>
+                )}
+              </h3>
+              <Link
+                href={`/dashboard/${structureId}/biberonnerie/${isLaitMaternel ? "lait-maternel" : "boites"}`}
+                className="text-xs text-rzpanda-primary hover:underline"
+              >
+                Gérer →
+              </Link>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+
+            {isLaitMaternel ? (
+              <>
+                {laitsMaternelsEnfant.length === 0 ? (
+                  <div className="p-4 rounded-lg bg-pink-50 border border-pink-200 text-sm text-pink-800 space-y-2">
+                    <p>Aucun lait maternel disponible pour {selected.prenom}.</p>
+                    <Link
+                      href={`/dashboard/${structureId}/biberonnerie/lait-maternel`}
+                      className="inline-flex items-center gap-1.5 h-8 px-3 rounded-lg bg-pink-500 text-white text-xs font-medium hover:bg-pink-600"
+                    >
+                      <Milk size={12} /> Enregistrer un recueil
+                    </Link>
+                  </div>
+                ) : (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Recueil disponible *</label>
+                    <select
+                      value={laitMaternelId}
+                      onChange={(e) => setLaitMaternelId(e.target.value)}
+                      className={`${inputClass} bg-white`}
+                    >
+                      <option value="">— Sélectionner un recueil —</option>
+                      {laitsMaternelsEnfant.map((lm) => {
+                        const dlcDate = new Date(lm.dlc);
+                        const dlcExp = dlcDate < new Date();
+                        const reste = lm.quantite_restante_ml ?? lm.quantite_ml;
+                        return (
+                          <option key={lm.id} value={lm.id} disabled={dlcExp}>
+                            Recueil du {new Date(lm.date_recueil).toLocaleDateString("fr-FR")} · {reste} ml restants
+                            {lm.congele ? " · congelé" : ""} · DLC {dlcDate.toLocaleString("fr-FR", { dateStyle: "short", timeStyle: "short" })}
+                            {dlcExp ? " (PÉRIMÉ)" : ""}
+                          </option>
+                        );
+                      })}
+                    </select>
+                    {laitMaternelPerime && (
+                      <div className="mt-2 flex items-start gap-2 p-3 rounded-lg bg-red-50 border border-red-200">
+                        <AlertTriangle size={16} className="text-red-600 shrink-0 mt-0.5" />
+                        <p className="text-sm text-red-700">DLC dépassée — NE PAS UTILISER.</p>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </>
+            ) : boites.length > 0 && !saisieManuelle && (
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Date de péremption</label>
-                <input type="date" value={datePeremption} onChange={(e) => setDatePeremption(e.target.value)} className={inputClass} />
+                <label className="block text-sm font-medium text-gray-700 mb-1">Boîte de lait *</label>
+                <select value={boiteLaitId} onChange={(e) => setBoiteLaitId(e.target.value)} className={`${inputClass} bg-white`}>
+                  <option value="">— Sélectionner une boîte du catalogue —</option>
+                  {boites.map((b) => {
+                    const dlcDate = new Date(b.dlc);
+                    const dlcExp = dlcDate < new Date();
+                    return (
+                      <option key={b.id} value={b.id} disabled={dlcExp}>
+                        {b.marque} · Lot {b.numero_lot} · DLC {dlcDate.toLocaleDateString("fr-FR")}
+                        {dlcExp ? " (DLC dépassée)" : ""}
+                      </option>
+                    );
+                  })}
+                </select>
+                {boiteSelectionnee && (
+                  <p className="text-xs text-gray-500 mt-1">
+                    {boiteSelectionnee.type === "POUDRE" ? "Poudre" : "Liquide"} · Lot {boiteSelectionnee.numero_lot} · DLC{" "}
+                    {new Date(boiteSelectionnee.dlc).toLocaleDateString("fr-FR")}
+                    {boiteSelectionnee.date_ouverture &&
+                      ` · Ouverte le ${new Date(boiteSelectionnee.date_ouverture).toLocaleDateString("fr-FR")}`}
+                  </p>
+                )}
+                {boiteSelectionneePerimee && (
+                  <div className="mt-2 flex items-start gap-2 p-3 rounded-lg bg-red-50 border border-red-200">
+                    <AlertTriangle size={16} className="text-red-600 shrink-0 mt-0.5" />
+                    <p className="text-sm text-red-700">DLC de cette boîte dépassée — NE PAS UTILISER.</p>
+                  </div>
+                )}
+                <button
+                  type="button"
+                  onClick={() => { setSaisieManuelle(true); setBoiteLaitId(""); }}
+                  className="mt-2 text-xs text-gray-500 hover:text-rzpanda-primary"
+                >
+                  Saisir un lot manuellement (boîte non cataloguée)
+                </button>
               </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Date ouverture boîte</label>
-                <input type="date" value={dateOuverture} onChange={(e) => setDateOuverture(e.target.value)} className={inputClass} />
+            )}
+
+            {!isLaitMaternel && boites.length === 0 && !saisieManuelle && (
+              <div className="p-4 rounded-lg bg-gray-50 border border-gray-200 text-sm text-gray-600 space-y-2">
+                <p>Aucune boîte enregistrée dans le catalogue.</p>
+                <div className="flex gap-2 flex-wrap">
+                  <Link
+                    href={`/dashboard/${structureId}/biberonnerie/boites`}
+                    className="inline-flex items-center gap-1.5 h-8 px-3 rounded-lg bg-rzpanda-primary text-white text-xs font-medium hover:bg-rzpanda-primary/90"
+                  >
+                    <Box size={12} /> Ajouter une boîte
+                  </Link>
+                  <button
+                    type="button"
+                    onClick={() => setSaisieManuelle(true)}
+                    className="inline-flex h-8 px-3 rounded-lg border border-gray-300 text-xs text-gray-600 hover:bg-white"
+                  >
+                    Saisir un lot manuellement
+                  </button>
+                </div>
               </div>
-            </div>
-            {boiteExpiree && (
-              <div className="flex items-start gap-2 p-3 rounded-lg bg-orange-50 border border-orange-200">
-                <AlertTriangle size={16} className="text-orange-600 shrink-0 mt-0.5" />
-                <p className="text-sm text-orange-700">Boîte ouverte depuis plus de 30 jours. À jeter.</p>
+            )}
+
+            {!isLaitMaternel && saisieManuelle && (
+              <div className="space-y-3">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Numéro de lot *</label>
+                  <input type="text" value={numeroLot} onChange={(e) => setNumeroLot(e.target.value)} placeholder="Ex: G2024-1150" className={inputClass} />
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Date de péremption</label>
+                    <input type="date" value={datePeremption} onChange={(e) => setDatePeremption(e.target.value)} className={inputClass} />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Date ouverture boîte</label>
+                    <input type="date" value={dateOuverture} onChange={(e) => setDateOuverture(e.target.value)} className={inputClass} />
+                  </div>
+                </div>
+                {boiteExpiree && (
+                  <div className="flex items-start gap-2 p-3 rounded-lg bg-orange-50 border border-orange-200">
+                    <AlertTriangle size={16} className="text-orange-600 shrink-0 mt-0.5" />
+                    <p className="text-sm text-orange-700">Boîte ouverte depuis plus de 30 jours. À jeter.</p>
+                  </div>
+                )}
+                {boites.length > 0 && (
+                  <button
+                    type="button"
+                    onClick={() => setSaisieManuelle(false)}
+                    className="text-xs text-gray-500 hover:text-rzpanda-primary"
+                  >
+                    ← Choisir une boîte du catalogue
+                  </button>
+                )}
               </div>
             )}
           </div>

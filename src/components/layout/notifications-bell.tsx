@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState, useCallback } from "react";
 import Link from "next/link";
-import { Bell, AlertOctagon, Clock, AlertTriangle } from "lucide-react";
+import { Bell, AlertOctagon, Clock, AlertTriangle, Pill, Milk, ShieldAlert } from "lucide-react";
 import { getAlertes, type AlerteItem } from "@/app/actions/alertes";
 
 interface NotificationsBellProps {
@@ -45,6 +45,9 @@ export function NotificationsBell({ structureId }: NotificationsBellProps) {
   const renderAlertIcon = (type: AlerteItem["type"]) => {
     if (type === "dlc_depassee") return <AlertOctagon size={16} className="text-red-600 shrink-0" />;
     if (type === "dlc_proche") return <AlertTriangle size={16} className="text-orange-500 shrink-0" />;
+    if (type === "medicament_a_signer") return <Pill size={16} className="text-blue-600 shrink-0" />;
+    if (type === "lait_maternel_dlc") return <Milk size={16} className="text-pink-500 shrink-0" />;
+    if (type === "pai_present") return <ShieldAlert size={16} className="text-amber-600 shrink-0" />;
     return <Clock size={16} className="text-orange-500 shrink-0" />;
   };
 

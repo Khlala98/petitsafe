@@ -135,6 +135,29 @@ enum GraviteIncident {
   GRAVE
 }
 
+enum TypeBoiteLait {
+  POUDRE
+  LIQUIDE
+}
+
+enum VoieAdministration {
+  ORALE
+  CUTANEE
+  NASALE
+  OCULAIRE
+  AURICULAIRE
+  RECTALE
+  INHALEE
+  AUTRE
+}
+
+enum StatutLaitMaternel {
+  DISPONIBLE
+  UTILISE
+  JETE
+  PERIME
+}
+
 // ═══ MULTI-TENANT ═══
 
 model Structure {
@@ -153,24 +176,28 @@ model Structure {
   seuil_moyens_max Int           @default(30)
   created_at       DateTime      @default(now())
 
-  users            UserStructure[]
-  profils          Profil[]
-  enfants          Enfant[]
-  equipements      Equipement[]
-  zones_nettoyage  ZoneNettoyage[]
-  stocks           Stock[]
-  transmissions    Transmission[]
-  protocoles       Protocole[]
-  exports          ExportPDF[]
-  demandes_demo    DemandeDemo[]
-  biberons         Biberon[]
-  repas            Repas[]
-  changes          Change[]
-  siestes          Sieste[]
-  releves_temp     ReleveTemperature[]
-  releves_plat     RelevePlat[]
-  receptions       ReceptionMarchandise[]
-  incidents        Incident[]
+  users                      UserStructure[]
+  profils                    Profil[]
+  enfants                    Enfant[]
+  equipements                Equipement[]
+  zones_nettoyage            ZoneNettoyage[]
+  stocks                     Stock[]
+  transmissions              Transmission[]
+  protocoles                 Protocole[]
+  exports                    ExportPDF[]
+  demandes_demo              DemandeDemo[]
+  biberons                   Biberon[]
+  repas                      Repas[]
+  changes                    Change[]
+  siestes                    Sieste[]
+  releves_temp               ReleveTemperature[]
+  releves_plat               RelevePlat[]
+  receptions                 ReceptionMarchandise[]
+  incidents                  Incident[]
+  boites_lait                BoiteLait[]
+  laits_maternels            LaitMaternel[]
+  administrations_medicament AdministrationMedicament[]
+  pais                       PAI[]
 }
 
 model UserStructure {
@@ -203,18 +230,20 @@ model Profil {
   created_at     DateTime   @default(now())
   updated_at     DateTime   @updatedAt
 
-  structure      Structure  @relation(fields: [structure_id], references: [id], onDelete: Cascade)
+  structure Structure @relation(fields: [structure_id], references: [id], onDelete: Cascade)
 
-  releves_temp           ReleveTemperature[]
-  biberons               Biberon[]
-  validations_nettoyage  ValidationNettoyage[]
-  repas                  Repas[]
-  changes                Change[]
-  siestes                Sieste[]
-  transmissions          Transmission[]
-  incidents              Incident[]
-  receptions             ReceptionMarchandise[]
-  releves_plat           RelevePlat[]
+  releves_temp               ReleveTemperature[]
+  biberons                   Biberon[]
+  validations_nettoyage      ValidationNettoyage[]
+  repas                      Repas[]
+  changes                    Change[]
+  siestes                    Sieste[]
+  transmissions              Transmission[]
+  incidents                  Incident[]
+  receptions                 ReceptionMarchandise[]
+  releves_plat               RelevePlat[]
+  administrations_medicament AdministrationMedicament[] @relation("ProfilAdministrateur")
+  cosignatures_medicament    AdministrationMedicament[] @relation("ProfilTemoin")
 
   @@index([structure_id])
   @@index([structure_id, actif])
@@ -223,29 +252,32 @@ model Profil {
 // ═══ ENFANTS ═══
 
 model Enfant {
-  id             String   @id @default(uuid())
+  id             String    @id @default(uuid())
   structure_id   String
   prenom         String
   nom            String
   date_naissance DateTime
   sexe           Sexe?
   groupe         String?
-  groupe_force   Boolean  @default(false)
+  groupe_force   Boolean   @default(false)
   photo_url      String?
-  actif          Boolean  @default(true)
+  actif          Boolean   @default(true)
   date_entree    DateTime?
-  regimes        String[] @default([])
-  portail_token  String?  @unique
+  regimes        String[]  @default([])
+  portail_token  String?   @unique
 
-  structure      Structure        @relation(fields: [structure_id], references: [id], onDelete: Cascade)
-  allergies      AllergieEnfant[]
-  contacts       ContactUrgence[]
-  biberons       Biberon[]
-  repas          Repas[]
-  changes        Change[]
-  siestes        Sieste[]
-  transmissions  Transmission[]
-  incidents      Incident[]
+  structure                  Structure                  @relation(fields: [structure_id], references: [id], onDelete: Cascade)
+  allergies                  AllergieEnfant[]
+  contacts                   ContactUrgence[]
+  biberons                   Biberon[]
+  repas                      Repas[]
+  changes                    Change[]
+  siestes                    Sieste[]
+  transmissions              Transmission[]
+  incidents                  Incident[]
+  laits_maternels            LaitMaternel[]
+  administrations_medicament AdministrationMedicament[]
+  pai                        PAI?
 
   @@index([structure_id])
   @@index([structure_id, actif])
@@ -259,7 +291,7 @@ model AllergieEnfant {
   protocole    String?
   document_pai String?
 
-  enfant       Enfant @relation(fields: [enfant_id], references: [id], onDelete: Cascade)
+  enfant Enfant @relation(fields: [enfant_id], references: [id], onDelete: Cascade)
 
   @@index([enfant_id])
 }
@@ -273,7 +305,7 @@ model ContactUrgence {
   est_autorise_recuperer Boolean @default(true)
   ordre_priorite         Int     @default(1)
 
-  enfant                 Enfant @relation(fields: [enfant_id], references: [id], onDelete: Cascade)
+  enfant Enfant @relation(fields: [enfant_id], references: [id], onDelete: Cascade)
 
   @@index([enfant_id])
 }
@@ -302,17 +334,23 @@ model Biberon {
   observations         String?
   professionnel_id     String
   profil_id            String?
+  boite_lait_id        String?
+  lait_maternel_id     String?
 
-  structure            Structure @relation(fields: [structure_id], references: [id], onDelete: Cascade)
-  enfant               Enfant    @relation(fields: [enfant_id], references: [id], onDelete: Cascade)
-  profil               Profil?   @relation(fields: [profil_id], references: [id], onDelete: SetNull)
+  structure     Structure     @relation(fields: [structure_id], references: [id], onDelete: Cascade)
+  enfant        Enfant        @relation(fields: [enfant_id], references: [id], onDelete: Cascade)
+  profil        Profil?       @relation(fields: [profil_id], references: [id], onDelete: SetNull)
+  boite_lait    BoiteLait?    @relation(fields: [boite_lait_id], references: [id], onDelete: SetNull)
+  lait_maternel LaitMaternel? @relation(fields: [lait_maternel_id], references: [id], onDelete: SetNull)
 
   @@index([structure_id, date])
   @@index([enfant_id, date])
+  @@index([boite_lait_id])
+  @@index([lait_maternel_id])
 }
 
 model Repas {
-  id               String     @id @default(uuid())
+  id               String    @id @default(uuid())
   structure_id     String
   enfant_id        String
   date             DateTime
@@ -327,9 +365,9 @@ model Repas {
   professionnel_id String
   profil_id        String?
 
-  structure        Structure @relation(fields: [structure_id], references: [id], onDelete: Cascade)
-  enfant           Enfant    @relation(fields: [enfant_id], references: [id], onDelete: Cascade)
-  profil           Profil?   @relation(fields: [profil_id], references: [id], onDelete: SetNull)
+  structure Structure @relation(fields: [structure_id], references: [id], onDelete: Cascade)
+  enfant    Enfant    @relation(fields: [enfant_id], references: [id], onDelete: Cascade)
+  profil    Profil?   @relation(fields: [profil_id], references: [id], onDelete: SetNull)
 
   @@index([structure_id, date])
   @@index([enfant_id, date])
@@ -346,9 +384,9 @@ model Change {
   professionnel_id String
   profil_id        String?
 
-  structure        Structure @relation(fields: [structure_id], references: [id], onDelete: Cascade)
-  enfant           Enfant    @relation(fields: [enfant_id], references: [id], onDelete: Cascade)
-  profil           Profil?   @relation(fields: [profil_id], references: [id], onDelete: SetNull)
+  structure Structure @relation(fields: [structure_id], references: [id], onDelete: Cascade)
+  enfant    Enfant    @relation(fields: [enfant_id], references: [id], onDelete: Cascade)
+  profil    Profil?   @relation(fields: [profil_id], references: [id], onDelete: SetNull)
 
   @@index([structure_id, date])
   @@index([enfant_id, date])
@@ -366,9 +404,9 @@ model Sieste {
   professionnel_id String
   profil_id        String?
 
-  structure        Structure @relation(fields: [structure_id], references: [id], onDelete: Cascade)
-  enfant           Enfant    @relation(fields: [enfant_id], references: [id], onDelete: Cascade)
-  profil           Profil?   @relation(fields: [profil_id], references: [id], onDelete: SetNull)
+  structure Structure @relation(fields: [structure_id], references: [id], onDelete: Cascade)
+  enfant    Enfant    @relation(fields: [enfant_id], references: [id], onDelete: Cascade)
+  profil    Profil?   @relation(fields: [profil_id], references: [id], onDelete: SetNull)
 
   @@index([structure_id, date])
   @@index([enfant_id, date])
@@ -390,9 +428,9 @@ model Incident {
   professionnel_id String
   profil_id        String?
 
-  structure        Structure @relation(fields: [structure_id], references: [id], onDelete: Cascade)
-  enfant           Enfant    @relation(fields: [enfant_id], references: [id], onDelete: Cascade)
-  profil           Profil?   @relation(fields: [profil_id], references: [id], onDelete: SetNull)
+  structure Structure @relation(fields: [structure_id], references: [id], onDelete: Cascade)
+  enfant    Enfant    @relation(fields: [enfant_id], references: [id], onDelete: Cascade)
+  profil    Profil?   @relation(fields: [profil_id], references: [id], onDelete: SetNull)
 
   @@index([structure_id, date])
   @@index([enfant_id, date])
@@ -408,8 +446,8 @@ model Equipement {
   temperature_max Float
   actif           Boolean        @default(true)
 
-  structure       Structure           @relation(fields: [structure_id], references: [id], onDelete: Cascade)
-  releves         ReleveTemperature[]
+  structure Structure           @relation(fields: [structure_id], references: [id], onDelete: Cascade)
+  releves   ReleveTemperature[]
 
   @@index([structure_id])
 }
@@ -427,20 +465,20 @@ model ReleveTemperature {
   professionnel_id  String
   profil_id         String?
 
-  structure         Structure  @relation(fields: [structure_id], references: [id], onDelete: Cascade)
-  equipement        Equipement @relation(fields: [equipement_id], references: [id], onDelete: Cascade)
-  profil            Profil?    @relation(fields: [profil_id], references: [id], onDelete: SetNull)
+  structure  Structure  @relation(fields: [structure_id], references: [id], onDelete: Cascade)
+  equipement Equipement @relation(fields: [equipement_id], references: [id], onDelete: Cascade)
+  profil     Profil?    @relation(fields: [profil_id], references: [id], onDelete: SetNull)
 
   @@index([structure_id, date])
   @@index([equipement_id, date])
 }
 
 model RelevePlat {
-  id                String    @id @default(uuid())
+  id                String   @id @default(uuid())
   structure_id      String
   date              DateTime
   nom_plat          String
-  type_plat         TypePlat  @default(CHAUD)
+  type_plat         TypePlat @default(CHAUD)
   temperature_avant Float
   heure_avant       DateTime
   temperature_apres Float
@@ -450,8 +488,8 @@ model RelevePlat {
   professionnel_id  String
   profil_id         String?
 
-  structure         Structure @relation(fields: [structure_id], references: [id], onDelete: Cascade)
-  profil            Profil?   @relation(fields: [profil_id], references: [id], onDelete: SetNull)
+  structure Structure @relation(fields: [structure_id], references: [id], onDelete: Cascade)
+  profil    Profil?   @relation(fields: [profil_id], references: [id], onDelete: SetNull)
 
   @@index([structure_id, date])
 }
@@ -459,26 +497,26 @@ model RelevePlat {
 // ═══ TRAÇABILITÉ ALIMENTAIRE ═══
 
 model ReceptionMarchandise {
-  id                   String        @id @default(uuid())
-  structure_id         String
-  date                 DateTime
-  fournisseur          String
-  nom_produit          String
-  numero_lot           String
-  dlc                  DateTime
+  id                    String        @id @default(uuid())
+  structure_id          String
+  date                  DateTime
+  fournisseur           String
+  nom_produit           String
+  numero_lot            String
+  dlc                   DateTime
   temperature_reception Float?
-  emballage_conforme   Boolean       @default(true)
-  photo_etiquette_url  String?
-  photo_bon_livraison  String?
-  conforme             Boolean       @default(true)
-  motif_non_conformite String?
-  statut               StatutProduit @default(EN_STOCK)
-  motif_destruction    String?
-  professionnel_id     String
-  profil_id            String?
+  emballage_conforme    Boolean       @default(true)
+  photo_etiquette_url   String?
+  photo_bon_livraison   String?
+  conforme              Boolean       @default(true)
+  motif_non_conformite  String?
+  statut                StatutProduit @default(EN_STOCK)
+  motif_destruction     String?
+  professionnel_id      String
+  profil_id             String?
 
-  structure            Structure @relation(fields: [structure_id], references: [id], onDelete: Cascade)
-  profil               Profil?   @relation(fields: [profil_id], references: [id], onDelete: SetNull)
+  structure Structure @relation(fields: [structure_id], references: [id], onDelete: Cascade)
+  profil    Profil?   @relation(fields: [profil_id], references: [id], onDelete: SetNull)
 
   @@index([structure_id, date])
   @@index([structure_id, dlc])
@@ -493,40 +531,40 @@ model ZoneNettoyage {
   couleur_code String?
   ordre        Int     @default(0)
 
-  structure    Structure        @relation(fields: [structure_id], references: [id], onDelete: Cascade)
-  taches       TacheNettoyage[]
+  structure Structure        @relation(fields: [structure_id], references: [id], onDelete: Cascade)
+  taches    TacheNettoyage[]
 
   @@index([structure_id])
 }
 
 model TacheNettoyage {
-  id          String    @id @default(uuid())
-  zone_id     String
-  nom         String
-  frequence   Frequence
-  methode     String
-  produit     String?
-  notes       String?
-  actif       Boolean   @default(true)
+  id        String    @id @default(uuid())
+  zone_id   String
+  nom       String
+  frequence Frequence
+  methode   String
+  produit   String?
+  notes     String?
+  actif     Boolean   @default(true)
 
-  zone        ZoneNettoyage        @relation(fields: [zone_id], references: [id], onDelete: Cascade)
+  zone        ZoneNettoyage         @relation(fields: [zone_id], references: [id], onDelete: Cascade)
   validations ValidationNettoyage[]
 
   @@index([zone_id])
 }
 
 model ValidationNettoyage {
-  id               String   @id @default(uuid())
-  tache_id         String
-  date             DateTime
-  heure            DateTime
-  professionnel_id String
+  id                String   @id @default(uuid())
+  tache_id          String
+  date              DateTime
+  heure             DateTime
+  professionnel_id  String
   professionnel_nom String
-  observations     String?
-  profil_id        String?
+  observations      String?
+  profil_id         String?
 
-  tache            TacheNettoyage @relation(fields: [tache_id], references: [id], onDelete: Cascade)
-  profil           Profil?        @relation(fields: [profil_id], references: [id], onDelete: SetNull)
+  tache  TacheNettoyage @relation(fields: [tache_id], references: [id], onDelete: Cascade)
+  profil Profil?        @relation(fields: [profil_id], references: [id], onDelete: SetNull)
 
   @@index([tache_id, date])
 }
@@ -544,22 +582,22 @@ model Stock {
   derniere_maj DateTime
   maj_par      String
 
-  structure    Structure        @relation(fields: [structure_id], references: [id], onDelete: Cascade)
-  mouvements   MouvementStock[]
+  structure  Structure        @relation(fields: [structure_id], references: [id], onDelete: Cascade)
+  mouvements MouvementStock[]
 
   @@index([structure_id])
 }
 
 model MouvementStock {
-  id       String        @id @default(uuid())
-  stock_id String
-  date     DateTime
+  id        String        @id @default(uuid())
+  stock_id  String
+  date      DateTime
   type_mouv TypeMouvement
-  quantite Float
-  motif    String?
-  par      String
+  quantite  Float
+  motif     String?
+  par       String
 
-  stock    Stock @relation(fields: [stock_id], references: [id], onDelete: Cascade)
+  stock Stock @relation(fields: [stock_id], references: [id], onDelete: Cascade)
 
   @@index([stock_id])
 }
@@ -576,9 +614,9 @@ model Transmission {
   type_transm  TypeTransmission
   profil_id    String?
 
-  structure    Structure @relation(fields: [structure_id], references: [id], onDelete: Cascade)
-  enfant       Enfant?   @relation(fields: [enfant_id], references: [id], onDelete: SetNull)
-  profil       Profil?   @relation(fields: [profil_id], references: [id], onDelete: SetNull)
+  structure Structure @relation(fields: [structure_id], references: [id], onDelete: Cascade)
+  enfant    Enfant?   @relation(fields: [enfant_id], references: [id], onDelete: SetNull)
+  profil    Profil?   @relation(fields: [profil_id], references: [id], onDelete: SetNull)
 
   @@index([structure_id, date])
   @@index([enfant_id, date])
@@ -597,7 +635,7 @@ model Protocole {
   cree_par         String
   date_creation    DateTime @default(now())
 
-  structure        Structure @relation(fields: [structure_id], references: [id], onDelete: Cascade)
+  structure Structure @relation(fields: [structure_id], references: [id], onDelete: Cascade)
 
   @@index([structure_id])
 }
@@ -614,7 +652,115 @@ model ExportPDF {
   url           String
   created_at    DateTime   @default(now())
 
-  structure     Structure @relation(fields: [structure_id], references: [id], onDelete: Cascade)
+  structure Structure @relation(fields: [structure_id], references: [id], onDelete: Cascade)
+
+  @@index([structure_id])
+}
+
+// ═══ BIBERONNERIE — Boîtes de lait (catalogue) ═══
+
+model BoiteLait {
+  id             String        @id @default(uuid())
+  structure_id   String
+  marque         String
+  type           TypeBoiteLait @default(POUDRE)
+  numero_lot     String
+  dlc            DateTime
+  date_ouverture DateTime?
+  notes          String?
+  actif          Boolean       @default(true)
+  created_at     DateTime      @default(now())
+  updated_at     DateTime      @updatedAt
+
+  structure Structure @relation(fields: [structure_id], references: [id], onDelete: Cascade)
+  biberons  Biberon[]
+
+  @@index([structure_id])
+  @@index([structure_id, actif])
+}
+
+// ═══ BIBERONNERIE — Lait maternel ═══
+
+model LaitMaternel {
+  id                   String             @id @default(uuid())
+  structure_id         String
+  enfant_id            String
+  date_recueil         DateTime
+  congele              Boolean            @default(false)
+  date_decongelation   DateTime?
+  quantite_ml          Int
+  quantite_restante_ml Int?
+  dlc                  DateTime
+  statut               StatutLaitMaternel @default(DISPONIBLE)
+  notes                String?
+  created_at           DateTime           @default(now())
+  updated_at           DateTime           @updatedAt
+
+  structure Structure @relation(fields: [structure_id], references: [id], onDelete: Cascade)
+  enfant    Enfant    @relation(fields: [enfant_id], references: [id], onDelete: Cascade)
+  biberons  Biberon[]
+
+  @@index([structure_id])
+  @@index([structure_id, statut])
+  @@index([enfant_id, statut])
+  @@index([structure_id, dlc])
+}
+
+// ═══ ADMINISTRATION DES MÉDICAMENTS ═══
+
+model AdministrationMedicament {
+  id                  String             @id @default(uuid())
+  structure_id        String
+  enfant_id           String
+  nom_medicament      String
+  posologie           String
+  voie                VoieAdministration @default(ORALE)
+  date_administration DateTime
+  ordonnance_fournie  Boolean            @default(false)
+  observations        String?
+
+  // Signature électronique simple — irréversible une fois posée
+  signe         Boolean   @default(false)
+  signe_par_id  String?
+  signe_par_nom String?
+  signe_le      DateTime?
+
+  // Co-signature (témoin) facultative
+  temoin_id       String?
+  temoin_nom      String?
+  temoin_signe_le DateTime?
+
+  created_at DateTime @default(now())
+
+  structure Structure @relation(fields: [structure_id], references: [id], onDelete: Cascade)
+  enfant    Enfant    @relation(fields: [enfant_id], references: [id], onDelete: Cascade)
+  signe_par Profil?   @relation("ProfilAdministrateur", fields: [signe_par_id], references: [id], onDelete: SetNull)
+  temoin    Profil?   @relation("ProfilTemoin", fields: [temoin_id], references: [id], onDelete: SetNull)
+
+  @@index([structure_id, date_administration])
+  @@index([enfant_id, date_administration])
+}
+
+// ═══ PAI — Projet d'Accueil Individualisé ═══
+
+model PAI {
+  id                    String    @id @default(uuid())
+  structure_id          String
+  enfant_id             String    @unique
+  actif                 Boolean   @default(true)
+  allergenes            String[]  @default([])
+  medicaments_autorises String?
+  protocole_urgence     String?
+  medecin_nom           String?
+  medecin_telephone     String?
+  numero_urgence        String?
+  document_url          String?
+  date_creation         DateTime  @default(now())
+  date_revision         DateTime?
+  notes                 String?
+
+  structure Structure @relation(fields: [structure_id], references: [id], onDelete: Cascade)
+  enfant    Enfant    @relation(fields: [enfant_id], references: [id], onDelete: Cascade)
 
   @@index([structure_id])
 }
@@ -622,14 +768,14 @@ model ExportPDF {
 // ═══ DEMANDES DÉMO (site marketing) ═══
 
 model DemandeDemo {
-  id                String    @id @default(uuid())
+  id                String   @id @default(uuid())
   nom               String
   email             String
   telephone         String
   type_structure    String
   nombre_structures String
-  date_demande      DateTime  @default(now())
+  date_demande      DateTime @default(now())
   structure_id      String?
 
-  structure         Structure? @relation(fields: [structure_id], references: [id], onDelete: SetNull)
+  structure Structure? @relation(fields: [structure_id], references: [id], onDelete: SetNull)
 }

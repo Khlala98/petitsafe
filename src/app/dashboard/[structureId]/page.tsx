@@ -10,10 +10,11 @@ import { useEffect, useState } from "react";
 import { PastilleStatut } from "@/components/shared/pastille-statut";
 import { useRealtimeSubscription } from "@/hooks/use-realtime-subscription";
 import { getDashboardData, type DashboardData } from "@/app/actions/dashboard";
+import { getAlertes, type AlerteItem } from "@/app/actions/alertes";
 import Link from "next/link";
 import {
   Thermometer, Sparkles, Package, Baby, AlertTriangle, Clock,
-  Users, ArrowRight, MessageSquare,
+  Users, ArrowRight, MessageSquare, Pill, Milk, ShieldAlert,
 } from "lucide-react";
 
 export default function DashboardPage() {
@@ -24,6 +25,7 @@ export default function DashboardPage() {
   const params = useParams();
   const structureId = params.structureId as string;
   const [data, setData] = useState<DashboardData | null>(null);
+  const [alertesSante, setAlertesSante] = useState<AlerteItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [fetchError, setFetchError] = useState<string | null>(null);
 
@@ -32,12 +34,22 @@ export default function DashboardPage() {
 
   const fetchData = async () => {
     try {
-      const res = await getDashboardData(structureId, modulesActifs);
+      const [res, alertesRes] = await Promise.all([
+        getDashboardData(structureId, modulesActifs),
+        getAlertes(structureId),
+      ]);
       if (res.success) {
         setData(res.data);
         setFetchError(null);
       } else {
         setFetchError(res.error || "Erreur de chargement");
+      }
+      if (alertesRes.success && alertesRes.data) {
+        setAlertesSante(
+          alertesRes.data.filter((a) =>
+            ["medicament_a_signer", "lait_maternel_dlc", "pai_present"].includes(a.type),
+          ),
+        );
       }
     } catch (e) {
       console.error("[DashboardPage] getDashboardData failed:", e);
@@ -228,6 +240,39 @@ export default function DashboardPage() {
           </div>
         )}
       </div>
+
+      {/* ═══ ALERTES SANTÉ — médicaments, lait maternel, PAI ═══ */}
+      {alertesSante.length > 0 && (
+        <div className="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
+          <h2 className="text-lg font-semibold text-gray-800 flex items-center gap-2 mb-4">
+            <ShieldAlert size={20} className="text-amber-500" />
+            Alertes santé & médicaments
+            <span className="text-xs font-medium bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full">
+              {alertesSante.length}
+            </span>
+          </h2>
+          <div className="space-y-2">
+            {alertesSante.map((a) => {
+              const Icon = a.type === "medicament_a_signer" ? Pill : a.type === "lait_maternel_dlc" ? Milk : ShieldAlert;
+              return (
+                <Link
+                  key={a.id}
+                  href={a.href}
+                  className={`flex items-start gap-3 p-3 rounded-lg border ${
+                    a.niveau === "rouge" ? "bg-red-50 border-red-200" : "bg-orange-50 border-orange-200"
+                  } hover:opacity-80 transition-opacity`}
+                >
+                  <Icon size={18} className={`shrink-0 mt-0.5 ${a.niveau === "rouge" ? "text-red-600" : "text-orange-600"}`} />
+                  <div className="flex-1 min-w-0">
+                    <p className={`text-sm font-medium ${a.niveau === "rouge" ? "text-red-800" : "text-orange-800"}`}>{a.titre}</p>
+                    <p className={`text-xs ${a.niveau === "rouge" ? "text-red-700" : "text-orange-700"}`}>{a.detail}</p>
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       {/* ═══ ACTIVITÉ RÉCENTE ═══ */}
       <div className="bg-white rounded-xl p-5 shadow-sm border border-gray-100">

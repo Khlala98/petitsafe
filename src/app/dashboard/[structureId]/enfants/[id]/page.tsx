@@ -10,9 +10,12 @@ import { genererTokenPortail, regenererTokenPortail } from "@/app/actions/portai
 import { calculerAge } from "@/lib/business-logic";
 import { BadgeAllergie } from "@/components/shared/badge-allergie";
 import { BadgeRegime } from "@/components/shared/badge-regime";
-import { Loader2, ArrowLeft, Edit, Trash2, Phone, User, MessageSquare, Link2, Copy, RefreshCw } from "lucide-react";
+import { Loader2, ArrowLeft, Edit, Trash2, Phone, User, MessageSquare, Link2, Copy, RefreshCw, ShieldAlert } from "lucide-react";
 import { toast } from "sonner";
 import { useProfil } from "@/hooks/use-profil";
+import { MedicamentsTab } from "@/components/enfants/medicaments-tab";
+import { PAITab } from "@/components/enfants/pai-tab";
+import { getPAI } from "@/app/actions/pai";
 
 interface Enfant {
   id: string; prenom: string; nom: string; date_naissance: string; sexe?: string | null;
@@ -26,7 +29,7 @@ interface TransmissionEnfant {
   id: string; contenu: string; auteur: string; date: string; type_transm: string;
 }
 
-const TABS = ["Infos générales", "Allergies & Santé", "Contacts urgence", "Transmissions"];
+const TABS = ["Infos générales", "Allergies & Santé", "Contacts urgence", "Médicaments", "PAI", "Transmissions"];
 const SEVERITE_LABELS: Record<string, string> = { LEGERE: "Légère", MODEREE: "Modérée", SEVERE: "Sévère" };
 const COULEURS_AVATAR = ["#66bb6a", "#4caf50", "#F4A261", "#E53E3E", "#8E44AD", "#F39C12"];
 
@@ -38,6 +41,7 @@ export default function FicheEnfantPage() {
   const { isAdmin } = useProfil();
   const [enfant, setEnfant] = useState<Enfant | null>(null);
   const [transmissions, setTransmissions] = useState<TransmissionEnfant[]>([]);
+  const [paiActif, setPaiActif] = useState(false);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState(0);
   const [portalUrl, setPortalUrl] = useState<string | null>(null);
@@ -45,9 +49,10 @@ export default function FicheEnfantPage() {
 
   useEffect(() => {
     const fetchData = async () => {
-      const [result, transRes] = await Promise.all([
+      const [result, transRes, paiRes] = await Promise.all([
         getEnfant(enfantId, structureId),
         getTransmissionsEnfant(structureId, enfantId),
+        getPAI(enfantId),
       ]);
       if (result.success && result.data) {
         setEnfant({ ...result.data, date_naissance: result.data.date_naissance.toISOString() });
@@ -57,6 +62,9 @@ export default function FicheEnfantPage() {
       }
       if (transRes.success && transRes.data) {
         setTransmissions(transRes.data.map((t) => ({ ...t, date: (t.date as unknown as Date).toISOString?.() ?? String(t.date) })) as TransmissionEnfant[]);
+      }
+      if (paiRes.success && paiRes.data) {
+        setPaiActif(paiRes.data.actif);
       }
       setLoading(false);
     };
@@ -157,6 +165,25 @@ export default function FicheEnfantPage() {
           <p className="text-sm text-gray-500">{age}{enfant.groupe ? ` · ${enfant.groupe}` : ""}{enfant.sexe ? ` · ${enfant.sexe === "FILLE" ? "Fille" : "Garçon"}` : ""}</p>
         </div>
       </div>
+
+      {/* PAI badge */}
+      {paiActif && (
+        <div className="flex items-start gap-2 p-3 rounded-lg bg-amber-50 border border-amber-200">
+          <ShieldAlert size={18} className="text-amber-600 shrink-0 mt-0.5" />
+          <div className="flex-1">
+            <p className="text-sm font-semibold text-amber-800">PAI actif</p>
+            <p className="text-xs text-amber-700">
+              Cet enfant a un Projet d&apos;Accueil Individualisé. Consultez l&apos;onglet PAI pour le protocole d&apos;urgence.
+            </p>
+          </div>
+          <button
+            onClick={() => setActiveTab(4)}
+            className="text-xs font-medium text-amber-700 hover:underline shrink-0"
+          >
+            Voir le PAI →
+          </button>
+        </div>
+      )}
 
       {/* Allergie & régime banners */}
       {enfant.allergies.length > 0 && <BadgeAllergie enfant={enfant} />}
@@ -282,7 +309,11 @@ export default function FicheEnfantPage() {
           </div>
         )}
 
-        {activeTab === 3 && (
+        {activeTab === 3 && <MedicamentsTab structureId={structureId} enfantId={enfantId} />}
+
+        {activeTab === 4 && <PAITab structureId={structureId} enfantId={enfantId} />}
+
+        {activeTab === 5 && (
           <div className="space-y-3">
             {transmissions.length === 0 ? (
               <div className="text-center py-8">

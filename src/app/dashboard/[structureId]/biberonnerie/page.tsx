@@ -11,7 +11,7 @@ import { getStatutBiberon } from "@/lib/business-logic";
 import { QUANTITES_BIBERON_ML } from "@/lib/constants";
 import { useRealtimeSubscription } from "@/hooks/use-realtime-subscription";
 import { toast } from "sonner";
-import { Loader2, Plus, Info, Clock, Check, AlertTriangle } from "lucide-react";
+import { Loader2, Plus, Info, Clock, Check, AlertTriangle, Box, Milk } from "lucide-react";
 import Link from "next/link";
 
 interface Biberon {
@@ -89,12 +89,22 @@ export default function BiberonneriePage() {
 
   return (
     <div className="max-w-5xl mx-auto space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between flex-wrap gap-2">
         <h1 className="text-2xl font-bold text-gray-800">Biberonnerie</h1>
-        <Link href={`/dashboard/${structureId}/biberonnerie/nouveau`}
-          className="h-10 px-4 rounded-xl bg-rzpanda-primary text-white text-sm font-medium hover:bg-rzpanda-primary/90 flex items-center gap-2">
-          <Plus size={16} /> Nouveau biberon
-        </Link>
+        <div className="flex items-center gap-2">
+          <Link href={`/dashboard/${structureId}/biberonnerie/boites`}
+            className="h-10 px-3 rounded-xl border border-gray-300 text-sm text-gray-600 hover:bg-gray-50 flex items-center gap-2">
+            <Box size={16} /> Boîtes de lait
+          </Link>
+          <Link href={`/dashboard/${structureId}/biberonnerie/lait-maternel`}
+            className="h-10 px-3 rounded-xl border border-pink-200 text-sm text-pink-600 hover:bg-pink-50 flex items-center gap-2">
+            <Milk size={16} /> Lait maternel
+          </Link>
+          <Link href={`/dashboard/${structureId}/biberonnerie/nouveau`}
+            className="h-10 px-4 rounded-xl bg-rzpanda-primary text-white text-sm font-medium hover:bg-rzpanda-primary/90 flex items-center gap-2">
+            <Plus size={16} /> Nouveau biberon
+          </Link>
+        </div>
       </div>
 
       {/* Alertes DLC lait */}

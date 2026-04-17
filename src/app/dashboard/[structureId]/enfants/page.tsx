@@ -6,12 +6,13 @@ import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { getEnfants } from "@/app/actions/enfants";
 import { getSeuilsAge } from "@/app/actions/structure";
+import { listerEnfantsAvecPAI } from "@/app/actions/pai";
 import { calculerAge, calculerGroupeAuto, joursAvantBascule } from "@/lib/business-logic";
 import { BadgeAllergie } from "@/components/shared/badge-allergie";
 import { BadgeRegime } from "@/components/shared/badge-regime";
 import { BoutonAction } from "@/components/shared/bouton-action";
 import { GROUPES_ENFANTS } from "@/lib/constants";
-import { Plus, Search, Upload, Loader2, AlertTriangle } from "lucide-react";
+import { Plus, Search, Upload, Loader2, AlertTriangle, ShieldAlert } from "lucide-react";
 import { ImportCSVModal } from "@/components/enfants/import-csv-modal";
 import { useProfil } from "@/hooks/use-profil";
 
@@ -36,6 +37,7 @@ export default function EnfantsPage() {
   const structureId = params.structureId as string;
   const { isAdmin } = useProfil();
   const [enfants, setEnfants] = useState<Enfant[]>([]);
+  const [enfantsAvecPai, setEnfantsAvecPai] = useState<Set<string>>(new Set());
   const [seuils, setSeuils] = useState({ seuil_bebes_max: 18, seuil_moyens_max: 30 });
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -43,15 +45,19 @@ export default function EnfantsPage() {
   const [showImport, setShowImport] = useState(false);
 
   const fetchEnfants = async () => {
-    const [result, seuilsRes] = await Promise.all([
+    const [result, seuilsRes, paiRes] = await Promise.all([
       getEnfants(structureId),
       getSeuilsAge(structureId),
+      listerEnfantsAvecPAI(structureId),
     ]);
     if (result.success && result.data) {
       setEnfants(result.data.map((e) => ({ ...e, date_naissance: e.date_naissance.toISOString(), groupe_force: (e as unknown as { groupe_force: boolean }).groupe_force })));
     }
     if (seuilsRes.success && seuilsRes.data) {
       setSeuils(seuilsRes.data);
+    }
+    if (paiRes.success && paiRes.data) {
+      setEnfantsAvecPai(new Set(paiRes.data));
     }
     setLoading(false);
   };
@@ -147,9 +153,16 @@ export default function EnfantsPage() {
                       </p>
                     )}
                   </div>
-                  {enfant.allergies.length > 0 && (
-                    <AlertTriangle size={18} className="text-red-500 shrink-0 mt-1" aria-label="Allergies" />
-                  )}
+                  <div className="flex flex-col items-end gap-1 shrink-0 mt-1">
+                    {enfantsAvecPai.has(enfant.id) && (
+                      <span className="inline-flex items-center gap-1 text-[10px] font-bold bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded-full" aria-label="PAI">
+                        <ShieldAlert size={10} /> PAI
+                      </span>
+                    )}
+                    {enfant.allergies.length > 0 && (
+                      <AlertTriangle size={18} className="text-red-500" aria-label="Allergies" />
+                    )}
+                  </div>
                 </div>
                 {(enfant.allergies.length > 0 || enfant.regimes.length > 0) && (
                   <div className="mt-3 space-y-2">
