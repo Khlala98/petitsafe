@@ -31,7 +31,7 @@ interface TransmissionEnfant {
 
 const TABS = ["Infos générales", "Allergies & Santé", "Contacts urgence", "Médicaments", "PAI", "Transmissions"];
 const SEVERITE_LABELS: Record<string, string> = { LEGERE: "Légère", MODEREE: "Modérée", SEVERE: "Sévère" };
-const COULEURS_AVATAR = ["#66bb6a", "#4caf50", "#F4A261", "#E53E3E", "#8E44AD", "#F39C12"];
+const COULEURS_AVATAR = ["#1e3a5f", "#3b82f6", "#F4A261", "#E53E3E", "#8E44AD", "#F39C12"];
 
 export default function FicheEnfantPage() {
   const params = useParams();

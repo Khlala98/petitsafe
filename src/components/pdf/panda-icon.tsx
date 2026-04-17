@@ -3,8 +3,8 @@ import { Svg, Circle, Ellipse, Path, G } from "@react-pdf/renderer";
 export function PandaIcon({ size = 40 }: { size?: number }) {
   return (
     <Svg width={size} height={(size * 230) / 280} viewBox="60 50 280 230">
-      <Circle cx="200" cy="170" r="130" fill="#66bb6a" opacity={0.15} />
-      <Circle cx="200" cy="170" r="110" fill="#66bb6a" opacity={0.25} />
+      <Circle cx="200" cy="170" r="130" fill="#1e3a5f" opacity={0.15} />
+      <Circle cx="200" cy="170" r="110" fill="#1e3a5f" opacity={0.25} />
 
       <Ellipse cx="138" cy="90" rx="32" ry="30" fill="#1a1a1a" />
       <Ellipse cx="262" cy="90" rx="32" ry="30" fill="#1a1a1a" />
@@ -40,10 +40,10 @@ export function PandaIcon({ size = 40 }: { size?: number }) {
         <Ellipse cx="272" cy="225" rx="18" ry="12" fill="#1a1a1a" />
       </G>
 
-      <Circle cx="200" cy="115" r="6" fill="#66bb6a" />
-      <Path d="M200 109 Q205 95 210 100" fill="none" stroke="#66bb6a" strokeWidth={2} strokeLinecap="round" />
+      <Circle cx="200" cy="115" r="6" fill="#1e3a5f" />
+      <Path d="M200 109 Q205 95 210 100" fill="none" stroke="#1e3a5f" strokeWidth={2} strokeLinecap="round" />
       <G transform="rotate(-30 212 97)">
-        <Ellipse cx="212" cy="97" rx="5" ry="3" fill="#66bb6a" />
+        <Ellipse cx="212" cy="97" rx="5" ry="3" fill="#1e3a5f" />
       </G>
     </Svg>
   );

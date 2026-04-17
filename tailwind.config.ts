@@ -11,8 +11,8 @@ const config: Config = {
     extend: {
       colors: {
         rzpanda: {
-          primary: "#66bb6a",
-          secondary: "#4caf50",
+          primary: "#1e3a5f",
+          secondary: "#15294a",
           accent: "#F4A261",
           danger: "#E53E3E",
           warning: "#F39C12",

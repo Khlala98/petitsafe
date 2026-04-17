@@ -324,9 +324,9 @@ export default function TemperaturesPage() {
                   <YAxis tick={{ fontSize: 12 }} domain={["auto", "auto"]} />
                   <Tooltip />
                   {graphEquip?.type === "REFRIGERATEUR" && (
-                    <ReferenceArea y1={SEUILS_TEMPERATURE.frigo_min} y2={SEUILS_TEMPERATURE.frigo_max} fill="#4caf50" fillOpacity={0.1} />
+                    <ReferenceArea y1={SEUILS_TEMPERATURE.frigo_min} y2={SEUILS_TEMPERATURE.frigo_max} fill="#1e3a5f" fillOpacity={0.1} />
                   )}
-                  <Line type="monotone" dataKey="temperature" stroke="#66bb6a" strokeWidth={2} dot={{ r: 4 }} />
+                  <Line type="monotone" dataKey="temperature" stroke="#1e3a5f" strokeWidth={2} dot={{ r: 4 }} />
                 </LineChart>
               </ResponsiveContainer>
             </div>

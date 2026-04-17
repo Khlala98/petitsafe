@@ -47,9 +47,9 @@ export const pdfStyles = StyleSheet.create({
   // Tables
   tableHeader: {
     flexDirection: "row",
-    backgroundColor: "#dcfce7",
+    backgroundColor: "#e0e7f1",
     borderBottomWidth: 1,
-    borderBottomColor: "#86efac",
+    borderBottomColor: "#a8b8d0",
     paddingVertical: 6,
     paddingHorizontal: 4,
   },
@@ -84,7 +84,7 @@ export const pdfStyles = StyleSheet.create({
   },
   cellOk: {
     fontSize: 8,
-    color: "#4caf50",
+    color: "#15294a",
   },
   // Footer
   footer: {
