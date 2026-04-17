@@ -462,7 +462,7 @@ export function getRelevesTemperatureS2(frigoId: string, structureId: string, pr
 export const ZONES_NETTOYAGE_S2 = [
   {
     zone: "Cuisine",
-    couleur_code: "#1e3a5f",
+    couleur_code: "#2563eb",
     taches: [
       { nom: "Plan de travail", frequence: "QUOTIDIEN" as Frequence, methode: "Nettoyage après chaque utilisation", produit: "Vinaigre blanc" },
       { nom: "Réfrigérateur", frequence: "QUOTIDIEN" as Frequence, methode: "Nettoyage quotidien", produit: "Vinaigre blanc" },

@@ -15,10 +15,10 @@
     --popover: 0 0% 100%;
     --popover-foreground: 216 26% 14%;
 
-    --primary: 214 52% 25%; /* #1e3a5f */
+    --primary: 221 83% 53%; /* #2563eb */
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 217 56% 19%; /* #15294a */
+    --secondary: 224 76% 48%; /* #1d4ed8 */
     --secondary-foreground: 0 0% 100%;
 
     --muted: 210 20% 96%;
@@ -32,7 +32,7 @@
 
     --border: 214 14% 89%;
     --input: 214 14% 89%;
-    --ring: 214 52% 25%;
+    --ring: 221 83% 53%;
 
     --radius: 0.75rem; /* 12px */
   }

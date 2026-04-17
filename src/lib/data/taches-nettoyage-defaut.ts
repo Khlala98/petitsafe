@@ -18,7 +18,7 @@ export interface TacheDefaut {
 export const TACHES_NETTOYAGE_DEFAUT: TacheDefaut[] = [
   {
     zone: "Cuisine",
-    couleur_code: "#1e3a5f",
+    couleur_code: "#2563eb",
     taches: [
       { nom: "Plan de travail", frequence: "BIQUOTIDIEN", methode: "Nettoyage après chaque utilisation + soir", produit: "Vinaigre blanc + détergent le soir" },
       { nom: "Évier", frequence: "QUOTIDIEN", methode: "Nettoyage complet", produit: "Vinaigre blanc" },

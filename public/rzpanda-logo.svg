@@ -1,7 +1,7 @@
 <svg width="400" height="420" viewBox="0 0 400 420" xmlns="http://www.w3.org/2000/svg">
 
-<circle cx="200" cy="170" r="130" fill="#1e3a5f" opacity="0.15"/>
-<circle cx="200" cy="170" r="110" fill="#1e3a5f" opacity="0.25"/>
+<circle cx="200" cy="170" r="130" fill="#2563eb" opacity="0.15"/>
+<circle cx="200" cy="170" r="110" fill="#2563eb" opacity="0.25"/>
 
 <ellipse cx="138" cy="90" rx="32" ry="30" fill="#1a1a1a"/>
 <ellipse cx="262" cy="90" rx="32" ry="30" fill="#1a1a1a"/>
@@ -33,12 +33,12 @@
 <ellipse cx="128" cy="225" rx="18" ry="12" fill="#1a1a1a" transform="rotate(-20 128 225)"/>
 <ellipse cx="272" cy="225" rx="18" ry="12" fill="#1a1a1a" transform="rotate(20 272 225)"/>
 
-<circle cx="200" cy="115" r="6" fill="#1e3a5f"/>
-<path d="M200 109 Q205 95 210 100" fill="none" stroke="#1e3a5f" stroke-width="2" stroke-linecap="round"/>
-<ellipse cx="212" cy="97" rx="5" ry="3" fill="#1e3a5f" transform="rotate(-30 212 97)"/>
+<circle cx="200" cy="115" r="6" fill="#2563eb"/>
+<path d="M200 109 Q205 95 210 100" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round"/>
+<ellipse cx="212" cy="97" rx="5" ry="3" fill="#2563eb" transform="rotate(-30 212 97)"/>
 
 <text x="200" y="340" text-anchor="middle" font-family="Georgia, serif" font-size="42" font-weight="700">
-  <tspan fill="#1e3a5f">RZ</tspan><tspan fill="#2d2d2d">Pan</tspan><tspan fill="#1e3a5f">'</tspan><tspan fill="#2d2d2d">Da</tspan>
+  <tspan fill="#2563eb">RZ</tspan><tspan fill="#2d2d2d">Pan</tspan><tspan fill="#2563eb">'</tspan><tspan fill="#2d2d2d">Da</tspan>
 </text>
 
 <text x="200" y="370" text-anchor="middle" font-family="sans-serif" font-size="13" fill="#666666" letter-spacing="2">CONFORMITÉ HACCP · PETITE ENFANCE</text>

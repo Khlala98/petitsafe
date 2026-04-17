@@ -20,7 +20,7 @@ interface Enfant {
 
 type Counts = Record<string, { biberons: number; repas: number; changes: number; siestes: number; transmissions: number }>;
 
-const COULEURS_AVATAR = ["#1e3a5f", "#3b82f6", "#F4A261", "#E53E3E", "#8E44AD", "#F39C12"];
+const COULEURS_AVATAR = ["#2563eb", "#3b82f6", "#F4A261", "#E53E3E", "#8E44AD", "#F39C12"];
 
 export default function VueGroupePage() {
   const params = useParams();

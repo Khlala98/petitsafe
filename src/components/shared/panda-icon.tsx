@@ -18,8 +18,8 @@ export function PandaIcon({ size = 64, className }: PandaIconProps) {
       role="img"
       aria-label="RZPan'Da"
     >
-      <circle cx="200" cy="170" r="130" fill="#1e3a5f" opacity="0.15" />
-      <circle cx="200" cy="170" r="110" fill="#1e3a5f" opacity="0.25" />
+      <circle cx="200" cy="170" r="130" fill="#2563eb" opacity="0.15" />
+      <circle cx="200" cy="170" r="110" fill="#2563eb" opacity="0.25" />
 
       <ellipse cx="138" cy="90" rx="32" ry="30" fill="#1a1a1a" />
       <ellipse cx="262" cy="90" rx="32" ry="30" fill="#1a1a1a" />
@@ -46,9 +46,9 @@ export function PandaIcon({ size = 64, className }: PandaIconProps) {
       <ellipse cx="128" cy="225" rx="18" ry="12" fill="#1a1a1a" transform="rotate(-20 128 225)" />
       <ellipse cx="272" cy="225" rx="18" ry="12" fill="#1a1a1a" transform="rotate(20 272 225)" />
 
-      <circle cx="200" cy="115" r="6" fill="#1e3a5f" />
-      <path d="M200 109 Q205 95 210 100" fill="none" stroke="#1e3a5f" strokeWidth="2" strokeLinecap="round" />
-      <ellipse cx="212" cy="97" rx="5" ry="3" fill="#1e3a5f" transform="rotate(-30 212 97)" />
+      <circle cx="200" cy="115" r="6" fill="#2563eb" />
+      <path d="M200 109 Q205 95 210 100" fill="none" stroke="#2563eb" strokeWidth="2" strokeLinecap="round" />
+      <ellipse cx="212" cy="97" rx="5" ry="3" fill="#2563eb" transform="rotate(-30 212 97)" />
     </svg>
   );
 }

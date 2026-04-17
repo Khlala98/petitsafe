@@ -9,7 +9,7 @@ import type { TimelineEntry, EnfantPortail } from "@/app/actions/portail-parents
 import { Loader2, ChevronLeft, ChevronRight, ShieldAlert } from "lucide-react";
 import { calculerAge } from "@/lib/business-logic";
 
-const COULEURS_AVATAR = ["#1e3a5f", "#3b82f6", "#F4A261", "#E53E3E", "#8E44AD", "#F39C12"];
+const COULEURS_AVATAR = ["#2563eb", "#3b82f6", "#F4A261", "#E53E3E", "#8E44AD", "#F39C12"];
 
 const TYPE_COLORS: Record<string, string> = {
   biberon: "bg-pink-100 text-pink-700 border-pink-200",
